@@ -1,17 +1,12 @@
 apiVersion: core.k8sgpt.ai/v1alpha1
 kind: K8sGPT
 metadata:
-  labels:
-    app.kubernetes.io/name: k8sgpt
-    app.kubernetes.io/instance: k8sgpt-sample
-    app.kubernetes.io/part-of: k8sgpt-operator
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/created-by: k8sgpt-operator
   name: k8sgpt-sample
 spec:
   namespace: default
   model: gpt-3.5-turbo
   backend: openai
+  noCache: false
   version: v0.2.4
   enableAI: true
   secret:

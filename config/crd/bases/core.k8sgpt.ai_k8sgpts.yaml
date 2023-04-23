@@ -43,6 +43,8 @@ spec:
                 type: string
               namespace:
                 type: string
+              noCache:
+                type: boolean
               secret:
                 properties:
                   key:

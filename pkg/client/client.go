@@ -51,6 +51,10 @@ func (c *Client) ProcessAnalysis(deployment v1.Deployment, config *v1alpha1.K8sG
 		url = url + "?explain=true"
 	}
 
+	if config.Spec.NoCache {
+		url = url + "?nocache=true"
+	}
+
 	r, err := c.httpClient.Get(url)
 	if err != nil {
 		return nil, err
