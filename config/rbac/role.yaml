@@ -1,0 +1,45 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - core.k8sgpt.ai
+  resources:
+  - k8sgpts
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - core.k8sgpt.ai
+  resources:
+  - k8sgpts/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - core.k8sgpt.ai
+  resources:
+  - k8sgpts/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - core.k8sgpt.ai
+  resources:
+  - results
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch

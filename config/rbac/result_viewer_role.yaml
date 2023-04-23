@@ -1,0 +1,27 @@
+# permissions for end users to view results.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: result-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: k8sgpt-operator
+    app.kubernetes.io/part-of: k8sgpt-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: result-viewer-role
+rules:
+- apiGroups:
+  - core.k8sgpt.ai
+  resources:
+  - results
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - core.k8sgpt.ai
+  resources:
+  - results/status
+  verbs:
+  - get
