@@ -3,7 +3,7 @@
 IMG ?= ghcr.io/k8sgpt-ai/k8sgpt:latest
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.26.0
-
+CHART_VERSION=v0.0.1# x-release-please-version
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
 GOBIN=$(shell go env GOPATH)/bin
@@ -73,11 +73,8 @@ run: manifests generate fmt vet ## Run a controller from your host.
 # More info: https://docs.docker.com/develop/develop-images/build_enhancements/
 .PHONY: docker-build
 docker-build: test ## Build docker image with the manager.
-	docker build -t ${IMG} .
-
-.PHONY: docker-push
-docker-push: ## Push docker image with the manager.
-	docker push ${IMG}
+	@echo "===========> Building docker image"
+	docker buildx build --build-arg=VERSION="$$(git describe --tags --abbrev=0)" --build-arg=COMMIT="$$(git rev-parse --short HEAD)" --build-arg DATE="$$(date +%FT%TZ)" --platform="linux/amd64,linux/arm64" -t ${IMG} -f container/Dockerfile . --push
 
 # PLATFORMS defines the target platforms for  the manager image be build to provide support to multiple
 # architectures. (i.e. make docker-buildx IMG=myregistry/mypoperator:0.0.1). To use this option you need to:
@@ -119,6 +116,26 @@ deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
 	$(KUSTOMIZE) build config/default | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
 
+OSARCH=$(shell ./hack/get-os.sh)
+HELM = $(shell pwd)/bin/$(OSARCH)/helm
+HELM_INSTALLER ?= "https://get.helm.sh/helm-v3.10.1-$(OSARCH).tar.gz"
+.PHONY: helm
+helm: $(HELM) ## Download helm locally if necessary.
+$(HELM): $(LOCALBIN)
+	[ -e "$(HELM)" ] && rm -rf "$(HELM)" || true
+	cd $(LOCALBIN) && curl -s $(HELM_INSTALLER) | tar -xzf - -C $(LOCALBIN)
+
+.PHONY: release-manifests
+release-manifests: manifests kustomize
+	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG) && cd ../../
+	mkdir -p chart/k8sgpt-operator/templates/
+	$(KUSTOMIZE) build config/default > chart/k8sgpt-operator/templates/rendered.yaml
+
+helm-package: generate release-manifests helm
+	$(HELM) package --version $(CHART_VERSION) chart/k8sgpt-operator
+	mkdir -p charts && mv k8sgpt-operator-*.tgz charts
+	$(HELM) repo index --url https://charts.k8sgpt.ai/charts charts
+	mv charts/index.yaml index.yaml
 ##@ Build Dependencies
 
 ## Location to install dependencies to

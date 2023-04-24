@@ -9,7 +9,7 @@ k8sgpt-operator
 bin
 testbin/*
 Dockerfile.cross
-
+config/rendered
 # Test binary, build with `go test -c`
 *.test
 
