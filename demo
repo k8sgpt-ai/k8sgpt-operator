@@ -1,0 +1,14 @@
+. demo-magic.sh
+
+# hide the evidence
+clear
+
+
+pe "helm search repo k8sgpt"
+
+pe "helm install release k8sgpt/k8sgpt-operator"
+
+pe "cat config/samples/core_v1alpha1_k8sgpt.yaml"
+
+pe "kubectl apply -f config/samples/core_v1alpha1_k8sgpt.yaml"
+

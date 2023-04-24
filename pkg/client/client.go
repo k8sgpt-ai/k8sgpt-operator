@@ -44,7 +44,7 @@ func (c *Client) ProcessAnalysis(deployment v1.Deployment, config *v1alpha1.K8sG
 	if os.Getenv("LOCAL_MODE") != "" {
 		url = "http://localhost:8080/analyze"
 	} else {
-		url = fmt.Sprintf("http://%s.%s:8080/analyze", deployment.Name, deployment.Namespace)
+		url = fmt.Sprintf("http://%s.%s:8080/analyze", "k8sgpt", deployment.Namespace)
 	}
 
 	if config.Spec.EnableAI {
