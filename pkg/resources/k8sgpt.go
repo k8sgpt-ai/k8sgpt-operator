@@ -171,7 +171,7 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 					Containers: []v1.Container{
 						{
 							Name:  "k8sgpt",
-							Image: "ghcr.io/k8sgpt-ai/k8sgpt:" + config.Spec.Version,
+							Image: "ghcr.io/k8sgpt-ai/k8sgpt-operator:" + config.Spec.Version,
 							Args: []string{
 								"serve",
 							},
