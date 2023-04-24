@@ -9,54 +9,45 @@ This Operator is designed to enable K8sGPT within a Kubernetes cluster.
 It will allow you to create a custom resource that defines the behaviour and scope of a managed K8sGPT workload. Analysis and outputs will also be configurable to enable integration into existing workflows.
 
 
-## Architecture
+## Installation
 
-<img src="images/1.png" width="600px;" />
+```
+helm repo add k8sgpt https://charts.k8sgpt.ai/
+helm install release k8sgpt/k8sgpt-operator
+```
 
 ## Run the example
-1. Install custom resources:
 
-```sh
-make install
-```
+1. Install the operator from the [Installation](#installation) section.
 
-2. Build and push your image to the location specified by `IMG`:
-
-```sh
-make docker-build docker-push IMG=<some-registry>/k8sgpt-operator:tag
-```
-
-3. Deploy the controller to the cluster with the image specified by `IMG`:
-
-```sh
-make deploy IMG=<some-registry>/k8sgpt-operator:tag
-```
-
-4. Create secret:
+2. Create secret:
 ```sh 
 kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key=$OPENAI_TOKEN -n default
 ```
 
-5. Apply the K8sGPT configuration object:
+1. Apply the K8sGPT configuration object:
 ```sh
-kubectl apply -f config/samples/core_v1alpha1_k8sgpt.yaml
+kubectl apply -f - << EOF
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: K8sGPT
+metadata:
+  name: k8sgpt-sample
+spec:
+  namespace: default
+  model: gpt-3.5-turbo
+  backend: openai
+  noCache: false
+  version: v0.2.4
+  enableAI: true
+  secret:
+    name: k8sgpt-sample-secret
+    key: openai-api-key
+EOF
 ```
-### Uninstall CRDs
-To delete the CRDs from the cluster:
 
-```sh
-make uninstall
-```
+## Architecture
 
-### Undeploy controller
-UnDeploy the controller from the cluster:
-
-```sh
-make undeploy
-```
-
-<details>
-  <summary>Contributing</summary>
+<img src="images/1.png" width="600px;" />
 
 ## Contributing
 // TODO(user): Add detailed information on how you would like others to contribute to this project
@@ -93,4 +84,4 @@ make manifests
 
 More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
 
-</details>
+
