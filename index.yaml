@@ -3,12 +3,12 @@ entries:
   k8sgpt-operator:
   - apiVersion: v2
     appVersion: 0.2.4
-    created: "2023-04-24T19:52:01.766171+02:00"
+    created: "2023-04-24T19:52:47.588132+02:00"
     description: A Helm chart for Kubernetes
-    digest: 08edae95594e17a464d79f39d0d011d93f38e6583f343228b819b62ac234d7b5
+    digest: cd4a0ca2651f617ff7c1b81de031d9ae9acc23f291e46dc940a51f6a01857154
     name: k8sgpt-operator
     type: application
     urls:
-    - https://charts.k8sgpt.ai/charts/k8sgpt-operator-v0.0.2.tgz
-    version: v0.0.2
-generated: "2023-04-24T19:52:01.765797+02:00"
+    - https://charts.k8sgpt.ai/charts/k8sgpt-operator-v0.0.1.tgz
+    version: v0.0.1
+generated: "2023-04-24T19:52:47.587645+02:00"
