@@ -127,7 +127,7 @@ func GetClusterRole(config v1alpha1.K8sGPT) (*r1.ClusterRole, error) {
 			{
 				APIGroups: []string{"*"},
 				Resources: []string{"*"},
-				Verbs:     []string{"*"},
+				Verbs:     []string{"list", "get", "watch"},
 			},
 		},
 	}
@@ -170,8 +170,9 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 					ServiceAccountName: "k8sgpt",
 					Containers: []v1.Container{
 						{
-							Name:  "k8sgpt",
-							Image: "ghcr.io/k8sgpt-ai/k8sgpt-operator:" + config.Spec.Version,
+							Name:            "k8sgpt",
+							ImagePullPolicy: v1.PullAlways,
+							Image:           "ghcr.io/k8sgpt-ai/k8sgpt:" + config.Spec.Version,
 							Args: []string{
 								"serve",
 							},

@@ -131,7 +131,7 @@ release-manifests: manifests kustomize
 	mkdir -p chart/k8sgpt-operator/templates/
 	$(KUSTOMIZE) build config/default > chart/k8sgpt-operator/templates/rendered.yaml
 
-helm-package: generate release-manifests helm
+helm-package: generate manifests release-manifests helm
 	$(HELM) package --version $(CHART_VERSION) chart/k8sgpt-operator
 	mkdir -p charts && mv k8sgpt-operator-*.tgz charts
 	$(HELM) repo index --url https://charts.k8sgpt.ai/charts charts
