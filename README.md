@@ -18,6 +18,8 @@ helm install release k8sgpt/k8sgpt-operator
 
 ## Run the example
 
+<img src="images/demo1.gif" width="600px;"/>
+
 1. Install the operator from the [Installation](#installation) section.
 
 2. Create secret:
