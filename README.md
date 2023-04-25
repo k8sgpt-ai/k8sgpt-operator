@@ -1,9 +1,4 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./images/banner-white.png" width="600px;">
-  <img alt="Text changing depending on mode. Light: 'So light!' Dark: 'So dark!'" src="./images/banner-black.png" width="600px;">
-</picture>
-<br/>
-<br />
+<img src="./images/banner-white.png" width="600px;" />
 
 This Operator is designed to enable K8sGPT within a Kubernetes cluster.
 It will allow you to create a custom resource that defines the behaviour and scope of a managed K8sGPT workload. Analysis and outputs will also be configurable to enable integration into existing workflows.
