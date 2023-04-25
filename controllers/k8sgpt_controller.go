@@ -24,6 +24,7 @@ import (
 	k8sgptclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
+	"github.com/prometheus/client_golang/prometheus"
 	v1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,12 +33,32 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
 const (
 	FinalizerName            = "k8sgpt.ai/finalizer"
 	ReconcileErrorInterval   = 10 * time.Second
 	ReconcileSuccessInterval = 30 * time.Second
+)
+
+var (
+	// Metrics
+	// k8sgptReconcileErrorCount is a metric for the number of errors during reconcile
+	k8sgptReconcileErrorCount = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "k8sgpt_reconcile_error_count",
+		Help: "The total number of errors during reconcile",
+	})
+	// k8sgptNumberOfResults is a metric for the number of results
+	k8sgptNumberOfResults = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "k8sgpt_number_of_results",
+		Help: "The total number of results",
+	})
+	// k8sgptNumberOfResultsByType is a metric for the number of results by type
+	k8sgptNumberOfResultsByType = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "k8sgpt_number_of_results_by_type",
+		Help: "The total number of results by type",
+	}, []string{"kind", "name"})
 )
 
 // K8sGPTReconciler reconciles a K8sGPT object
@@ -61,6 +82,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	err := r.Get(ctx, req.NamespacedName, k8sgptConfig)
 	if err != nil {
 		// Error reading the object - requeue the request.
+		k8sgptReconcileErrorCount.Inc()
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
@@ -72,6 +94,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		if !utils.ContainsString(k8sgptConfig.GetFinalizers(), FinalizerName) {
 			controllerutil.AddFinalizer(k8sgptConfig, FinalizerName)
 			if err := r.Update(ctx, k8sgptConfig); err != nil {
+				k8sgptReconcileErrorCount.Inc()
 				return r.finishReconcile(err, false)
 			}
 		}
@@ -82,10 +105,12 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			// Delete any external resources associated with the instance
 			err := resources.Sync(ctx, r.Client, *k8sgptConfig, resources.Destroy)
 			if err != nil {
+				k8sgptReconcileErrorCount.Inc()
 				return r.finishReconcile(err, false)
 			}
 			controllerutil.RemoveFinalizer(k8sgptConfig, FinalizerName)
 			if err := r.Update(ctx, k8sgptConfig); err != nil {
+				k8sgptReconcileErrorCount.Inc()
 				return r.finishReconcile(err, false)
 			}
 		}
@@ -101,6 +126,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 		err = resources.Sync(ctx, r.Client, *k8sgptConfig, resources.Create)
 		if err != nil {
+			k8sgptReconcileErrorCount.Inc()
 			return r.finishReconcile(err, false)
 		}
 	}
@@ -110,12 +136,13 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		// Get the K8sGPT client
 		response, err := r.K8sGPTClient.ProcessAnalysis(deployment, k8sgptConfig)
 		if err != nil {
+			k8sgptReconcileErrorCount.Inc()
 			return r.finishReconcile(err, false)
 		}
 
 		// Create results from the analysis data
+		k8sgptNumberOfResults.Set(float64(len(response.Results)))
 		for _, resultSpec := range response.Results {
-
 			name := strings.ReplaceAll(resultSpec.Name, "-", "")
 			name = strings.ReplaceAll(name, "/", "")
 			result := corev1alpha1.Result{
@@ -125,23 +152,29 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					Namespace: k8sgptConfig.Namespace,
 				},
 			}
+			// Update metrics
+			k8sgptNumberOfResultsByType.With(prometheus.Labels{
+				"kind": resultSpec.Kind,
+				"name": resultSpec.Name,
+			}).Inc()
+
 			err = r.Create(ctx, &result)
 			if err != nil {
 				// if the result already exists, we will update it
 				if errors.IsAlreadyExists(err) {
 
 					result.ResourceVersion = k8sgptConfig.GetResourceVersion()
-
 					err = r.Update(ctx, &result)
 					if err != nil {
+						k8sgptReconcileErrorCount.Inc()
 						return r.finishReconcile(err, false)
 					}
 				} else {
 					return r.finishReconcile(err, false)
 				}
 			}
-
 		}
+
 	}
 
 	return r.finishReconcile(nil, false)
@@ -149,9 +182,13 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *K8sGPTReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
+	c := ctrl.NewControllerManagedBy(mgr).
 		For(&corev1alpha1.K8sGPT{}).
 		Complete(r)
+
+	metrics.Registry.MustRegister(k8sgptReconcileErrorCount)
+
+	return c
 }
 
 func (r *K8sGPTReconciler) finishReconcile(err error, requeueImmediate bool) (ctrl.Result, error) {
