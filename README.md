@@ -39,7 +39,7 @@ spec:
   model: gpt-3.5-turbo
   backend: openai
   noCache: false
-  version: v0.2.4
+  version: v0.2.7
   enableAI: true
   secret:
     name: k8sgpt-sample-secret
