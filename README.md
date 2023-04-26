@@ -42,6 +42,29 @@ spec:
 EOF
 ```
 
+4. Once the custom resource has been applied the K8sGPT-deployment will be installed and
+you will be able to see the Results objects of the analysis after some minutes ( if there are any issues):
+
+```bash
+❯ kubectl get results -o json | jq .
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "core.k8sgpt.ai/v1alpha1",
+      "kind": "Result",
+      "metadata": {
+        "creationTimestamp": "2023-04-26T09:45:02Z",
+        "generation": 1,
+        "name": "placementoperatorsystemplacementoperatorcontrollermanagermetricsservice",
+        "namespace": "default",
+        "resourceVersion": "108371",
+        "uid": "f0edd4de-92b6-4de2-ac86-5bb2b2da9736"
+      },
+      "spec": {
+        "details": "The error message means that the service in Kubernetes doesn't have any associated endpoints, which should have been labeled with \"control-plane=controller-manager\". \n\nTo solve this issue, you need to add the \"control-plane=controller-manager\" label to the endpoint that matches the service. Once the endpoint is labeled correctly, Kubernetes can associate it with the service, and the error should be resolved.",
+```
+
 ## Architecture
 
 <img src="images/1.png" width="600px;" />
