@@ -27,7 +27,14 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -a -o manager m
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM gcr.io/distroless/static:nonroot
+FROM gcr.io/distroless/static:nonroot as production
+
+LABEL org.opencontainers.image.source="https://github.com/k8sgpt-ai/k8sgpt-operator" \
+    org.opencontainers.image.url="https://k8sgpt.ai" \
+    org.opencontainers.image.title="k8sgpt" \
+    org.opencontainers.image.vendor='The K8sGPT Authors' \
+    org.opencontainers.image.licenses='Apache-2.0'
+
 WORKDIR /
 COPY --from=builder /workspace/manager .
 USER 65532:65532
