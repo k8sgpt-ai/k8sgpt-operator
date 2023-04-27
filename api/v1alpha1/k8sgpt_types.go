@@ -30,13 +30,14 @@ type SecretRef struct {
 
 // K8sGPTSpec defines the desired state of K8sGPT
 type K8sGPTSpec struct {
-	Backend   string    `json:"backend,omitempty"`
-	Model     string    `json:"model,omitempty"`
-	Secret    SecretRef `json:"secret,omitempty"`
-	Namespace string    `json:"namespace,omitempty"`
-	Version   string    `json:"version,omitempty"`
-	EnableAI  bool      `json:"enableAI,omitempty"`
-	NoCache   bool      `json:"noCache,omitempty"`
+	Backend   string     `json:"backend,omitempty"`
+	BaseUrl   string     `json:"baseUrl,omitempty"`
+	Model     string     `json:"model,omitempty"`
+	Secret    *SecretRef `json:"secret,omitempty"`
+	Namespace string     `json:"namespace,omitempty"`
+	Version   string     `json:"version,omitempty"`
+	EnableAI  bool       `json:"enableAI,omitempty"`
+	NoCache   bool       `json:"noCache,omitempty"`
 }
 
 // K8sGPTStatus defines the observed state of K8sGPT

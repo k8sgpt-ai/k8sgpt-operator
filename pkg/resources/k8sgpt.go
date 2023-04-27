@@ -178,17 +178,6 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 							},
 							Env: []v1.EnvVar{
 								{
-									Name: "K8SGPT_PASSWORD",
-									ValueFrom: &v1.EnvVarSource{
-										SecretKeyRef: &v1.SecretKeySelector{
-											LocalObjectReference: v1.LocalObjectReference{
-												Name: config.Spec.Secret.Name,
-											},
-											Key: config.Spec.Secret.Key,
-										},
-									},
-								},
-								{
 									Name:  "K8SGPT_MODEL",
 									Value: config.Spec.Model,
 								},
@@ -217,6 +206,31 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 				},
 			},
 		},
+	}
+	if config.Spec.Secret != nil {
+		password := v1.EnvVar{
+			Name: "K8SGPT_PASSWORD",
+			ValueFrom: &v1.EnvVarSource{
+				SecretKeyRef: &v1.SecretKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{
+						Name: config.Spec.Secret.Name,
+					},
+					Key: config.Spec.Secret.Key,
+				},
+			},
+		}
+		deployment.Spec.Template.Spec.Containers[0].Env = append(
+			deployment.Spec.Template.Spec.Containers[0].Env, password,
+		)
+	}
+	if config.Spec.BaseUrl != "" {
+		baseUrl := v1.EnvVar{
+			Name:  "K8SGPT_BASEURL",
+			Value: config.Spec.BaseUrl,
+		}
+		deployment.Spec.Template.Spec.Containers[0].Env = append(
+			deployment.Spec.Template.Spec.Containers[0].Env, baseUrl,
+		)
 	}
 	return &deployment, nil
 }
