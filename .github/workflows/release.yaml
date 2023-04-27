@@ -36,11 +36,12 @@ jobs:
           default-branch: main
 
   release-charts:
-    needs: release-please
+    if: needs.release-please.outputs.releases_created == 'true'
+    needs:
+      - release-please
     permissions:
       contents: write
     runs-on: ubuntu-latest
-    if: ${{ needs.release-please.outputs.release_created }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
