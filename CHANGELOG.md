@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.5](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.4...v0.0.5) (2023-04-27)
+
+
+### Other
+
+* fixing missing release trigger ([#15](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/15)) ([46ae78b](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/46ae78bf146d088582c1d4718050a91928a43b56))
+
 ## 0.0.4 (2023-04-27)
 
 
