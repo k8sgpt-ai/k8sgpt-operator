@@ -69,7 +69,13 @@ you will be able to see the Results objects of the analysis after some minutes (
 
 <img src="images/1.png" width="600px;" />
 
-## Contributing
+## Helm values
 
-Please see our community [contributing guidelines](https://github.com/k8sgpt-ai/community) for more information on how to get involved.
+| Parameter | Description | Default |
+| --------- | ----------- | ------- |
+| `serviceMonitor.enabled` | Enable Prometheus Operator ServiceMonitor | `false` |
+| `controllerManager.manager.image.repository` | Image repository | `k8sgpt/k8sgpt-operator` |
+| `controllerManager.manager.image.pullPolicy` | Image pull policy | `IfNotPresent` |
+| `controllerManager.manager.image.tag` | Image tag | `v0.2.7` |
+| `controllerManager.manager.imagePullSecrets` | Image pull secrets | `[]` |
 
