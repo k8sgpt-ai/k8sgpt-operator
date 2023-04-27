@@ -3,7 +3,7 @@
 IMG ?= ghcr.io/k8sgpt-ai/k8sgpt-operator:latest
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.26.0
-CHART_VERSION=v0.0.2# x-release-please-version
+CHART_VERSION=v0.0.3# x-release-please-version
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
 GOBIN=$(shell go env GOPATH)/bin
@@ -116,26 +116,38 @@ deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
 	$(KUSTOMIZE) build config/default | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
 
+.PHONY: helmify
+helmify: $(HELMIFY) ## Download helmify locally if necessary.
+$(HELMIFY): $(LOCALBIN)
+	test -s $(LOCALBIN)/helmify || GOBIN=$(LOCALBIN) go install github.com/arttor/helmify/cmd/helmify@latest
+    
 OSARCH=$(shell ./hack/get-os.sh)
 HELM = $(shell pwd)/bin/$(OSARCH)/helm
 HELM_INSTALLER ?= "https://get.helm.sh/helm-v3.10.1-$(OSARCH).tar.gz"
+HELMIFY ?= $(LOCALBIN)/helmify
 .PHONY: helm
 helm: $(HELM) ## Download helm locally if necessary.
 $(HELM): $(LOCALBIN)
 	[ -e "$(HELM)" ] && rm -rf "$(HELM)" || true
 	cd $(LOCALBIN) && curl -s $(HELM_INSTALLER) | tar -xzf - -C $(LOCALBIN)
 
-.PHONY: release-manifests
-release-manifests: manifests kustomize
+.PHONY: helmify
+helmify: $(HELMIFY) ## Download helmify locally if necessary.
+$(HELMIFY): $(LOCALBIN)
+	test -s $(LOCALBIN)/helmify || GOBIN=$(LOCALBIN) go install github.com/arttor/helmify/cmd/helmify@latest
+   
+.PHONY: helm-build
+helm-build: helm helmify manifests kustomize
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG) && cd ../../
-	mkdir -p chart/k8sgpt-operator/templates/
-	$(KUSTOMIZE) build config/default > chart/k8sgpt-operator/templates/rendered.yaml
+	$(KUSTOMIZE) build config/default | $(HELMIFY) 
 
-helm-package: generate manifests release-manifests helm
-	$(HELM) package --version $(CHART_VERSION) chart/k8sgpt-operator
+helm-package: generate manifests helm-build
+	$(HELM) package --version $(CHART_VERSION) chart/
 	mkdir -p charts && mv k8sgpt-operator-*.tgz charts
 	$(HELM) repo index --url https://charts.k8sgpt.ai/charts charts
 	mv charts/index.yaml index.yaml
+
+
 ##@ Build Dependencies
 
 ## Location to install dependencies to
