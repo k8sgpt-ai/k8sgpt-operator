@@ -50,7 +50,6 @@ repository:
 # Labels: define labels for Issues and Pull Requests
 labels:
   - name: bug
-    color: CC0000
     description: An issue with the system 🐛.
 
   - name: feature
