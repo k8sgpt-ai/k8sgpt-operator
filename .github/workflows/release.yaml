@@ -6,7 +6,10 @@ on:
       - main
       - '[0-9]+.[0-9]+.x'
   workflow_dispatch:
-
+env:
+  # Default minimum version of Go to support.
+  DEFAULT_GO_VERSION: 1.19
+  REGISTRY: ghcr.io
 defaults:
   run:
     shell: bash
@@ -32,34 +35,43 @@ jobs:
           token: ${{secrets.GITHUB_TOKEN}}
           default-branch: main
 
-  goreleaser:
-    if: needs.release-please.outputs.releases_created == 'true'
+  release-charts:
+    needs: release-please
     permissions:
       contents: write
-    needs:
-      - release-please
     runs-on: ubuntu-latest
+    if: ${{ needs.release-please.outputs.release_created }}
     steps:
       - name: Checkout
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Set up Go
-        uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # v4
-        with:
-          go-version: '1.20'
-      - name: Download Syft
-        uses: anchore/sbom-action/download-syft@422cb34a0f8b599678c41b21163ea6088edb2624 # v0.14.1
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@f82d6c1c344bcacabba2c841718984797f664a6b # v4
-        with:
-          # either 'goreleaser' (default) or 'goreleaser-pro'
-          distribution: goreleaser
-          version: latest
-          args: release --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.K8SGPT_BOT_SECRET }}
 
+      - name: Setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.DEFAULT_GO_VERSION }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Generate helm charts
+        run: IMG=ghcr.io/k8sgpt-ai/k8sgpt-operator:${{ needs.release-please.outputs.release_tag_name }} make helm-package
+
+      - name: Commit files
+        run: |
+          git add charts/
+          git add index.yaml
+          git commit -s -m "chore: released charts ${{ needs.release-please.outputs.release_tag_name }}"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ env.GITHUB_PAGES_BRANCH }}
+          
   build-container:
     if: needs.release-please.outputs.releases_created == 'true'
     needs:

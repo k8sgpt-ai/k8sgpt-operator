@@ -37,6 +37,8 @@ spec:
             properties:
               backend:
                 type: string
+              baseUrl:
+                type: string
               enableAI:
                 type: boolean
               model:
