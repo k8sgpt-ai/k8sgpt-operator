@@ -1,0 +1,84 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: results.core.k8sgpt.ai
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.11.1
+  labels:
+  {{- include "chart.labels" . | nindent 4 }}
+spec:
+  group: core.k8sgpt.ai
+  names:
+    kind: Result
+    listKind: ResultList
+    plural: results
+    singular: result
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Result is the Schema for the results API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ResultSpec defines the desired state of Result
+            properties:
+              details:
+                type: string
+              error:
+                items:
+                  properties:
+                    sensitive:
+                      items:
+                        properties:
+                          masked:
+                            type: string
+                          unmasked:
+                            type: string
+                        type: object
+                      type: array
+                    text:
+                      type: string
+                  type: object
+                type: array
+              kind:
+                description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                  Important: Run "make" to regenerate code after modifying this file'
+                type: string
+              name:
+                type: string
+              parentObject:
+                type: string
+            required:
+            - details
+            - error
+            - kind
+            - name
+            - parentObject
+            type: object
+          status:
+            description: ResultStatus defines the observed state of Result
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
