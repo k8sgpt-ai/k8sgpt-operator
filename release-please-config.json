@@ -12,6 +12,7 @@
         "deploy/manifest.yaml",
         "chart/operator/Chart.yaml",
         "chart/operator/values.yaml",
+        "chart/operator/README.md",
         "container/manifests/deployment.yaml"
       ],
       "changelog-sections": [
