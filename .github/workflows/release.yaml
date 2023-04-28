@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     if: needs.release-please.outputs.releases_created == 'true'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
       - name: Publish Helm chart
         uses: stefanprodan/helm-gh-pages@master
         with:
