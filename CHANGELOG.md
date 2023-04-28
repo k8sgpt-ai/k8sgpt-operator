@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.8](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.7...v0.0.8) (2023-04-28)
+
+
+### Bug Fixes
+
+* helm-release ([#32](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/32)) ([59047bf](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/59047bfb0fc83e39247f1e6ba4031e3b54d2494a))
+
+
+### Other
+
+* updated example readme ([#30](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/30)) ([2701072](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/2701072113b3b1bd6f1f85fbec00d4f0e8bae628))
+
 ## [0.0.7](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.6...v0.0.7) (2023-04-28)
 
 
