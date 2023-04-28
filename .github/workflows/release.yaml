@@ -54,8 +54,6 @@ jobs:
           owner: k8sgpt-ai
           repository: charts
           branch: main
-          index_dir: ./
-          target_dir: charts
           commit_username: k8sgpt-ai-bot
           commit_email: bot@noreply.k8sgpt.ai
           
