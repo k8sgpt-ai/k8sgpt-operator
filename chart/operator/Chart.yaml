@@ -1,6 +1,6 @@
 apiVersion: v2
 name: k8sgpt-operator
-description: A Helm chart for Kubernetes
+description: Automatic SRE Superpowers within your Kubernetes cluster
 maintainers:
   - name: "The K8sGPT Authors"
     email: "noreply@k8sgpt.ai"
