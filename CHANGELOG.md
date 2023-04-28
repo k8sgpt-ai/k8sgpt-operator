@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.0.9](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.8...v0.0.9) (2023-04-28)
+
+
+### Features
+
+* update artifacthub annotations ([5a5ae40](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5a5ae40efe5ed75ee22ba72c1fb22105855e5e14))
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/onsi/gomega to v1.27.6 ([#28](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/28)) ([1b781d0](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/1b781d09ce18107d8d4e046f30997bfce32799a9))
+* **deps:** update module github.com/prometheus/client_golang to v1.15.0 ([#40](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/40)) ([97b644f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/97b644f11cb5606ddab64bc96dc2d0a39162e8dd))
+* **deps:** update module sigs.k8s.io/controller-runtime to v0.14.6 ([#35](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/35)) ([c135030](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c135030f695c753107789239d79b324ee04173d9))
+* disable version checking for helm charts ([#37](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/37)) ([d6929b3](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d6929b3212f719ebf97218e506b1175525719b95))
+* ignore old client go packages in renovate ([#43](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/43)) ([4a84b0e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/4a84b0e2822db6786e60ec2b602712d2806d47d6))
+
+
+### Other
+
+* **deps:** pin dependencies ([#27](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/27)) ([6e9f78c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/6e9f78c03264bc103bb06d296b0eaa94f9233c23))
+* **deps:** update actions/checkout action to v3 ([#41](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/41)) ([1df8133](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/1df81336cb6fb1cffc9e308038faf98b8bd7c7cd))
+* **deps:** update gcr.io/kubebuilder/kube-rbac-proxy docker tag to v0.14.1 ([#36](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/36)) ([58a0677](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/58a0677291cc1b62702ac76b8a9ba84230011ac1))
+* **deps:** update helm/kind-action action to v1.5.0 ([#38](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/38)) ([b70aad5](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/b70aad5aa9731cd3c65d20392486f9f796557252))
+
+
+### Docs
+
+* add artifacthub badge and chart readme ([#45](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/45)) ([99c55f2](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/99c55f2afb28cb674e87148ff50c7c0b249e2051))
+
 ## [0.0.8](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.7...v0.0.8) (2023-04-28)
 
 
