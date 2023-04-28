@@ -40,4 +40,5 @@ branches:
       restrictions:
         users: []
         apps: []
-        teams: []
+        teams:
+          -

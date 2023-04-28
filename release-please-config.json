@@ -10,8 +10,8 @@
       "extra-files": [
         "README.md",
         "deploy/manifest.yaml",
-        "chart/Chart.yaml",
-        "chart/values.yaml",
+        "chart/operator/Chart.yaml",
+        "chart/operator/values.yaml",
         "container/manifests/deployment.yaml"
       ],
       "changelog-sections": [
