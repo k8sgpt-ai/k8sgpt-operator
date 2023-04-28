@@ -1,3 +1,5 @@
+serviceMonitor:
+  enabled: false
 controllerManager:
   kubeRbacProxy:
     containerSecurityContext:

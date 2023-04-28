@@ -3,7 +3,7 @@
 IMG ?= ghcr.io/k8sgpt-ai/k8sgpt-operator:latest
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.26.0
-CHART_VERSION=v0.0.5 #x-release-please-version
+CHART_VERSION=v0.0.6 #x-release-please-version
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
 GOBIN=$(shell go env GOPATH)/bin
@@ -141,7 +141,7 @@ helm-build: helm helmify manifests kustomize
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG) && cd ../../
 	$(KUSTOMIZE) build config/default | $(HELMIFY) 
 
-helm-package: generate manifests helm-build
+helm-package: generate manifests
 	$(HELM) package --version $(CHART_VERSION) chart/
 	mkdir -p charts && mv k8sgpt-operator-*.tgz charts
 	$(HELM) repo index --url https://charts.k8sgpt.ai/charts charts
