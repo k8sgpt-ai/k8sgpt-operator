@@ -10,6 +10,8 @@ env:
   # Default minimum version of Go to support.
   DEFAULT_GO_VERSION: 1.19
   REGISTRY: ghcr.io
+  GITHUB_PAGES_BRANCH: gh_pages
+
 defaults:
   run:
     shell: bash
@@ -42,35 +44,18 @@ jobs:
     runs-on: ubuntu-latest
     if: needs.release-please.outputs.releases_created == 'true'
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v2
+      - name: Publish Helm chart
+        uses: stefanprodan/helm-gh-pages@master
         with:
-          fetch-depth: 0
-
-      - name: Setup go
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ env.DEFAULT_GO_VERSION }}
-
-      - name: Configure Git
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-
-      - name: Generate helm charts
-        run: IMG=ghcr.io/k8sgpt-ai/k8sgpt-operator:${{ needs.release-please.outputs.release_tag_name }} make helm-package
-
-      - name: Commit files
-        run: |
-          git add charts/
-          git add index.yaml
-          git commit -s -m "chore: released charts ${{ needs.release-please.outputs.release_tag_name }}"
-
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ env.GITHUB_PAGES_BRANCH }}
+          token: ${{ secrets.K8SGPT_BOT_SECRET }}
+          charts_dir: chart
+          charts_url: https://charts.k8sgpt.ai
+          owner: k8sgpt-ai
+          repository: charts
+          branch: main
+          commit_username: k8sgpt-ai-bot
+          commit_email: bot@noreply.k8sgpt.ai
           
   build-container:
     if: needs.release-please.outputs.releases_created == 'true'

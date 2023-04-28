@@ -29,8 +29,8 @@ apiVersion: core.k8sgpt.ai/v1alpha1
 kind: K8sGPT
 metadata:
   name: k8sgpt-sample
+  namespace: kube-system
 spec:
-  namespace: default
   model: gpt-3.5-turbo
   backend: openai
   noCache: false

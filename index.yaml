@@ -3,9 +3,29 @@ entries:
   k8sgpt-operator:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-04-27T09:16:53.562871+02:00"
+    created: "2023-04-28T08:48:06.511832+02:00"
     description: A Helm chart for Kubernetes
-    digest: 48138af5e01194ac73cabb698bd9f5245fcff1955123632be37c8b6f03826e69
+    digest: e7671f79b0ef1aebbae436a79bed6ab5caec714d53c65618f9fda5591837461e
+    name: k8sgpt-operator
+    type: application
+    urls:
+    - https://charts.k8sgpt.ai/charts/k8sgpt-operator-v0.0.6.tgz
+    version: v0.0.6
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2023-04-28T08:48:06.511621+02:00"
+    description: A Helm chart for Kubernetes
+    digest: 585fe03dbc10791746c50565eab63a1fb900e9f89710725e497db56608bd41d4
+    name: k8sgpt-operator
+    type: application
+    urls:
+    - https://charts.k8sgpt.ai/charts/k8sgpt-operator-v0.0.5.tgz
+    version: v0.0.5
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2023-04-28T08:48:06.511316+02:00"
+    description: A Helm chart for Kubernetes
+    digest: 01a83204abf1b7af53745da8cd9d25961a1d3b88d779ab22f920f801481bf835
     name: k8sgpt-operator
     type: application
     urls:
@@ -13,7 +33,7 @@ entries:
     version: v0.0.3
   - apiVersion: v2
     appVersion: 0.2.4
-    created: "2023-04-27T09:16:53.562637+02:00"
+    created: "2023-04-28T08:48:06.510881+02:00"
     description: A Helm chart for Kubernetes
     digest: e0dbf56b6e036a1eaf9f03a0c6a1b4a2a360a339c5b82b24a58fbc7df23a89c6
     name: k8sgpt-operator
@@ -23,7 +43,7 @@ entries:
     version: v0.0.2
   - apiVersion: v2
     appVersion: 0.2.4
-    created: "2023-04-27T09:16:53.56221+02:00"
+    created: "2023-04-28T08:48:06.51051+02:00"
     description: A Helm chart for Kubernetes
     digest: cd4a0ca2651f617ff7c1b81de031d9ae9acc23f291e46dc940a51f6a01857154
     name: k8sgpt-operator
@@ -31,4 +51,4 @@ entries:
     urls:
     - https://charts.k8sgpt.ai/charts/k8sgpt-operator-v0.0.1.tgz
     version: v0.0.1
-generated: "2023-04-27T09:16:53.560128+02:00"
+generated: "2023-04-28T08:48:06.51011+02:00"
