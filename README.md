@@ -69,7 +69,7 @@ you will be able to see the Results objects of the analysis after some minutes (
 
 1. Install the operator from the [Installation](#installation) section.
 
-2. Follow the [LocalAI installation guide](https://github.com/go-skynet/helm-charts#readme) to install LocalAI. No OpenAI secret is required when using LocalAI!
+2. Follow the [LocalAI installation guide](https://github.com/go-skynet/helm-charts#readme) to install LocalAI. (*No OpenAI secret is required when using LocalAI*).
 
 3. Apply the K8sGPT configuration object:
 ```sh
