@@ -47,6 +47,7 @@ jobs:
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
+          ls -la
           changed=$(ct list-changed --chart-dirs ./chart --target-branch ${{ github.event.repository.default_branch }})
           if [[ -n "$changed" ]]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
