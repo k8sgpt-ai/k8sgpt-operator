@@ -43,8 +43,6 @@ spec:
                 type: boolean
               model:
                 type: string
-              namespace:
-                type: string
               noCache:
                 type: boolean
               secret:
