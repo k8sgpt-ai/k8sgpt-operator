@@ -16,7 +16,7 @@ The following table lists the configurable parameters of the K8sgpt-operator cha
 | `controllerManager.kubeRbacProxy.containerSecurityContext.allowPrivilegeEscalation` |             | `false`                                                                       |
 | `controllerManager.kubeRbacProxy.containerSecurityContext.capabilities.drop`        |             | `["ALL"]`                                                                     |
 | `controllerManager.kubeRbacProxy.image.repository`                                  |             | `"gcr.io/kubebuilder/kube-rbac-proxy"`                                        |
-| `controllerManager.kubeRbacProxy.image.tag`                                         |             | `"v0.14.1"`                                                                   |
+| `controllerManager.kubeRbacProxy.image.tag`                                         |             | `"v0.0.9"`                                                                   |
 | `controllerManager.kubeRbacProxy.resources.limits.cpu`                              |             | `"500m"`                                                                      |
 | `controllerManager.kubeRbacProxy.resources.limits.memory`                           |             | `"128Mi"`                                                                     |
 | `controllerManager.kubeRbacProxy.resources.requests.cpu`                            |             | `"5m"`                                                                        |
@@ -24,7 +24,7 @@ The following table lists the configurable parameters of the K8sgpt-operator cha
 | `controllerManager.manager.containerSecurityContext.allowPrivilegeEscalation`       |             | `false`                                                                       |
 | `controllerManager.manager.containerSecurityContext.capabilities.drop`              |             | `["ALL"]`                                                                     |
 | `controllerManager.manager.image.repository`                                        |             | `"ghcr.io/k8sgpt-ai/k8sgpt-operator"`                                         |
-| `controllerManager.manager.image.tag`                                               |             | `"v0.0.8"`                                                                    |
+| `controllerManager.manager.image.tag`                                               |             | `"v0.0.9"`                                                                    |
 | `controllerManager.manager.resources.limits.cpu`                                    |             | `"500m"`                                                                      |
 | `controllerManager.manager.resources.limits.memory`                                 |             | `"128Mi"`                                                                     |
 | `controllerManager.manager.resources.requests.cpu`                                  |             | `"10m"`                                                                       |
