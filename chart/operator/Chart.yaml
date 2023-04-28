@@ -18,7 +18,11 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
+<<<<<<< HEAD:chart/operator/Chart.yaml
 version: 0.0.7   # x-release-please-version
+=======
+version: 0.0.6   # x-release-please-version
+>>>>>>> 31efa1ea6b1507c2fc731cf3834ef21329547901:chart/Chart.yaml
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.

@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.0.7](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.6...v0.0.7) (2023-04-28)
+
+
+### Features
+
+* cutting new release ([#22](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/22)) ([5e8acc2](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5e8acc2f689ad8f4deea28d9bd7cb7c2a469430e))
+
+
+### Bug Fixes
+
+* bug with servicemonitor ([#24](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/24)) ([35c8b8c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/35c8b8ce1b3bb77eef8df4f7a4f5a555d21d47af))
+
+
+### Other
+
+* helm releasing and testing ([#26](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/26)) ([c337d33](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c337d330942a9cfdbea84b05cbf47729ca4e557b))
+
 ## [0.0.6](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.5...v0.0.6) (2023-04-28)
 
 
