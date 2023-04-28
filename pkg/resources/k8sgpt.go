@@ -43,7 +43,7 @@ func GetService(config v1alpha1.K8sGPT) (*v1.Service, error) {
 	service := v1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "k8sgpt",
-			Namespace: config.Spec.Namespace,
+			Namespace: config.Namespace,
 		},
 		Spec: v1.ServiceSpec{
 			Selector: map[string]string{
@@ -67,7 +67,7 @@ func GetServiceAccount(config v1alpha1.K8sGPT) (*v1.ServiceAccount, error) {
 	serviceAccount := v1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "k8sgpt",
-			Namespace: config.Spec.Namespace,
+			Namespace: config.Namespace,
 		},
 	}
 
@@ -94,7 +94,7 @@ func GetClusterRoleBinding(config v1alpha1.K8sGPT) (*r1.ClusterRoleBinding, erro
 			{
 				Kind:      "ServiceAccount",
 				Name:      "k8sgpt",
-				Namespace: config.Spec.Namespace,
+				Namespace: config.Namespace,
 			},
 		},
 		RoleRef: r1.RoleRef{
@@ -143,7 +143,7 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 	deployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      DeploymentName,
-			Namespace: config.Spec.Namespace,
+			Namespace: config.Namespace,
 			OwnerReferences: []metav1.OwnerReference{
 				{
 					Kind:       config.Kind,
