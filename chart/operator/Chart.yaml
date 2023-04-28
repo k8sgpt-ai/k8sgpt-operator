@@ -5,6 +5,14 @@ maintainers:
   - name: "The K8sGPT Authors"
     email: "noreply@k8sgpt.ai"
     url: https://github.com/k8sgpt-ai/community
+annotations:
+  artifacthub.io/links: |
+    - name: support
+      url: https://github.com/k8sgpt-ai/k8sgpt-operator/issues/new
+    - name: community
+      url: https://github.com/k8sgpt-ai/community
+  artifacthub.io/license: "Apache-2.0"
+  artifacthub.io/categories: "monitoring-logging"
 
 # A chart can be either an 'application' or a 'library' chart.
 #
