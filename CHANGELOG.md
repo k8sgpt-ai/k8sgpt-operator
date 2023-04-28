@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.6](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.5...v0.0.6) (2023-04-28)
+
+
+### Other
+
+* added missing chart ([83ceb6c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/83ceb6c746b5ddb7cf18d41f3a40b7d5c057380a))
+
 ## [0.0.5](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.4...v0.0.5) (2023-04-27)
 
 
