@@ -142,10 +142,10 @@ helm-build: helm helmify manifests kustomize
 	$(KUSTOMIZE) build config/default | $(HELMIFY) 
 
 helm-package: generate manifests
-	$(HELM) package --version $(CHART_VERSION) chart/
+	$(HELM) package --version $(CHART_VERSION) chart/operator/
 	mkdir -p charts && mv k8sgpt-operator-*.tgz charts
 	$(HELM) repo index --url https://charts.k8sgpt.ai/charts charts
-	mv charts/index.yaml index.yaml
+	mv charts/operator/index.yaml index.yaml
 
 
 ##@ Build Dependencies
