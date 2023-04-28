@@ -9,7 +9,7 @@ controllerManager:
         - ALL
     image:
       repository: gcr.io/kubebuilder/kube-rbac-proxy
-      tag: v0.13.1
+      tag: v0.14.1
     resources:
       limits:
         cpu: 500m
@@ -25,7 +25,7 @@ controllerManager:
         - ALL
     image:
       repository: ghcr.io/k8sgpt-ai/k8sgpt-operator
-      tag: v0.0.8 #x-release-please-version
+      tag: v0.0.8  # x-release-please-version
     resources:
       limits:
         cpu: 500m
