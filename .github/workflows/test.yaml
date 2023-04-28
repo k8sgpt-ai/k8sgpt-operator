@@ -1,9 +1,6 @@
 name: Run tests
 
 on:
-  push:
-    branches:
-      - chore/helm_release
   pull_request:
     branches:
       - main
