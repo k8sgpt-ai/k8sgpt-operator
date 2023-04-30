@@ -90,7 +90,7 @@ spec:
 EOF
 ```
 
-4. Same as step 4. in the example above. See this [blog](https://medium.com/@tyler_97636/k8sgpt-localai-unlock-kubernetes-superpowers-for-free-584790de9b65) for detailed instructions.
+4. Same as step 4. in the example above.
 
 ## Architecture
 
