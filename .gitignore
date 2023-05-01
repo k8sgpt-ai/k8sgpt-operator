@@ -26,3 +26,5 @@ config/rendered
 *.swp
 *.swo
 *~
+coverage.out
+coverage.html
