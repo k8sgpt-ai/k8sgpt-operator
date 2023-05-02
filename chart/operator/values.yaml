@@ -1,5 +1,6 @@
 serviceMonitor:
   enabled: false
+  additionalLabels: {}
 controllerManager:
   kubeRbacProxy:
     containerSecurityContext:
