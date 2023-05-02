@@ -184,3 +184,10 @@ $(CONTROLLER_GEN): $(LOCALBIN)
 envtest: $(ENVTEST) ## Download envtest-setup locally if necessary.
 $(ENVTEST): $(LOCALBIN)
 	test -s $(LOCALBIN)/setup-envtest || GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
+
+
+# Running code covergae locally, skip "imgaes", "charts" folder output as HTML
+.PHONY: coverage
+coverage: generate fmt vet manifests ## Run code coverage
+	go test -v -cover ./... -coverprofile coverage.out | grep -v /chart/ | grep -v /images/ | grep -v /charts/ | grep -v /config/ | grep -v /hack/ | grep -v /test/ | grep -v /vendor/
+	go tool cover -html=coverage.out -o coverage.html
