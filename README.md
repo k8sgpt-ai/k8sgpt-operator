@@ -49,7 +49,7 @@ EOF
 ```
 
 4. Once the custom resource has been applied the K8sGPT-deployment will be installed and
-you will be able to see the Results objects of the analysis after some minutes ( if there are any issues):
+you will be able to see the Results objects of the analysis after some minutes (if there are any issues in your cluster):
 
 ```bash
 ❯ kubectl get results -o json | jq .
@@ -70,6 +70,31 @@ you will be able to see the Results objects of the analysis after some minutes (
       "spec": {
         "details": "The error message means that the service in Kubernetes doesn't have any associated endpoints, which should have been labeled with \"control-plane=controller-manager\". \n\nTo solve this issue, you need to add the \"control-plane=controller-manager\" label to the endpoint that matches the service. Once the endpoint is labeled correctly, Kubernetes can associate it with the service, and the error should be resolved.",
 ```
+
+## LocalAI Example
+
+1. Install the operator from the [Installation](#installation) section.
+
+2. Follow the [LocalAI installation guide](https://github.com/go-skynet/helm-charts#readme) to install LocalAI. (*No OpenAI secret is required when using LocalAI*).
+
+3. Apply the K8sGPT configuration object:
+```sh
+kubectl apply -f - << EOF
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: K8sGPT
+metadata:
+  name: k8sgpt-local-ai
+spec:
+  namespace: default
+  model: gpt-3.5-turbo
+  backend: local-ai
+  noCache: false
+  version: v0.2.7
+  enableAI: true
+EOF
+```
+
+4. Same as step 4. in the example above.
 
 ## Architecture
 
