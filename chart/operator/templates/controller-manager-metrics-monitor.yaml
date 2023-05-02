@@ -9,6 +9,9 @@ metadata:
     app.kubernetes.io/part-of: k8sgpt-operator
     control-plane: controller-manager
   {{- include "chart.labels" . | nindent 4 }}
+  {{- if .Values.serviceMonitor.additionalLabels }}
+    {{- toYaml .Values.serviceMonitor.additionalLabels | nindent 4 }}
+  {{- end }}
 spec:
   endpoints:
   - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
