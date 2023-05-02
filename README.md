@@ -1,4 +1,8 @@
-<img src="./images/banner-white.png" width="600px;" />
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./images/banner-white.png" width="600px;">
+  <img alt="Text changing depending on mode. Light: 'So light!' Dark: 'So dark!'" src="./images/banner-black.png" width="600px;">
+</picture>
+<br/>
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/k8sgpt)](https://artifacthub.io/packages/search?repo=k8sgpt)
 
