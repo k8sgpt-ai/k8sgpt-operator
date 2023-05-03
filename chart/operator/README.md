@@ -13,6 +13,7 @@ The following table lists the configurable parameters of the K8sgpt-operator cha
 | Parameter                                                                           | Description | Default                                                                       |
 |-------------------------------------------------------------------------------------|-------------|-------------------------------------------------------------------------------|
 | `serviceMonitor.enabled`                                                            |             | `false`                                                                       |
+| `serviceMonitor.additionalLabels`                                                   |             |`{}`
 | `controllerManager.kubeRbacProxy.containerSecurityContext.allowPrivilegeEscalation` |             | `false`                                                                       |
 | `controllerManager.kubeRbacProxy.containerSecurityContext.capabilities.drop`        |             | `["ALL"]`                                                                     |
 | `controllerManager.kubeRbacProxy.image.repository`                                  |             | `"gcr.io/kubebuilder/kube-rbac-proxy"`                                        |
