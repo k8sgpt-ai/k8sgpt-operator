@@ -3,7 +3,7 @@ module github.com/k8sgpt-ai/k8sgpt-operator
 go 1.19
 
 require (
-	github.com/onsi/ginkgo/v2 v2.9.3
+	github.com/onsi/ginkgo/v2 v2.9.4
 	github.com/onsi/gomega v1.27.6
 	github.com/prometheus/client_golang v1.15.1
 	k8s.io/api v0.26.3
