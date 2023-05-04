@@ -25,7 +25,7 @@ helm install release k8sgpt/k8sgpt-operator
 
 2. Create secret:
 ```sh 
-kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key=$OPENAI_TOKEN -n default
+kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key=$OPENAI_TOKEN -n kube-system
 ```
 
 3. Apply the K8sGPT configuration object:
