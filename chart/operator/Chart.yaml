@@ -31,4 +31,4 @@ version: 0.0.9   # x-release-please-version
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "0.0.9"    # x-release-please-version
+appVersion: "0.0.10"    # x-release-please-version
