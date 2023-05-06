@@ -16,6 +16,7 @@ package resources
 
 import (
 	"context"
+	err "errors"
 
 	"github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
@@ -231,6 +232,18 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 		deployment.Spec.Template.Spec.Containers[0].Env = append(
 			deployment.Spec.Template.Spec.Containers[0].Env, baseUrl,
 		)
+	}
+	// Engine is required only when azureopenai is the ai backend
+	if config.Spec.Engine != "" && config.Spec.Backend == "azureopenai" {
+		engine := v1.EnvVar{
+			Name:  "K8SGPT_ENGINE",
+			Value: config.Spec.Engine,
+		}
+		deployment.Spec.Template.Spec.Containers[0].Env = append(
+			deployment.Spec.Template.Spec.Containers[0].Env, engine,
+		)
+	} else if config.Spec.Engine != "" && config.Spec.Backend != "azureopenai" {
+		return &appsv1.Deployment{}, err.New("Engine is supported only by azureopenai provider.")
 	}
 	return &deployment, nil
 }

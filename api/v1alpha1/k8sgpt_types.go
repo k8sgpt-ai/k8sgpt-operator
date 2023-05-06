@@ -30,9 +30,13 @@ type SecretRef struct {
 
 // K8sGPTSpec defines the desired state of K8sGPT
 type K8sGPTSpec struct {
-	Backend  string     `json:"backend,omitempty"`
-	BaseUrl  string     `json:"baseUrl,omitempty"`
+	// +kubebuilder:default:=openai
+	// +kubebuilder:validation:Enum=openai;localai;azureopenai
+	Backend string `json:"backend,omitempty"`
+	BaseUrl string `json:"baseUrl,omitempty"`
+	// +kubebuilder:default:=gpt-3.5-turbo
 	Model    string     `json:"model,omitempty"`
+	Engine   string     `json:"engine,omitempty"`
 	Secret   *SecretRef `json:"secret,omitempty"`
 	Version  string     `json:"version,omitempty"`
 	EnableAI bool       `json:"enableAI,omitempty"`
