@@ -5,6 +5,8 @@
 domain: k8sgpt.ai
 layout:
 - go.kubebuilder.io/v3
+plugins:
+  grafana.kubebuilder.io/v1-alpha: {}
 projectName: k8sgpt-operator
 repo: github.com/k8sgpt-ai/k8sgpt-operator
 resources:
