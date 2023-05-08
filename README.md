@@ -87,7 +87,7 @@ metadata:
 spec:
   namespace: default
   model: gpt-3.5-turbo
-  backend: local-ai
+  backend: localai
   noCache: false
   version: v0.2.7
   enableAI: true

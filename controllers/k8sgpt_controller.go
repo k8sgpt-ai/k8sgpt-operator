@@ -186,7 +186,7 @@ func (r *K8sGPTReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&corev1alpha1.K8sGPT{}).
 		Complete(r)
 
-	metrics.Registry.MustRegister(k8sgptReconcileErrorCount)
+	metrics.Registry.MustRegister(k8sgptReconcileErrorCount, k8sgptNumberOfResults, k8sgptNumberOfResultsByType)
 
 	return c
 }
