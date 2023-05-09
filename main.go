@@ -87,7 +87,14 @@ func main() {
 	}
 
 	// New K8sGPT in cluster Client
-	k8sgptClient := k8sgptClient.NewClient()
+	var address string
+	if os.Getenv("LOCAL_MODE") != "" {
+		address = "localhost:8080"
+	} else {
+		address = os.Getenv("K8SGPT_API_HOST")
+	}
+
+	k8sgptClient, err := k8sgptClient.NewClient(address)
 
 	if err = (&controllers.K8sGPTReconciler{
 		Client:       mgr.GetClient(),
