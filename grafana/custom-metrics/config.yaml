@@ -2,6 +2,11 @@
 customMetrics:
   - metric: k8sgpt_reconcile_error_count
     type: counter
+    unit: cpm
+  - metric: k8sgpt_number_of_results
+    type: gauge
+  - metric: k8sgpt_number_of_results_by_type
+    type: gauge
 #  - metric: # Raw custom metric (required)
 #    type:   # Metric type: counter/gauge/histogram (required)
 #    expr:   # Prom_ql for the metric (optional)
