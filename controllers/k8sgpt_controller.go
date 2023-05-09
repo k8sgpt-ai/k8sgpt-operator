@@ -17,11 +17,13 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
-	k8sgptclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
+
+	kclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
 	"github.com/prometheus/client_golang/prometheus"
@@ -65,7 +67,9 @@ var (
 type K8sGPTReconciler struct {
 	client.Client
 	Scheme       *runtime.Scheme
-	K8sGPTClient *k8sgptclient.Client
+	K8sGPTClient *kclient.Client
+	// This is a map of clients for each deployment
+	k8sGPTClients map[string]*kclient.Client
 }
 
 // +kubebuilder:rbac:groups=core.k8sgpt.ai,resources=k8sgpts,verbs=get;list;watch;create;update;patch;delete
@@ -133,8 +137,25 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 	// If the deployment is active, we will query it directly for analysis data
 	if deployment.Status.ReadyReplicas > 0 {
-		// Get the K8sGPT client
-		response, err := r.K8sGPTClient.ProcessAnalysis(deployment, k8sgptConfig)
+		// Check if the client exists in the map
+		if _, ok := r.k8sGPTClients[k8sgptConfig.Name]; !ok {
+			// Create a new client
+			var address string
+			if os.Getenv("LOCAL_MODE") != "" {
+				address = "localhost:8080"
+			} else {
+				address = fmt.Sprintf("%s.%s:8080", "k8sgpt", deployment.Namespace)
+			}
+
+			k8sgptClient, err := kclient.NewClient(address)
+			if err != nil {
+				k8sgptReconcileErrorCount.Inc()
+				return r.finishReconcile(err, false)
+			}
+			r.k8sGPTClients[k8sgptConfig.Name] = k8sgptClient
+		}
+
+		response, err := r.k8sGPTClients[k8sgptConfig.Name].ProcessAnalysis(deployment, k8sgptConfig)
 		if err != nil {
 			k8sgptReconcileErrorCount.Inc()
 			return r.finishReconcile(err, false)
@@ -186,7 +207,8 @@ func (r *K8sGPTReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&corev1alpha1.K8sGPT{}).
 		Complete(r)
 
-	metrics.Registry.MustRegister(k8sgptReconcileErrorCount)
+	r.k8sGPTClients = make(map[string]*kclient.Client)
+	metrics.Registry.MustRegister(k8sgptReconcileErrorCount, k8sgptNumberOfResults, k8sgptNumberOfResultsByType)
 
 	return c
 }

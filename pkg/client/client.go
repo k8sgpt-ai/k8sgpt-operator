@@ -14,58 +14,65 @@ limitations under the License.
 package client
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"os"
-	"time"
 
+	rpc "buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go/schema/v1/schemav1grpc"
+	schemav1 "buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go/schema/v1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/common"
+	"google.golang.org/grpc"
 	v1 "k8s.io/api/apps/v1"
 )
 
 // This is the client for communicating with the K8sGPT in cluster deployment
 type Client struct {
-	httpClient *http.Client
+	conn *grpc.ClientConn
 }
 
-func NewClient() *Client {
-	return &Client{
-		httpClient: &http.Client{Timeout: 120 * time.Second},
+func NewClient(address string) (*Client, error) {
+	// Connect to the K8sGPT server and create a new client
+	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	if err != nil {
+		return nil, fmt.Errorf("failed to dial K8sGPT server: %v", err)
 	}
+
+	client := &Client{conn: conn}
+
+	return client, nil
 }
 
 func (c *Client) ProcessAnalysis(deployment v1.Deployment, config *v1alpha1.K8sGPT) (*common.K8sGPTReponse, error) {
 
-	// Construct the request
-	// <service-name>.<namespace>:8080/analyze
-	var url string
-	if os.Getenv("LOCAL_MODE") != "" {
-		url = "http://localhost:8080/analyze"
-	} else {
-		url = fmt.Sprintf("http://%s.%s:8080/analyze", "k8sgpt", deployment.Namespace)
+	client := rpc.NewServerClient(c.conn)
+
+	req := &schemav1.AnalyzeRequest{
+		Explain: config.Spec.EnableAI,
+		Nocache: config.Spec.NoCache,
 	}
 
-	if config.Spec.EnableAI {
-		url = url + "?explain=true"
+	res, err := client.Analyze(context.Background(), req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to call Analyze RPC: %v", err)
 	}
 
-	if config.Spec.NoCache {
-		url = url + "?nocache=true"
-	}
+	var target []v1alpha1.ResultSpec
 
-	r, err := c.httpClient.Get(url)
+	jsonBytes, err := json.Marshal(res.Results)
 	if err != nil {
 		return nil, err
 	}
-	defer r.Body.Close()
 
-	var target common.K8sGPTReponse
-
-	err = json.NewDecoder(r.Body).Decode(&target)
+	err = json.Unmarshal(jsonBytes, &target)
 	if err != nil {
 		return nil, err
 	}
-	return &target, nil
+
+	response := &common.K8sGPTReponse{
+		Status:   res.Status,
+		Results:  target,
+		Problems: int(res.Problems),
+	}
+	return response, nil
 }
