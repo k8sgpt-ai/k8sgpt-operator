@@ -84,8 +84,8 @@ apiVersion: core.k8sgpt.ai/v1alpha1
 kind: K8sGPT
 metadata:
   name: k8sgpt-local-ai
-spec:
   namespace: default
+spec:
   model: gpt-3.5-turbo
   backend: localai
   noCache: false
