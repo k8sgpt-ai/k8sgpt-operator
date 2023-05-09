@@ -144,7 +144,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			if os.Getenv("LOCAL_MODE") != "" {
 				address = "localhost:8080"
 			} else {
-				address = os.Getenv("K8SGPT_API_HOST")
+				address = fmt.Sprintf("%s.%s:8080", "k8sgpt", deployment.Namespace)
 			}
 
 			k8sgptClient, err := kclient.NewClient(address)
