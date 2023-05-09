@@ -23,7 +23,6 @@ import (
 
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/controllers"
-	k8sgptClient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -86,20 +85,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	// New K8sGPT in cluster Client
-	var address string
-	if os.Getenv("LOCAL_MODE") != "" {
-		address = "localhost:8080"
-	} else {
-		address = os.Getenv("K8SGPT_API_HOST")
-	}
-
-	k8sgptClient, err := k8sgptClient.NewClient(address)
-
 	if err = (&controllers.K8sGPTReconciler{
-		Client:       mgr.GetClient(),
-		Scheme:       mgr.GetScheme(),
-		K8sGPTClient: k8sgptClient,
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "K8sGPT")
 		os.Exit(1)
