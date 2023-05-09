@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.0.10](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.9...v0.0.10) (2023-05-09)
+
+
+### Features
+
+* add additionalLabels to serviceMonitor ([#51](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/51)) ([d8497fc](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d8497fc09706bc51fa0d75d62cde1ab5f1f326df))
+* add azureopenai backend ([#62](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/62)) ([d51cc3e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d51cc3ead261387365d5e3333f358b8a8db8cb85))
+* migrate api client to grpc ([#68](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/68)) ([809b877](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/809b8776504472904bd5a8146a6947e50b1b1311))
+* register all the custom prom metrics ([#67](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/67)) ([e8a2074](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e8a20749e3b807e15fc4b7378df790ded031b7bf))
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/onsi/ginkgo/v2 to v2.9.3 ([#56](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/56)) ([6657a40](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/6657a404d7451d78896e2b0c9eb9be7267329d38))
+* **deps:** update module github.com/onsi/ginkgo/v2 to v2.9.4 ([#58](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/58)) ([2f4ae37](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/2f4ae37e1bdfd0913ee3a66db42c74885650b81e))
+* **deps:** update module github.com/prometheus/client_golang to v1.15.1 ([#57](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/57)) ([5770f5f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5770f5f8ca609042aee15897dd182c0fe27d9bd7))
+* fix readme example ([#70](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/70)) ([27ee7ff](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/27ee7ff90a0e8d0a6070f44a2cdb1575c0aba38a))
+
+
+### Docs
+
+* add LocalAI example to README ([#18](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/18)) ([aea19f4](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/aea19f49a6031a051db2eabbbbbc4e3609513d35))
+* fix localai's backend name ([#64](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/64)) ([2f69d29](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/2f69d29699b3e70ad8c10c9f4bc146446549d693))
+
+
+### Other
+
+* added changing banners ([#50](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/50)) ([fd25d49](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/fd25d49f00d0f7a5d7b537e0a20ee8e5ea9b7cb7))
+* **deps:** update anchore/sbom-action action to v0.14.2 ([#66](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/66)) ([12ada7e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/12ada7e9e26ed061c898c59609f8abece22c2ee5))
+* **deps:** update golang docker tag to v1.20.4 ([#54](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/54)) ([b6d6046](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/b6d60466d9ad50656267f236f783d8aab72dea0f))
+* update helm readme with servicemonitor labels ([#55](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/55)) ([d0a71fb](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d0a71fb276b953d29164c2c47578788b13ab79df))
+* update readme ([#59](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/59)) ([59583eb](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/59583eb761f3ce220fd36073ac69c9437d4cac57))
+* updated logo ([d6b6f42](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d6b6f4212046c32b66a27703b4a45f76e2e1a377))
+
 ## [0.0.9](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.8...v0.0.9) (2023-04-28)
 
 
