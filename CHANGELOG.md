@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.11](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.10...v0.0.11) (2023-05-09)
+
+
+### Features
+
+* fix grpc client creation slightly ([#73](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/73)) ([98b39a9](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/98b39a9310a910df28f6204afb7027335661c318))
+
 ## [0.0.10](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.9...v0.0.10) (2023-05-09)
 
 
