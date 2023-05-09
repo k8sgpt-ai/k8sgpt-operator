@@ -40,7 +40,7 @@ spec:
   model: gpt-3.5-turbo
   backend: openai
   noCache: false
-  version: v0.2.7
+  version: v0.3.0
   enableAI: true
   secret:
     name: k8sgpt-sample-secret
@@ -89,7 +89,7 @@ spec:
   model: gpt-3.5-turbo
   backend: localai
   noCache: false
-  version: v0.2.7
+  version: v0.3.0
   enableAI: true
 EOF
 ```
@@ -102,11 +102,12 @@ EOF
 
 ## Helm values
 
+Here is an example of some of the values that can be configured.
+For more details please see [here](chart/values.yaml)
 | Parameter | Description | Default |
 | --------- | ----------- | ------- |
 | `serviceMonitor.enabled` | Enable Prometheus Operator ServiceMonitor | `false` |
 | `controllerManager.manager.image.repository` | Image repository | `k8sgpt/k8sgpt-operator` |
 | `controllerManager.manager.image.pullPolicy` | Image pull policy | `IfNotPresent` |
-| `controllerManager.manager.image.tag` | Image tag | `v0.2.7` |
 | `controllerManager.manager.imagePullSecrets` | Image pull secrets | `[]` |
 
