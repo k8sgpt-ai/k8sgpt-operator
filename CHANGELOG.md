@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.12](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.11...v0.0.12) (2023-05-10)
+
+
+### Features
+
+* add grafana plugin and dashboards ([#65](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/65)) ([c3059bc](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c3059bc6fc9e9a08c40a5094f9b577b1a3feaf64))
+* feat/direct pod ip ([#76](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/76)) ([5d82413](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5d82413954566601392e46acec90cad91349856e))
+
 ## [0.0.11](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.10...v0.0.11) (2023-05-09)
 
 
