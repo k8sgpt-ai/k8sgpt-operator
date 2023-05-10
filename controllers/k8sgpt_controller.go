@@ -17,17 +17,18 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"net"
 	"os"
 	"strings"
 	"time"
 
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
-
 	kclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
 	"github.com/prometheus/client_golang/prometheus"
 	v1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -144,8 +145,35 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			if os.Getenv("LOCAL_MODE") != "" {
 				address = "localhost:8080"
 			} else {
-				address = fmt.Sprintf("%s.%s:8080", "k8sgpt", deployment.Namespace)
+				// Get k8sgpt-deployment service pod ip
+				podList := &corev1.PodList{}
+				listOpts := []client.ListOption{
+					client.InNamespace(k8sgptConfig.Namespace),
+					client.MatchingLabels{"app": "k8sgpt-deployment"},
+				}
+				err := r.List(ctx, podList, listOpts...)
+				if err != nil {
+					k8sgptReconcileErrorCount.Inc()
+					return r.finishReconcile(err, false)
+				}
+				if len(podList.Items) == 0 {
+					k8sgptReconcileErrorCount.Inc()
+					return r.finishReconcile(fmt.Errorf("no pods found for k8sgpt-deployment"), false)
+				}
+				address = fmt.Sprintf("%s:8080", podList.Items[0].Status.PodIP)
 			}
+
+			fmt.Printf("Creating new client for %s\n", address)
+			// Test if the port is open
+			conn, err := net.DialTimeout("tcp", address, 1*time.Second)
+			if err != nil {
+				k8sgptReconcileErrorCount.Inc()
+				return r.finishReconcile(err, false)
+			}
+
+			fmt.Printf("Connection established between %s and localhost with time out of %d seconds.\n", address, int64(1))
+			fmt.Printf("Remote Address : %s \n", conn.RemoteAddr().String())
+			fmt.Printf("Local Address : %s \n", conn.LocalAddr().String())
 
 			k8sgptClient, err := kclient.NewClient(address)
 			if err != nil {
