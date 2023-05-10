@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -253,37 +254,37 @@ func Sync(ctx context.Context, c client.Client,
 
 	var objs []client.Object
 
-	svc, err := GetService(config)
-	if err != nil {
-		return err
+	svc, er := GetService(config)
+	if er != nil {
+		return er
 	}
 
 	objs = append(objs, svc)
 
-	svcAcc, err := GetServiceAccount(config)
-	if err != nil {
-		return err
+	svcAcc, er := GetServiceAccount(config)
+	if er != nil {
+		return er
 	}
 
 	objs = append(objs, svcAcc)
 
-	clusterRole, err := GetClusterRole(config)
-	if err != nil {
-		return err
+	clusterRole, er := GetClusterRole(config)
+	if er != nil {
+		return er
 	}
 
 	objs = append(objs, clusterRole)
 
-	clusterRoleBinding, err := GetClusterRoleBinding(config)
-	if err != nil {
-		return err
+	clusterRoleBinding, er := GetClusterRoleBinding(config)
+	if er != nil {
+		return er
 	}
 
 	objs = append(objs, clusterRoleBinding)
 
-	deployment, err := GetDeployment(config)
-	if err != nil {
-		return err
+	deployment, er := GetDeployment(config)
+	if er != nil {
+		return er
 	}
 
 	objs = append(objs, deployment)
@@ -292,6 +293,18 @@ func Sync(ctx context.Context, c client.Client,
 	for _, obj := range objs {
 		switch i {
 		case Create:
+
+			// before creation we will check to see if the secret exists if used as a ref
+			if config.Spec.Secret != nil {
+
+				secret := &v1.Secret{}
+				er := c.Get(ctx, types.NamespacedName{Name: config.Spec.Secret.Name,
+					Namespace: config.Namespace}, secret)
+				if er != nil {
+					return err.New("references secret does not exist, cannot create deployment")
+				}
+			}
+
 			err := c.Create(ctx, obj)
 			if err != nil {
 				// If the object already exists, ignore the error

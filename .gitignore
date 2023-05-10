@@ -1,3 +1,4 @@
+__debug_bin
 *.DS_Store
 k8sgpt-operator
 # Binaries for programs and plugins
