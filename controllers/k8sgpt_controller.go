@@ -212,8 +212,16 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 				// if the result already exists, we will update it
 				if errors.IsAlreadyExists(err) {
 
-					result.ResourceVersion = k8sgptConfig.GetResourceVersion()
-					err = r.Update(ctx, &result)
+					// Get the actual result with metadata rather than our local construct
+					var newResult corev1alpha1.Result
+					err = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
+						Name: name}, &newResult)
+					if err != nil {
+						k8sgptReconcileErrorCount.Inc()
+						return r.finishReconcile(err, false)
+					}
+					newResult.Spec = resultSpec
+					err = r.Update(ctx, &newResult)
 					if err != nil {
 						k8sgptReconcileErrorCount.Inc()
 						return r.finishReconcile(err, false)
