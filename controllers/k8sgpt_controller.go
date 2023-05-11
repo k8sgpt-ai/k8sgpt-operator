@@ -188,9 +188,9 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			k8sgptReconcileErrorCount.Inc()
 			return r.finishReconcile(err, false)
 		}
-
-		// Create results from the analysis data
+		// Parse the k8sgpt-deployment response into a list of results
 		k8sgptNumberOfResults.Set(float64(len(response.Results)))
+		rawResults := make(map[string]corev1alpha1.Result)
 		for _, resultSpec := range response.Results {
 			name := strings.ReplaceAll(resultSpec.Name, "-", "")
 			name = strings.ReplaceAll(name, "/", "")
@@ -201,32 +201,65 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					Namespace: k8sgptConfig.Namespace,
 				},
 			}
-			// Update metrics
-			k8sgptNumberOfResultsByType.With(prometheus.Labels{
-				"kind": resultSpec.Kind,
-				"name": resultSpec.Name,
-			}).Inc()
+			rawResults[name] = result
+		}
 
-			err = r.Create(ctx, &result)
+		// Prior to creating or updating any results we will delete any stale results that
+		// no longer are relevent, we can do this by using the resultSpec composed name against
+		// the custom resource name
+		resultList := &corev1alpha1.ResultList{}
+		err = r.List(ctx, resultList)
+		if err != nil {
+			k8sgptReconcileErrorCount.Inc()
+			return r.finishReconcile(err, false)
+		}
+		if len(resultList.Items) > 0 {
+			// If the result does not exist in the map we will delete it
+			for _, result := range resultList.Items {
+				if _, ok := rawResults[result.Name]; !ok {
+					err = r.Delete(ctx, &result)
+					if err != nil {
+						k8sgptReconcileErrorCount.Inc()
+						return r.finishReconcile(err, false)
+					} else {
+						k8sgptNumberOfResultsByType.With(prometheus.Labels{
+							"kind": result.Kind,
+							"name": result.Name,
+						}).Dec()
+					}
+				}
+			}
+		}
+		// At this point we are able to loop through our rawResults and create them or update
+		// them as needed
+		for _, result := range rawResults {
+			// Check if the result already exists
+			var existingResult corev1alpha1.Result
+			err = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
+				Name: result.Name}, &existingResult)
 			if err != nil {
 				// if the result already exists, we will update it
-				if errors.IsAlreadyExists(err) {
-
-					// Get the actual result with metadata rather than our local construct
-					var newResult corev1alpha1.Result
-					err = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
-						Name: name}, &newResult)
+				if errors.IsNotFound(err) {
+					err = r.Create(ctx, &result)
 					if err != nil {
 						k8sgptReconcileErrorCount.Inc()
 						return r.finishReconcile(err, false)
-					}
-					newResult.Spec = resultSpec
-					err = r.Update(ctx, &newResult)
-					if err != nil {
-						k8sgptReconcileErrorCount.Inc()
-						return r.finishReconcile(err, false)
+					} else {
+						k8sgptNumberOfResultsByType.With(prometheus.Labels{
+							"kind": result.Kind,
+							"name": result.Name,
+						}).Inc()
 					}
 				} else {
+					k8sgptReconcileErrorCount.Inc()
+					return r.finishReconcile(err, false)
+				}
+			} else {
+				// If the result already exists we will update it
+				existingResult.Spec = result.Spec
+				err = r.Update(ctx, &existingResult)
+				if err != nil {
+					k8sgptReconcileErrorCount.Inc()
 					return r.finishReconcile(err, false)
 				}
 			}
