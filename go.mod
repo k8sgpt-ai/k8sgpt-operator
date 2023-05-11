@@ -4,10 +4,11 @@ go 1.19
 
 require (
 	buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.3.0-20230506120742-576a6b5d0a86.1
+	buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.28.1-20230506120742-576a6b5d0a86.4
 	github.com/onsi/ginkgo/v2 v2.9.4
 	github.com/onsi/gomega v1.27.6
 	github.com/prometheus/client_golang v1.15.1
-	google.golang.org/grpc v1.53.0
+	google.golang.org/grpc v1.55.0
 	k8s.io/api v0.26.3
 	k8s.io/apimachinery v0.26.3
 	k8s.io/client-go v0.26.3
@@ -22,7 +23,6 @@ require (
 )
 
 require (
-	buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.28.1-20230506120742-576a6b5d0a86.4 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -67,7 +67,7 @@ require (
 	golang.org/x/time v0.3.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
+	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
