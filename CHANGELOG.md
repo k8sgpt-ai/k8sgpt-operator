@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.13](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.12...v0.0.13) (2023-05-11)
+
+
+### Bug Fixes
+
+* stagnent results ([#82](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/82)) ([1d58a0e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/1d58a0e36ed293f884c68bd775cee17420f70084))
+
+
+### Other
+
+* updated readme url ([#78](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/78)) ([57bcb46](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/57bcb46e38e0c0959cbdd6e61c7b284e24652e1d))
+
 ## [0.0.12](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.11...v0.0.12) (2023-05-10)
 
 
