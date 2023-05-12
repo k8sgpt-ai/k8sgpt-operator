@@ -19,7 +19,7 @@ helm install release k8sgpt/k8sgpt-operator -n k8sgpt-operator-system --create-n
 
 ## Run the example
 
-<img src="images/demo1.gif" width="600px;"/>
+<img src="images/demo2.gif" width="600px;"/>
 
 1. Install the operator from the [Installation](#installation) section.
 
