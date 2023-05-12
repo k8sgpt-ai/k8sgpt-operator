@@ -216,7 +216,10 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		if len(resultList.Items) > 0 {
 			// If the result does not exist in the map we will delete it
 			for _, result := range resultList.Items {
-				if _, ok := rawResults[result.Name]; !ok {
+				name := strings.ReplaceAll(result.Name, "-", "")
+				name = strings.ReplaceAll(name, "/", "")
+				fmt.Printf("Checking if %s is still relevant\n", name)
+				if _, ok := rawResults[name]; !ok {
 					err = r.Delete(ctx, &result)
 					if err != nil {
 						k8sgptReconcileErrorCount.Inc()
