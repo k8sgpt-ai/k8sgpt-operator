@@ -1,0 +1,716 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/component: configmap
+    app.kubernetes.io/created-by: k8sgpt-operator
+    app.kubernetes.io/part-of: k8sgpt-operator
+  {{- include "chart.labels" . | nindent 4 }}
+  name: k8sgpt-overview
+data:
+  k8sgpt-overview.json: |-
+    {
+    "annotations": {
+        "list": [
+        {
+            "builtIn": 1,
+            "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "target": {
+            "limit": 100,
+            "matchAny": false,
+            "tags": [],
+            "type": "dashboard"
+            },
+            "type": "dashboard"
+        }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 30,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+        {
+        "collapsed": false,
+        "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+        },
+        "id": 6,
+        "panels": [],
+        "title": "Heads up",
+        "type": "row"
+        },
+        {
+        "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+        },
+        "gridPos": {
+            "h": 8,
+            "w": 4,
+            "x": 0,
+            "y": 1
+        },
+        "id": 10,
+        "options": {
+            "content": "![K8sGPT Logo](https://k8sgpt.ai/images/logo-black.png)\n\nGiving Kubernetes Superpowers to everyone!",
+            "mode": "markdown"
+        },
+        "pluginVersion": "9.0.4",
+        "type": "text"
+        },
+        {
+        "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+        },
+        "description": "",
+        "fieldConfig": {
+            "defaults": {
+            "color": {
+                "mode": "palette-classic"
+            },
+            "custom": {
+                "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+                }
+            },
+            "mappings": [],
+            "min": 0,
+            "unit": "none"
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 8,
+            "w": 5,
+            "x": 4,
+            "y": 1
+        },
+        "id": 2,
+        "options": {
+            "displayLabels": [],
+            "legend": {
+            "displayMode": "list",
+            "placement": "bottom"
+            },
+            "pieType": "pie",
+            "reduceOptions": {
+            "calcs": [
+                "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+            },
+            "tooltip": {
+            "mode": "single",
+            "sort": "none"
+            }
+        },
+        "targets": [
+            {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "editorMode": "code",
+            "exemplar": false,
+            "expr": "sum by (kind) (k8sgpt_number_of_results_by_type)",
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "A"
+            }
+        ],
+        "title": "Result Kind types",
+        "type": "piechart"
+        },
+        {
+        "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+        },
+        "description": "",
+        "fieldConfig": {
+            "defaults": {
+            "color": {
+                "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                {
+                    "color": "green",
+                    "value": null
+                },
+                {
+                    "color": "#EAB839",
+                    "value": 2
+                },
+                {
+                    "color": "dark-orange",
+                    "value": 10
+                },
+                {
+                    "color": "dark-red",
+                    "value": 30
+                }
+                ]
+            }
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 8,
+            "w": 5,
+            "x": 9,
+            "y": 1
+        },
+        "id": 8,
+        "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+            "calcs": [
+                "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+            },
+            "textMode": "auto"
+        },
+        "pluginVersion": "9.0.4",
+        "targets": [
+            {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "editorMode": "builder",
+            "expr": "sum(k8sgpt_number_of_results)",
+            "range": true,
+            "refId": "A"
+            }
+        ],
+        "title": "Analysis Results",
+        "type": "stat"
+        },
+        {
+        "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+        },
+        "fieldConfig": {
+            "defaults": {
+            "color": {
+                "mode": "palette-classic"
+            },
+            "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "bars",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                "fill": "solid"
+                },
+                "lineWidth": 3,
+                "pointSize": 10,
+                "scaleDistribution": {
+                "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": true,
+                "stacking": {
+                "group": "A",
+                "mode": "normal"
+                },
+                "thresholdsStyle": {
+                "mode": "off"
+                }
+            },
+            "mappings": [],
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                {
+                    "color": "green",
+                    "value": null
+                }
+                ]
+            }
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 8,
+            "w": 9,
+            "x": 14,
+            "y": 1
+        },
+        "id": 4,
+        "options": {
+            "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+            },
+            "tooltip": {
+            "mode": "single",
+            "sort": "none"
+            }
+        },
+        "targets": [
+            {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "editorMode": "builder",
+            "expr": "count by(kind) (k8sgpt_number_of_results_by_type)",
+            "hide": false,
+            "range": true,
+            "refId": "A"
+            }
+        ],
+        "title": "Results over time",
+        "type": "timeseries"
+        },
+        {
+        "collapsed": false,
+        "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 9
+        },
+        "id": 14,
+        "panels": [],
+        "title": "Stats",
+        "type": "row"
+        },
+        {
+        "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+        },
+        "description": "Total number of reconciliations per controller",
+        "fieldConfig": {
+            "defaults": {
+            "color": {
+                "mode": "continuous-GrYlRd"
+            },
+            "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "gradientMode": "scheme",
+                "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 3,
+                "pointSize": 5,
+                "scaleDistribution": {
+                "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                "group": "A",
+                "mode": "none"
+                },
+                "thresholdsStyle": {
+                "mode": "off"
+                }
+            },
+            "mappings": [],
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                {
+                    "color": "green",
+                    "value": null
+                },
+                {
+                    "color": "red",
+                    "value": 80
+                }
+                ]
+            },
+            "unit": "cpm"
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 7,
+            "w": 7,
+            "x": 0,
+            "y": 10
+        },
+        "id": 20,
+        "options": {
+            "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+            },
+            "tooltip": {
+            "mode": "single",
+            "sort": "none"
+            }
+        },
+        "targets": [
+            {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "editorMode": "code",
+            "exemplar": true,
+            "expr": "sum(rate(controller_runtime_reconcile_total{job=\"$job\", namespace=\"$namespace\"}[5m])) by (instance, pod)",
+            "interval": "",
+            "legendFormat": "{{instance}} {{pod}}",
+            "range": true,
+            "refId": "A"
+            }
+        ],
+        "title": "Total Reconciliation Count Per Controller",
+        "type": "timeseries"
+        },
+        {
+        "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+        },
+        "fieldConfig": {
+            "defaults": {
+            "color": {
+                "mode": "continuous-GrYlRd"
+            },
+            "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "gradientMode": "scheme",
+                "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 3,
+                "pointSize": 5,
+                "scaleDistribution": {
+                "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                "group": "A",
+                "mode": "none"
+                },
+                "thresholdsStyle": {
+                "mode": "off"
+                }
+            },
+            "mappings": [],
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                {
+                    "color": "green",
+                    "value": null
+                },
+                {
+                    "color": "red",
+                    "value": 80
+                }
+                ]
+            },
+            "unit": "ops"
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 7,
+            "y": 10
+        },
+        "id": 16,
+        "options": {
+            "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+            },
+            "tooltip": {
+            "mode": "single",
+            "sort": "none"
+            }
+        },
+        "pluginVersion": "8.4.3",
+        "targets": [
+            {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "exemplar": true,
+            "expr": "sum(rate(workqueue_adds_total{job=\"$job\", namespace=\"$namespace\"}[5m])) by (instance, name)",
+            "interval": "",
+            "legendFormat": "{{name}} {{instance}}",
+            "refId": "A"
+            }
+        ],
+        "title": "Work Queue Add Rate",
+        "type": "timeseries"
+        },
+        {
+        "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+        },
+        "description": "How long in seconds an item stays in workqueue before being requested",
+        "fieldConfig": {
+            "defaults": {
+            "color": {
+                "mode": "palette-classic"
+            },
+            "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                "group": "A",
+                "mode": "normal"
+                },
+                "thresholdsStyle": {
+                "mode": "off"
+                }
+            },
+            "mappings": [],
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                {
+                    "color": "green",
+                    "value": null
+                },
+                {
+                    "color": "red",
+                    "value": 80
+                }
+                ]
+            },
+            "unit": "s"
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 15,
+            "y": 10
+        },
+        "id": 18,
+        "options": {
+            "legend": {
+            "calcs": [
+                "max",
+                "mean"
+            ],
+            "displayMode": "hidden",
+            "placement": "bottom"
+            },
+            "tooltip": {
+            "mode": "single",
+            "sort": "none"
+            }
+        },
+        "targets": [
+            {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "exemplar": true,
+            "expr": "histogram_quantile(0.50, sum(rate(workqueue_queue_duration_seconds_bucket{job=\"$job\", namespace=\"$namespace\"}[5m])) by (instance, name, le))",
+            "interval": "",
+            "legendFormat": "P50 {{name}} {{instance}} ",
+            "refId": "A"
+            },
+            {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "exemplar": true,
+            "expr": "histogram_quantile(0.90, sum(rate(workqueue_queue_duration_seconds_bucket{job=\"$job\", namespace=\"$namespace\"}[5m])) by (instance, name, le))",
+            "hide": false,
+            "interval": "",
+            "legendFormat": "P90 {{name}} {{instance}} ",
+            "refId": "B"
+            },
+            {
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "exemplar": true,
+            "expr": "histogram_quantile(0.99, sum(rate(workqueue_queue_duration_seconds_bucket{job=\"$job\", namespace=\"$namespace\"}[5m])) by (instance, name, le))",
+            "hide": false,
+            "interval": "",
+            "legendFormat": "P99 {{name}} {{instance}} ",
+            "refId": "C"
+            }
+        ],
+        "title": "Seconds For Items Stay In Queue (before being requested) (P50, P90, P99)",
+        "type": "timeseries"
+        }
+    ],
+    "refresh": false,
+    "schemaVersion": 36,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+        "list": [
+        {
+            "current": {
+            "selected": false,
+            "text": "k8sgpt-k8sgpt-operat-controller-manager-metrics-service",
+            "value": "k8sgpt-k8sgpt-operat-controller-manager-metrics-service"
+            },
+            "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+            },
+            "definition": "label_values(controller_runtime_reconcile_total{namespace=~\"$namespace\"}, job)",
+            "hide": 0,
+            "includeAll": false,
+            "multi": false,
+            "name": "job",
+            "options": [],
+            "query": {
+            "query": "label_values(controller_runtime_reconcile_total{namespace=~\"$namespace\"}, job)",
+            "refId": "StandardVariableQuery"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 0,
+            "type": "query"
+        },
+        {
+            "current": {
+            "selected": false,
+            "text": "k8sgpt-operator-system",
+            "value": "k8sgpt-operator-system"
+            },
+            "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+            },
+            "definition": "label_values(controller_runtime_reconcile_total, namespace)",
+            "hide": 0,
+            "includeAll": false,
+            "multi": false,
+            "name": "namespace",
+            "options": [],
+            "query": {
+            "query": "label_values(controller_runtime_reconcile_total, namespace)",
+            "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 0,
+            "type": "query"
+        },
+        {
+            "current": {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+            },
+            "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+            },
+            "definition": "label_values(controller_runtime_reconcile_total{namespace=~\"$namespace\", job=~\"$job\"}, pod)",
+            "hide": 2,
+            "includeAll": true,
+            "label": "pod",
+            "multi": true,
+            "name": "pod",
+            "options": [],
+            "query": {
+            "query": "label_values(controller_runtime_reconcile_total{namespace=~\"$namespace\", job=~\"$job\"}, pod)",
+            "refId": "StandardVariableQuery"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 0,
+            "type": "query"
+        }
+        ]
+    },
+    "time": {
+        "from": "now-15m",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "K8sGPT Overview",
+    "uid": "U82QyO8Vz",
+    "version": 7,
+    "weekStart": ""
+    }
