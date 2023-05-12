@@ -226,7 +226,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 						return r.finishReconcile(err, false)
 					} else {
 						k8sgptNumberOfResultsByType.With(prometheus.Labels{
-							"kind": result.Kind,
+							"kind": result.Spec.Kind,
 							"name": result.Name,
 						}).Dec()
 					}
@@ -249,7 +249,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 						return r.finishReconcile(err, false)
 					} else {
 						k8sgptNumberOfResultsByType.With(prometheus.Labels{
-							"kind": result.Kind,
+							"kind": result.Spec.Kind,
 							"name": result.Name,
 						}).Inc()
 					}
