@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.0.14](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.13...v0.0.14) (2023-05-12)
+
+
+### Bug Fixes
+
+* Add missing backend from analysis request. ([#89](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/89)) ([a829a0a](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/a829a0a06ac5296cdbb1784b73b0eef31b9df80f))
+* **deps:** update module buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go to v1.28.1-20230510140658-54288a50e81c.4 ([#84](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/84)) ([3ed4269](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/3ed42696a9991f71d97dd8634df09fcd8eefe54a))
+* **deps:** update module google.golang.org/grpc to v1.55.0 ([#71](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/71)) ([009919f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/009919f574a9fb018324a668addd751a80234b32))
+* readme namespaces ([#86](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/86)) ([7e04b61](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/7e04b617deb3e4233872838d46b9f3a0e13d6471))
+
+
+### Other
+
+* updated the demo gif ([#87](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/87)) ([0843174](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0843174fbd582f4a47942748d94879f6e4d99953))
+
 ## [0.0.13](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.12...v0.0.13) (2023-05-11)
 
 
