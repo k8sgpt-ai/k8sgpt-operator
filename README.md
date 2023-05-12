@@ -14,7 +14,7 @@ It will allow you to create a custom resource that defines the behaviour and sco
 
 ```
 helm repo add k8sgpt https://charts.k8sgpt.ai/
-helm install release k8sgpt/k8sgpt-operator
+helm install release k8sgpt/k8sgpt-operator -n k8sgpt-operator-system --create-namespace
 ```
 
 ## Run the example
@@ -25,7 +25,8 @@ helm install release k8sgpt/k8sgpt-operator
 
 2. Create secret:
 ```sh 
-kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key=$OPENAI_TOKEN -n kube-system
+kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key=$OPENAI_TOKEN -n k8sgpt-
+operator-system
 ```
 
 3. Apply the K8sGPT configuration object:
@@ -35,7 +36,7 @@ apiVersion: core.k8sgpt.ai/v1alpha1
 kind: K8sGPT
 metadata:
   name: k8sgpt-sample
-  namespace: kube-system
+  namespace: k8sgpt-operator-system
 spec:
   model: gpt-3.5-turbo
   backend: openai
