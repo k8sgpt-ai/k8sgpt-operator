@@ -216,6 +216,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		if len(resultList.Items) > 0 {
 			// If the result does not exist in the map we will delete it
 			for _, result := range resultList.Items {
+				fmt.Printf("Checking if %s is still relevant\n", result.Name)
 				if _, ok := rawResults[result.Name]; !ok {
 					err = r.Delete(ctx, &result)
 					if err != nil {
@@ -223,7 +224,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 						return r.finishReconcile(err, false)
 					} else {
 						k8sgptNumberOfResultsByType.With(prometheus.Labels{
-							"kind": result.Kind,
+							"kind": result.Spec.Kind,
 							"name": result.Name,
 						}).Dec()
 					}
@@ -246,7 +247,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 						return r.finishReconcile(err, false)
 					} else {
 						k8sgptNumberOfResultsByType.With(prometheus.Labels{
-							"kind": result.Kind,
+							"kind": result.Spec.Kind,
 							"name": result.Name,
 						}).Inc()
 					}
