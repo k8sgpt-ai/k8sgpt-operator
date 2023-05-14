@@ -41,6 +41,7 @@ type K8sGPTSpec struct {
 	Version  string     `json:"version,omitempty"`
 	EnableAI bool       `json:"enableAI,omitempty"`
 	NoCache  bool       `json:"noCache,omitempty"`
+	Filters  []string   `json:"filters,omitempty"`
 }
 
 // K8sGPTStatus defines the observed state of K8sGPT

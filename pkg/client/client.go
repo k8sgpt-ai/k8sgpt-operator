@@ -51,6 +51,7 @@ func (c *Client) ProcessAnalysis(deployment v1.Deployment, config *v1alpha1.K8sG
 		Explain: config.Spec.EnableAI,
 		Nocache: config.Spec.NoCache,
 		Backend: config.Spec.Backend,
+		Filters: config.Spec.Filters,
 	}
 
 	res, err := client.Analyze(context.Background(), req)
