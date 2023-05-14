@@ -48,6 +48,10 @@ spec:
                 type: boolean
               engine:
                 type: string
+              filters:
+                items:
+                  type: string
+                type: array
               model:
                 default: gpt-3.5-turbo
                 type: string

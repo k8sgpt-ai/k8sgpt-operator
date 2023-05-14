@@ -43,6 +43,8 @@ spec:
   noCache: false
   version: v0.3.0
   enableAI: true
+  # filters:
+  #   - Ingress
   secret:
     name: k8sgpt-sample-secret
     key: openai-api-key
