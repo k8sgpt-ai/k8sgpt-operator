@@ -9,4 +9,5 @@ metadata:
   {{- include "chart.labels" . | nindent 4 }}
   name: k8sgpt-overview
 data:
-  k8sgpt-overview.json: |- {{ .Files.Get "dashboards/k8sgpt-overview.json" | indent 4}}
+  k8sgpt-overview.json: |
+{{ .Files.Get "dashboards/k8sgpt-overview.json" | indent 4}}
