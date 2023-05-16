@@ -1,6 +1,7 @@
 serviceMonitor:
   enabled: false
   additionalLabels: {}
+grafanaDashboard: false
 controllerManager:
   kubeRbacProxy:
     containerSecurityContext:
