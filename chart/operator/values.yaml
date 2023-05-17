@@ -3,7 +3,7 @@ serviceMonitor:
   additionalLabels: {}
 
 grafanaDashboard:
-  enabled: true 
+  enabled: false 
   folder:
     annotation: grafana_folder
     name: ai
