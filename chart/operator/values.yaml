@@ -1,7 +1,15 @@
 serviceMonitor:
   enabled: false
   additionalLabels: {}
-grafanaDashboard: false
+
+grafanaDashboard:
+  enabled: true 
+  folder:
+    annotation: grafana_folder
+    name: ai
+  dashboard:
+    label: grafana_dashboard
+
 controllerManager:
   kubeRbacProxy:
     containerSecurityContext:
