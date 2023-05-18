@@ -1,11 +1,9 @@
-{{ if .Values.grafanaDashboard.enabled -}}
+{{ if .Values.grafanaDashboard -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  annotations:
-    {{ .Values.grafanaDashboard.folder.annotation }}: {{ .Values.grafanaDashboard.folder.name }}
   labels:
-    {{ .Values.grafanaDashboard.dashboard.label }}: "1"
+    grafana_dashboard: "1"
     app.kubernetes.io/component: configmap
     app.kubernetes.io/created-by: k8sgpt-operator
     app.kubernetes.io/part-of: k8sgpt-operator
