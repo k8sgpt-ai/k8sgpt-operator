@@ -2,7 +2,6 @@ __debug_bin
 *.DS_Store
 k8sgpt-operator
 # Binaries for programs and plugins
-.vscode
 *.exe
 *.exe~
 *.dll
@@ -24,6 +23,9 @@ config/rendered
 
 # editor and IDE paraphernalia
 .idea
+.devspace
+.vscode/*
+!.vscode/launch.json
 *.swp
 *.swo
 *~

@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: controller-manager
+  namespace: system
+spec:
+  template:
+    spec:
+      containers:
+      - name: manager
+        # devspace automatically loads newly build images into kind
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/bash", "-c", "--"]
+        args: ["while true; do sleep 30; done;"]
+        resources: null
+        livenessProbe: null
+        readinessProbe: null
+        securityContext: null
+      securityContext: null
+      serviceAccount: k8sgpt-operator-controller-manager
+      serviceAccountName: k8sgpt-operator-controller-manager

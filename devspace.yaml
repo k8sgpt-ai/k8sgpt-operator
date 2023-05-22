@@ -1,0 +1,53 @@
+name: k8sgpt-operator
+version: v2beta1
+
+vars:
+  IMAGE: ghcr.io/k8sgpt-ai/k8sgpt-operator
+
+images:
+  controller:
+    image: ${IMAGE}
+    tags:
+    - dev
+    createPullSecret: false
+    dockerfile: Dockerfile.dev
+    rebuildStrategy: ignoreContextChanges
+    docker:
+      useBuildKit: true
+      # Note: uncomment if debugging against a remote k8s cluster
+      # args:
+      # - "--platform=linux/amd64"
+
+deployments:
+  controller:
+    namespace: k8sgpt-operator-system
+    kubectl:
+      kustomize: true
+      kustomizeArgs:
+      - "--load-restrictor"
+      - "LoadRestrictionsNone"
+      manifests:
+      - config/manager/overlays/devspace
+
+dev:
+  controller:
+    imageSelector: ${IMAGE}
+    terminal:
+      enabled: true
+      disableReplace: true
+      workDir: "/workspace"
+      command: ./devspace_start.sh
+    ports:
+    - port: "2347"
+    sync:
+    - path: .:/workspace
+      excludePaths:
+        - '**'
+        - '!/api'
+        - '!/controllers'
+        - '!/pkg'
+        - '!/devspace_start.sh'
+        - '!/go.mod'
+        - '!/go.sum'
+        - '!/main.go'
+        - 'Makefile'
