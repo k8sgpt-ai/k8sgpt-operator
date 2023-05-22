@@ -136,3 +136,24 @@ EOF
 ## Helm values
 
 For details please see [here](chart/values.yaml)
+
+## Development
+
+### DevSpace + Kind
+DevSpace provides a bidirectional file sync between your local IDE and a debug container running in K8s (local or remote). This removes the need to wait for image builds/rebuilds. It also enables in-cluster debugging using delve.
+
+Prerequisites:
+- Install [DevSpace](https://www.devspace.sh/docs/getting-started/installation)
+- Install [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
+
+```bash
+# deploy a local k8s cluster using kind
+kind create cluster
+
+# install CRDs and deploy the k8sgpt-operator
+make install
+make deploy
+
+# build k8sgpt-operator dev image, then patch deployment to use debug container
+devspace dev
+```
