@@ -50,7 +50,7 @@ func (c *Client) ProcessAnalysis(deployment v1.Deployment, config *v1alpha1.K8sG
 	req := &schemav1.AnalyzeRequest{
 		Explain: config.Spec.EnableAI,
 		Nocache: config.Spec.NoCache,
-		Backend: config.Spec.Backend,
+		Backend: string(config.Spec.Backend),
 		Filters: config.Spec.Filters,
 	}
 

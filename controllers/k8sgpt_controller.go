@@ -192,6 +192,10 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		k8sgptNumberOfResults.Set(float64(len(response.Results)))
 		rawResults := make(map[string]corev1alpha1.Result)
 		for _, resultSpec := range response.Results {
+			// FIXME: remove this once backend is populated in the k8sgpt response
+			if resultSpec.Backend == "" {
+				resultSpec.Backend = k8sgptConfig.Spec.Backend
+			}
 			name := strings.ReplaceAll(resultSpec.Name, "-", "")
 			name = strings.ReplaceAll(name, "/", "")
 			result := corev1alpha1.Result{
