@@ -185,7 +185,7 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 								},
 								{
 									Name:  "K8SGPT_BACKEND",
-									Value: config.Spec.Backend,
+									Value: string(config.Spec.Backend),
 								},
 							},
 							Ports: []v1.ContainerPort{
@@ -235,7 +235,7 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 		)
 	}
 	// Engine is required only when azureopenai is the ai backend
-	if config.Spec.Engine != "" && config.Spec.Backend == "azureopenai" {
+	if config.Spec.Engine != "" && config.Spec.Backend == v1alpha1.AzureOpenAI {
 		engine := v1.EnvVar{
 			Name:  "K8SGPT_ENGINE",
 			Value: config.Spec.Engine,
@@ -243,7 +243,7 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 		deployment.Spec.Template.Spec.Containers[0].Env = append(
 			deployment.Spec.Template.Spec.Containers[0].Env, engine,
 		)
-	} else if config.Spec.Engine != "" && config.Spec.Backend != "azureopenai" {
+	} else if config.Spec.Engine != "" && config.Spec.Backend != v1alpha1.AzureOpenAI {
 		return &appsv1.Deployment{}, err.New("Engine is supported only by azureopenai provider.")
 	}
 	return &deployment, nil

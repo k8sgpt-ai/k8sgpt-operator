@@ -34,29 +34,27 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			Key:  "k8s-gpt",
 		}
 
-		Kind     = "K8sGPT"
-		Backend  = "gpt"
-		Backend2 = "gpt-2"
-		BaseUrl  = "https://api.k8s-gpt.localhost"
-		Model    = "345M"
-		Version  = "v1alpha1"
+		kind    = "K8sGPT"
+		baseUrl = "https://api.k8s-gpt.localhost"
+		model   = "345M"
+		version = "v1alpha1"
 
 		Namespace = "k8sGPT"
 
 		k8sGPT = K8sGPT{
 			TypeMeta: metav1.TypeMeta{
-				Kind: Kind,
+				Kind: kind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "k8s-gpt",
 				Namespace: Namespace,
 			},
 			Spec: K8sGPTSpec{
-				Backend:  Backend,
-				BaseUrl:  BaseUrl,
-				Model:    Model,
+				Backend:  OpenAI,
+				BaseUrl:  baseUrl,
+				Model:    model,
 				Secret:   &secretRef,
-				Version:  Version,
+				Version:  version,
 				EnableAI: true,
 				NoCache:  true,
 			},
@@ -64,18 +62,18 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 
 		k8sGPT2 = K8sGPT{
 			TypeMeta: metav1.TypeMeta{
-				Kind: Kind,
+				Kind: kind,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "k8s-gpt-2",
 				Namespace: Namespace,
 			},
 			Spec: K8sGPTSpec{
-				Backend:  Backend2,
-				BaseUrl:  BaseUrl,
-				Model:    Model,
+				Backend:  AzureOpenAI,
+				BaseUrl:  baseUrl,
+				Model:    model,
 				Secret:   &secretRef,
-				Version:  Version,
+				Version:  version,
 				EnableAI: false,
 				NoCache:  false,
 			},
