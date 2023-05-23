@@ -10,5 +10,3 @@ spec:
   noCache: false
   enableAI: true
   version: v0.3.0
-  # if not specified, k8s will marshal as a zero-valued SecretRef, which causes errors
-  secret: null
