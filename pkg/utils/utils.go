@@ -9,7 +9,7 @@ func ContainsString(slice []string, s string) bool {
 	return false
 }
 
-// Bool returns a pointer to a bool.
+// PtrBool returns a pointer to a bool.
 func PtrBool(b bool) *bool {
 	return &b
 }
