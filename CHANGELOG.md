@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.0.16](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.15...v0.0.16) (2023-05-24)
+
+
+### Features
+
+* add additional printer columns to Result CR ([#114](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/114)) ([778357d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/778357d065079a342e4da4f85e07e07b5208456a))
+* update deployment on version change in CR ([#119](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/119)) ([1bb8977](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/1bb8977b1c6ad3d269d843621dbce859d4c43c19))
+
+
+### Bug Fixes
+
+* **deps:** update module sigs.k8s.io/controller-runtime to v0.15.0 ([#116](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/116)) ([49fab66](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/49fab663cafee3838a934aab46dccdc071938b93))
+
 ## [0.0.15](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.14...v0.0.15) (2023-05-22)
 
 
