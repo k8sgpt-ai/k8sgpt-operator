@@ -66,6 +66,8 @@ spec:
                 type: object
               version:
                 type: string
+            required:
+            - backend
             type: object
           status:
             description: K8sGPTStatus defines the observed state of K8sGPT

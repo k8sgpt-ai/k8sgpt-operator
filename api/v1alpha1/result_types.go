@@ -32,8 +32,7 @@ type Sensitive struct {
 
 // ResultSpec defines the desired state of Result
 type ResultSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	Backend      `json:"backend"`
 	Kind         string    `json:"kind"`
 	Name         string    `json:"name"`
 	Error        []Failure `json:"error"`
@@ -49,6 +48,8 @@ type ResultStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Kind",type="string",JSONPath=".spec.kind",description="Kind"
+//+kubebuilder:printcolumn:name="Backend",type="string",JSONPath=".spec.backend",description="Backend"
 
 // Result is the Schema for the results API
 type Result struct {

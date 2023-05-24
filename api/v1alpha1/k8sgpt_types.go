@@ -32,7 +32,7 @@ type SecretRef struct {
 type K8sGPTSpec struct {
 	// +kubebuilder:default:=openai
 	// +kubebuilder:validation:Enum=openai;localai;azureopenai
-	Backend string `json:"backend,omitempty"`
+	Backend `json:"backend"`
 	BaseUrl string `json:"baseUrl,omitempty"`
 	// +kubebuilder:default:=gpt-3.5-turbo
 	Model    string     `json:"model,omitempty"`
@@ -43,6 +43,14 @@ type K8sGPTSpec struct {
 	NoCache  bool       `json:"noCache,omitempty"`
 	Filters  []string   `json:"filters,omitempty"`
 }
+
+type Backend string
+
+const (
+	OpenAI      Backend = "openai"
+	AzureOpenAI Backend = "azureopenai"
+	LocalAI     Backend = "localai"
+)
 
 // K8sGPTStatus defines the observed state of K8sGPT
 type K8sGPTStatus struct {

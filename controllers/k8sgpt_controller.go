@@ -136,9 +136,25 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		}
 	}
 
-	// If the deployment is active, we will query it directly for analysis data
 	if deployment.Status.ReadyReplicas > 0 {
-		// Check if the client exists in the map
+
+		// Check the version of the deployment image matches the version set in the K8sGPT CR
+		imageURI := deployment.Spec.Template.Spec.Containers[0].Image
+		imageVersion := strings.Split(imageURI, ":")[1]
+		if imageVersion != k8sgptConfig.Spec.Version {
+			// Update the deployment image
+			deployment.Spec.Template.Spec.Containers[0].Image = fmt.Sprintf("%s:%s",
+				strings.Split(imageURI, ":")[0], k8sgptConfig.Spec.Version)
+			err = r.Update(ctx, &deployment)
+			if err != nil {
+				k8sgptReconcileErrorCount.Inc()
+				return r.finishReconcile(err, false)
+			}
+
+			return r.finishReconcile(nil, false)
+		}
+
+		// If the deployment is active, we will query it directly for analysis data
 		if _, ok := r.k8sGPTClients[k8sgptConfig.Name]; !ok {
 			// Create a new client
 			var address string
@@ -192,6 +208,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		k8sgptNumberOfResults.Set(float64(len(response.Results)))
 		rawResults := make(map[string]corev1alpha1.Result)
 		for _, resultSpec := range response.Results {
+			resultSpec.Backend = k8sgptConfig.Spec.Backend
 			name := strings.ReplaceAll(resultSpec.Name, "-", "")
 			name = strings.ReplaceAll(name, "/", "")
 			result := corev1alpha1.Result{
