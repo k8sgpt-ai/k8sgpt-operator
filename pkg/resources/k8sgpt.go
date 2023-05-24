@@ -19,6 +19,7 @@ import (
 	err "errors"
 
 	"github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	r1 "k8s.io/api/rbac/v1"
@@ -85,10 +86,12 @@ func GetClusterRoleBinding(config v1alpha1.K8sGPT) (*r1.ClusterRoleBinding, erro
 			Name: "k8sgpt",
 			OwnerReferences: []metav1.OwnerReference{
 				{
-					Kind:       config.Kind,
-					Name:       config.Name,
-					UID:        config.UID,
-					APIVersion: config.APIVersion,
+					Kind:               config.Kind,
+					Name:               config.Name,
+					UID:                config.UID,
+					APIVersion:         config.APIVersion,
+					BlockOwnerDeletion: utils.PtrBool(true),
+					Controller:         utils.PtrBool(true),
 				},
 			},
 		},
@@ -118,10 +121,12 @@ func GetClusterRole(config v1alpha1.K8sGPT) (*r1.ClusterRole, error) {
 			Name: "k8sgpt",
 			OwnerReferences: []metav1.OwnerReference{
 				{
-					Kind:       config.Kind,
-					Name:       config.Name,
-					UID:        config.UID,
-					APIVersion: config.APIVersion,
+					Kind:               config.Kind,
+					Name:               config.Name,
+					UID:                config.UID,
+					APIVersion:         config.APIVersion,
+					BlockOwnerDeletion: utils.PtrBool(true),
+					Controller:         utils.PtrBool(true),
 				},
 			},
 		},
@@ -148,10 +153,12 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 			Namespace: config.Namespace,
 			OwnerReferences: []metav1.OwnerReference{
 				{
-					Kind:       config.Kind,
-					Name:       config.Name,
-					UID:        config.UID,
-					APIVersion: config.APIVersion,
+					Kind:               config.Kind,
+					Name:               config.Name,
+					UID:                config.UID,
+					APIVersion:         config.APIVersion,
+					BlockOwnerDeletion: utils.PtrBool(true),
+					Controller:         utils.PtrBool(true),
 				},
 			},
 		},
