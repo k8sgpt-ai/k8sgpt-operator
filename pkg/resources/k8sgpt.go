@@ -194,6 +194,14 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 									Name:  "K8SGPT_BACKEND",
 									Value: string(config.Spec.Backend),
 								},
+								{
+									Name:  "XDG_CONFIG_HOME",
+									Value: "/k8sgpt-config/",
+								},
+								{
+									Name:  "XDG_CACHE_HOME",
+									Value: "/k8sgpt-config/",
+								},
 							},
 							Ports: []v1.ContainerPort{
 								{
@@ -210,6 +218,18 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 									v1.ResourceMemory: resource.MustParse("156Mi"),
 								},
 							},
+							VolumeMounts: []v1.VolumeMount{
+								{
+									MountPath: "/k8sgpt-config",
+									Name:      "config",
+								},
+							},
+						},
+					},
+					Volumes: []v1.Volume{
+						{
+							VolumeSource: v1.VolumeSource{EmptyDir: &v1.EmptyDirVolumeSource{}},
+							Name:         "config",
 						},
 					},
 				},
