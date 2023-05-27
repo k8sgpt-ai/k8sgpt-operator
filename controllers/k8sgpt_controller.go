@@ -164,7 +164,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			// Create a new client
 			var address string
 			if os.Getenv("LOCAL_MODE") != "" {
-				address = "localhost:8080"
+				address = "localhost:8082"
 			} else {
 				// Get k8sgpt-deployment service pod ip
 				podList := &corev1.PodList{}
@@ -181,7 +181,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					k8sgptReconcileErrorCount.Inc()
 					return r.finishReconcile(fmt.Errorf("no pods found for k8sgpt-deployment"), false)
 				}
-				address = fmt.Sprintf("%s:8080", podList.Items[0].Status.PodIP)
+				address = fmt.Sprintf("%s:8082", podList.Items[0].Status.PodIP)
 			}
 
 			fmt.Printf("Creating new client for %s\n", address)
@@ -223,7 +223,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					Namespace: k8sgptConfig.Namespace,
 				},
 			}
-			if k8sgptConfig.Spec.Backstage == true {
+			if k8sgptConfig.Spec.Backstage {
 				labelKey := "backstage.io/kubernetes-id"
 				namespace, resourceName, _ := strings.Cut(resultSpec.Name, "/")
 				m, err := cmdutil.NewFactory(genericclioptions.NewConfigFlags(true)).ToRESTMapper()
