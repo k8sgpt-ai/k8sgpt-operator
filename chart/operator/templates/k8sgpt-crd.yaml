@@ -42,6 +42,8 @@ spec:
                 - localai
                 - azureopenai
                 type: string
+              backstage:
+                type: boolean
               baseUrl:
                 type: string
               enableAI:
