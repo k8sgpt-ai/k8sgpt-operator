@@ -28,6 +28,10 @@ type SecretRef struct {
 	Key  string `json:"key,omitempty"`
 }
 
+type ExtraOptionsRef struct {
+	EnableBackstage bool `json:"enableBackstage,omitempty"`
+}
+
 // K8sGPTSpec defines the desired state of K8sGPT
 type K8sGPTSpec struct {
 	// +kubebuilder:default:=openai
@@ -35,14 +39,14 @@ type K8sGPTSpec struct {
 	Backend `json:"backend"`
 	BaseUrl string `json:"baseUrl,omitempty"`
 	// +kubebuilder:default:=gpt-3.5-turbo
-	Model     string     `json:"model,omitempty"`
-	Engine    string     `json:"engine,omitempty"`
-	Secret    *SecretRef `json:"secret,omitempty"`
-	Version   string     `json:"version,omitempty"`
-	EnableAI  bool       `json:"enableAI,omitempty"`
-	NoCache   bool       `json:"noCache,omitempty"`
-	Filters   []string   `json:"filters,omitempty"`
-	Backstage bool       `json:"backstage,omitempty"`
+	Model        string           `json:"model,omitempty"`
+	Engine       string           `json:"engine,omitempty"`
+	Secret       *SecretRef       `json:"secret,omitempty"`
+	Version      string           `json:"version,omitempty"`
+	EnableAI     bool             `json:"enableAI,omitempty"`
+	NoCache      bool             `json:"noCache,omitempty"`
+	Filters      []string         `json:"filters,omitempty"`
+	ExtraOptions *ExtraOptionsRef `json:"extraOptions,omitempty"`
 }
 
 type Backend string

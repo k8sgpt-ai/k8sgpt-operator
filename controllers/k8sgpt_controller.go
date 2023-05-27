@@ -23,11 +23,9 @@ import (
 	"time"
 
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
-	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 
 	kclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
 	"github.com/prometheus/client_golang/prometheus"
@@ -35,7 +33,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -164,7 +161,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			// Create a new client
 			var address string
 			if os.Getenv("LOCAL_MODE") != "" {
-				address = "localhost:8082"
+				address = "localhost:8080"
 			} else {
 				// Get k8sgpt-deployment service pod ip
 				podList := &corev1.PodList{}
@@ -181,7 +178,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					k8sgptReconcileErrorCount.Inc()
 					return r.finishReconcile(fmt.Errorf("no pods found for k8sgpt-deployment"), false)
 				}
-				address = fmt.Sprintf("%s:8082", podList.Items[0].Status.PodIP)
+				address = fmt.Sprintf("%s:8080", podList.Items[0].Status.PodIP)
 			}
 
 			fmt.Printf("Creating new client for %s\n", address)
@@ -223,51 +220,13 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					Namespace: k8sgptConfig.Namespace,
 				},
 			}
-			if k8sgptConfig.Spec.Backstage {
-				labelKey := "backstage.io/kubernetes-id"
-				namespace, resourceName, _ := strings.Cut(resultSpec.Name, "/")
-				m, err := cmdutil.NewFactory(genericclioptions.NewConfigFlags(true)).ToRESTMapper()
+			if k8sgptConfig.Spec.ExtraOptions.EnableBackstage {
+				backstageLabel, err := integrations.BackstageLabel(ctx, r.Client, resultSpec)
 				if err != nil {
 					k8sgptReconcileErrorCount.Inc()
 					return r.finishReconcile(err, false)
 				}
-
-				gvr, err := m.ResourceFor(schema.GroupVersionResource{
-					Resource: resultSpec.Kind,
-				})
-				if err != nil {
-					k8sgptReconcileErrorCount.Inc()
-					return r.finishReconcile(err, false)
-				}
-
-				obj := &unstructured.Unstructured{}
-				gvk := schema.GroupVersionKind{
-					Group:   gvr.Group,
-					Kind:    resultSpec.Kind,
-					Version: gvr.Version,
-				}
-
-				obj.SetGroupVersionKind(gvk)
-
-				// Retrieve the resource using the client
-				err = r.Client.Get(ctx, client.ObjectKey{Name: resourceName, Namespace: namespace}, obj)
-				if err != nil {
-					if errors.IsNotFound(err) {
-						k8sgptReconcileErrorCount.Inc()
-						return r.finishReconcile(err, false)
-					} else {
-						k8sgptReconcileErrorCount.Inc()
-						return r.finishReconcile(err, false)
-					}
-				}
-				labels := obj.GetLabels()
-				if value, exists := labels[labelKey]; exists {
-					// Assign the same label key/value to result CR
-					result.ObjectMeta.Labels = map[string]string{labelKey: value}
-				} else {
-					// too verbose?
-					fmt.Printf("Label key '%s' does not exist in %s resource: %s\n", labelKey, resultSpec.Kind, obj.GetName())
-				}
+				result.ObjectMeta.Labels = backstageLabel
 			}
 			rawResults[name] = result
 		}
