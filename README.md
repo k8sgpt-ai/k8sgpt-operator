@@ -40,7 +40,7 @@ spec:
   model: gpt-3.5-turbo
   backend: openai
   noCache: false
-  version: v0.3.0
+  version: v0.3.5
   enableAI: true
   # filters:
   #   - Ingress
