@@ -53,6 +53,10 @@ spec:
                 type: string
               noCache:
                 type: boolean
+              filters:
+                items:
+                  type: string
+                type: array
               secret:
                 properties:
                   key:
