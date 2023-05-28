@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
@@ -17,14 +18,27 @@ const (
 	backstageLabelKey = "backstage.io/kubernetes-id"
 )
 
-func BackstageLabel(ctx context.Context, c client.Client, result v1alpha1.ResultSpec) (map[string]string, error) {
+type Integrations struct {
+	restMapper meta.RESTMapper
+	client     client.Client
+	ctx        context.Context
+}
 
-	namespace, resourceName, _ := strings.Cut(result.Name, "/")
-	m, err := cmdutil.NewFactory(genericclioptions.NewConfigFlags(true)).ToRESTMapper()
+func NewIntegrations(client client.Client, ctx context.Context) (*Integrations, error) {
+	restMapper, err := cmdutil.NewFactory(genericclioptions.NewConfigFlags(true)).ToRESTMapper()
 	if err != nil {
-		return nil, err
+		return &Integrations{}, err
 	}
-	gvr, err := m.ResourceFor(schema.GroupVersionResource{
+	return &Integrations{
+		restMapper: restMapper,
+		client:     client,
+		ctx:        ctx,
+	}, nil
+}
+
+func (i *Integrations) BackstageLabel(result v1alpha1.ResultSpec) (map[string]string, error) {
+	namespace, resourceName, _ := strings.Cut(result.Name, "/")
+	gvr, err := i.restMapper.ResourceFor(schema.GroupVersionResource{
 		Resource: result.Kind,
 	})
 	if err != nil {
@@ -39,7 +53,7 @@ func BackstageLabel(ctx context.Context, c client.Client, result v1alpha1.Result
 	}
 	obj.SetGroupVersionKind(gvk)
 	// Retrieve the resource using the client
-	err = c.Get(ctx, client.ObjectKey{Name: resourceName, Namespace: namespace}, obj)
+	err = i.client.Get(i.ctx, client.ObjectKey{Name: resourceName, Namespace: namespace}, obj)
 	if err != nil {
 		return nil, err
 	}
