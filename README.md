@@ -65,6 +65,47 @@ you will be able to see the Results objects of the analysis after some minutes (
         "details": "The error message means that the service in Kubernetes doesn't have any associated endpoints, which should have been labeled with \"control-plane=controller-manager\". \n\nTo solve this issue, you need to add the \"control-plane=controller-manager\" label to the endpoint that matches the service. Once the endpoint is labeled correctly, Kubernetes can associate it with the service, and the error should be resolved.",
 ```
 
+## Remote Cache
+
+<details>
+
+<summary>S3</summary>
+
+1. Install the operator from the [Installation](#installation) section.
+
+2. Create secret:
+```sh
+kubectl create secret generic k8sgpt-sample-cache-secret --from-literal=access_key_id=<AWS_ACCESS_KEY_ID>  --from-literal=secret_access_key=<AWS_SECRET_ACCESS_KEY> -n k8sgpt-
+operator-system
+```
+
+3. Apply the K8sGPT configuration object:
+```
+kubectl apply -f - << EOF
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: K8sGPT
+metadata:
+  name: k8sgpt-sample
+  namespace: k8sgpt-operator-system
+spec:
+  model: gpt-3.5-turbo
+  backend: openai
+  noCache: false
+  version: v0.3.0
+  enableAI: true
+  secret:
+    name: k8sgpt-sample-secret
+    key: openai-api-key
+  remoteCache:
+    credentials:
+      name: k8sgpt-sample-cache-secret 
+    bucketName: foo
+    region: us-west-1
+EOF
+```
+
+</details>
+
 ## Other AI Backend Examples
 
 <details>
