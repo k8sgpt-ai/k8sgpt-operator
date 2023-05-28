@@ -57,6 +57,22 @@ spec:
                 type: string
               noCache:
                 type: boolean
+              remoteCache:
+                properties:
+                  bucketName:
+                    type: string
+                  credentials:
+                    properties:
+                      access_key_id:
+                        type: string
+                      name:
+                        type: string
+                      secret_acess_key:
+                        type: string
+                    type: object
+                  region:
+                    type: string
+                type: object
               secret:
                 properties:
                   key:
@@ -71,6 +87,12 @@ spec:
             type: object
           status:
             description: K8sGPTStatus defines the observed state of K8sGPT
+            properties:
+              initialized:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "make" to regenerate code after modifying
+                  this file'
+                type: boolean
             type: object
         type: object
     served: true
