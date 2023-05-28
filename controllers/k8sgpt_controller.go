@@ -107,6 +107,13 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		// The object is being deleted
 		if utils.ContainsString(k8sgptConfig.GetFinalizers(), FinalizerName) {
 
+			if k8sgptConfig.Spec.RemoteCache != nil {
+				err := r.k8sGPTClients[k8sgptConfig.Name].RemoveConfig(k8sgptConfig)
+				if err != nil {
+					k8sgptReconcileErrorCount.Inc()
+					return r.finishReconcile(err, false)
+				}
+			}
 			// Delete any external resources associated with the instance
 			err := resources.Sync(ctx, r.Client, *k8sgptConfig, resources.Destroy)
 			if err != nil {
@@ -199,7 +206,15 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			r.k8sGPTClients[k8sgptConfig.Name] = k8sgptClient
 		}
 
-		response, err := r.k8sGPTClients[k8sgptConfig.Name].ProcessAnalysis(deployment, k8sgptConfig)
+		if k8sgptConfig.Spec.RemoteCache != nil {
+			err := r.k8sGPTClients[k8sgptConfig.Name].AddConfig(k8sgptConfig)
+			if err != nil {
+				k8sgptReconcileErrorCount.Inc()
+				return r.finishReconcile(err, false)
+			}
+		}
+
+		response, err := r.k8sGPTClients[k8sgptConfig.Name].ProcessAnalysis(k8sgptConfig)
 		if err != nil {
 			k8sgptReconcileErrorCount.Inc()
 			return r.finishReconcile(err, false)
