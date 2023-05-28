@@ -216,7 +216,7 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 			},
 		},
 	}
-	if config.Spec.RemoteCache.Credentials != nil {
+	if config.Spec.RemoteCache != nil {
 		addRemoteCacheEnvVar := func(name, key string) {
 			envVar := v1.EnvVar{
 				Name: name,
