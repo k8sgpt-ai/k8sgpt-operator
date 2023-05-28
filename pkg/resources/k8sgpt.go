@@ -216,6 +216,27 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 			},
 		},
 	}
+	if config.Spec.RemoteCache.Credentials != nil {
+		addRemoteCacheEnvVar := func(name, key string) {
+			envVar := v1.EnvVar{
+				Name: name,
+				ValueFrom: &v1.EnvVarSource{
+					SecretKeyRef: &v1.SecretKeySelector{
+						LocalObjectReference: v1.LocalObjectReference{
+							Name: config.Spec.RemoteCache.Credentials.Name,
+						},
+						Key: key,
+					},
+				},
+			}
+			deployment.Spec.Template.Spec.Containers[0].Env = append(
+				deployment.Spec.Template.Spec.Containers[0].Env, envVar,
+			)
+		}
+		addRemoteCacheEnvVar("AWS_ACCESS_KEY_ID", config.Spec.RemoteCache.Credentials.AccessKeyID)
+		addRemoteCacheEnvVar("AWS_SECRET_ACCESS_KEY", config.Spec.RemoteCache.Credentials.SecretAccessKey)
+
+	}
 	if config.Spec.Secret != nil {
 		password := v1.EnvVar{
 			Name: "K8SGPT_PASSWORD",
