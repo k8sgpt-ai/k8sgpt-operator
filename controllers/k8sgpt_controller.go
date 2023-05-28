@@ -220,7 +220,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					Namespace: k8sgptConfig.Namespace,
 				},
 			}
-			if k8sgptConfig.Spec.ExtraOptions.EnableBackstage {
+			if k8sgptConfig.Spec.ExtraOptions.Backstage.Enabled {
 				backstageLabel, err := integrations.BackstageLabel(ctx, r.Client, resultSpec)
 				if err != nil {
 					k8sgptReconcileErrorCount.Inc()

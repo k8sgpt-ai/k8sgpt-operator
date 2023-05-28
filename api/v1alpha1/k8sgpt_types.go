@@ -23,13 +23,17 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+type Backstage struct {
+	Enabled bool `json:"enabled,omitempty"`
+}
+
 type SecretRef struct {
 	Name string `json:"name,omitempty"`
 	Key  string `json:"key,omitempty"`
 }
 
 type ExtraOptionsRef struct {
-	EnableBackstage bool `json:"enableBackstage,omitempty"`
+	Backstage *Backstage `json:"backstage,omitempty"`
 }
 
 // K8sGPTSpec defines the desired state of K8sGPT

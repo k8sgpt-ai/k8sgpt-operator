@@ -50,8 +50,11 @@ spec:
                 type: string
               extraOptions:
                 properties:
-                  enableBackstage:
-                    type: boolean
+                  backstage:
+                    properties:
+                      enabled:
+                        type: boolean
+                    type: object
                 type: object
               model:
                 default: gpt-3.5-turbo
