@@ -28,6 +28,18 @@ type SecretRef struct {
 	Key  string `json:"key,omitempty"`
 }
 
+type CredentialsRef struct {
+	Name            string `json:"name,omitempty"`
+	AccessKeyID     string `json:"access_key_id,omitempty"`
+	SecretAccessKey string `json:"secret_acess_key,omitempty"`
+}
+
+type RemoteCacheRef struct {
+	Credentials *CredentialsRef `json:"credentials,omitempty"`
+	BucketName  string          `json:"bucketName,omitempty"`
+	Region      string          `json:"region,omitempty"`
+}
+
 // K8sGPTSpec defines the desired state of K8sGPT
 type K8sGPTSpec struct {
 	// +kubebuilder:default:=openai
@@ -35,13 +47,14 @@ type K8sGPTSpec struct {
 	Backend `json:"backend"`
 	BaseUrl string `json:"baseUrl,omitempty"`
 	// +kubebuilder:default:=gpt-3.5-turbo
-	Model    string     `json:"model,omitempty"`
-	Engine   string     `json:"engine,omitempty"`
-	Secret   *SecretRef `json:"secret,omitempty"`
-	Version  string     `json:"version,omitempty"`
-	EnableAI bool       `json:"enableAI,omitempty"`
-	NoCache  bool       `json:"noCache,omitempty"`
-	Filters  []string   `json:"filters,omitempty"`
+	Model       string          `json:"model,omitempty"`
+	Engine      string          `json:"engine,omitempty"`
+	Secret      *SecretRef      `json:"secret,omitempty"`
+	Version     string          `json:"version,omitempty"`
+	EnableAI    bool            `json:"enableAI,omitempty"`
+	NoCache     bool            `json:"noCache,omitempty"`
+	Filters     []string        `json:"filters,omitempty"`
+	RemoteCache *RemoteCacheRef `json:"remoteCache,omitempty"`
 }
 
 type Backend string

@@ -14,16 +14,9 @@ limitations under the License.
 package client
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 
-	rpc "buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go/schema/v1/schemav1grpc"
-	schemav1 "buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go/schema/v1"
-	"github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
-	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/common"
 	"google.golang.org/grpc"
-	v1 "k8s.io/api/apps/v1"
 )
 
 // This is the client for communicating with the K8sGPT in cluster deployment
@@ -41,40 +34,4 @@ func NewClient(address string) (*Client, error) {
 	client := &Client{conn: conn}
 
 	return client, nil
-}
-
-func (c *Client) ProcessAnalysis(deployment v1.Deployment, config *v1alpha1.K8sGPT) (*common.K8sGPTReponse, error) {
-
-	client := rpc.NewServerClient(c.conn)
-
-	req := &schemav1.AnalyzeRequest{
-		Explain: config.Spec.EnableAI,
-		Nocache: config.Spec.NoCache,
-		Backend: string(config.Spec.Backend),
-		Filters: config.Spec.Filters,
-	}
-
-	res, err := client.Analyze(context.Background(), req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to call Analyze RPC: %v", err)
-	}
-
-	var target []v1alpha1.ResultSpec
-
-	jsonBytes, err := json.Marshal(res.Results)
-	if err != nil {
-		return nil, err
-	}
-
-	err = json.Unmarshal(jsonBytes, &target)
-	if err != nil {
-		return nil, err
-	}
-
-	response := &common.K8sGPTReponse{
-		Status:   res.Status,
-		Results:  target,
-		Problems: int(res.Problems),
-	}
-	return response, nil
 }
