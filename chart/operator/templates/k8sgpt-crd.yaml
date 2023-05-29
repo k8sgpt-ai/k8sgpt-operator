@@ -48,6 +48,14 @@ spec:
                 type: boolean
               engine:
                 type: string
+              extraOptions:
+                properties:
+                  backstage:
+                    properties:
+                      enabled:
+                        type: boolean
+                    type: object
+                type: object
               model:
                 default: gpt-3.5-turbo
                 type: string

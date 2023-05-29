@@ -23,7 +23,9 @@ import (
 	"time"
 
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
+
 	kclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
 	"github.com/prometheus/client_golang/prometheus"
@@ -68,6 +70,7 @@ var (
 type K8sGPTReconciler struct {
 	client.Client
 	Scheme       *runtime.Scheme
+	Integrations *integrations.Integrations
 	K8sGPTClient *kclient.Client
 	// This is a map of clients for each deployment
 	k8sGPTClients map[string]*kclient.Client
@@ -218,6 +221,14 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					Namespace: k8sgptConfig.Namespace,
 				},
 			}
+			if k8sgptConfig.Spec.ExtraOptions.Backstage.Enabled {
+				backstageLabel, err := r.Integrations.BackstageLabel(resultSpec)
+				if err != nil {
+					k8sgptReconcileErrorCount.Inc()
+					return r.finishReconcile(err, false)
+				}
+				result.ObjectMeta.Labels = backstageLabel
+			}
 			rawResults[name] = result
 		}
 
@@ -256,7 +267,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			err = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
 				Name: result.Name}, &existingResult)
 			if err != nil {
-				// if the result already exists, we will update it
+				// if the result doesn't exist, we will create it
 				if errors.IsNotFound(err) {
 					err = r.Create(ctx, &result)
 					if err != nil {
@@ -275,6 +286,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			} else {
 				// If the result already exists we will update it
 				existingResult.Spec = result.Spec
+				existingResult.Labels = result.Labels
 				err = r.Update(ctx, &existingResult)
 				if err != nil {
 					k8sgptReconcileErrorCount.Inc()
