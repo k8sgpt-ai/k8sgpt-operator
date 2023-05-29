@@ -70,6 +70,7 @@ var (
 type K8sGPTReconciler struct {
 	client.Client
 	Scheme       *runtime.Scheme
+	Integrations *integrations.Integrations
 	K8sGPTClient *kclient.Client
 	// This is a map of clients for each deployment
 	k8sGPTClients map[string]*kclient.Client
@@ -209,12 +210,6 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		// Parse the k8sgpt-deployment response into a list of results
 		k8sgptNumberOfResults.Set(float64(len(response.Results)))
 		rawResults := make(map[string]corev1alpha1.Result)
-		integration, err := integrations.NewIntegrations(r.Client, ctx)
-		if err != nil {
-			k8sgptReconcileErrorCount.Inc()
-			return r.finishReconcile(err, false)
-		}
-
 		for _, resultSpec := range response.Results {
 			resultSpec.Backend = k8sgptConfig.Spec.Backend
 			name := strings.ReplaceAll(resultSpec.Name, "-", "")
@@ -227,7 +222,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 				},
 			}
 			if k8sgptConfig.Spec.ExtraOptions.Backstage.Enabled {
-				backstageLabel, err := integration.BackstageLabel(resultSpec)
+				backstageLabel, err := r.Integrations.BackstageLabel(resultSpec)
 				if err != nil {
 					k8sgptReconcileErrorCount.Inc()
 					return r.finishReconcile(err, false)
