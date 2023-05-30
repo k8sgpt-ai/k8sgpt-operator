@@ -1,6 +1,14 @@
 serviceMonitor:
   enabled: false
   additionalLabels: {}
+grafanaDashboard:
+  enabled: false
+  folder:
+    annotation: grafana_folder
+    name: ai
+  label:
+    key: grafana_dashboard
+    value: "1"
 controllerManager:
   kubeRbacProxy:
     containerSecurityContext:
@@ -26,7 +34,7 @@ controllerManager:
         - ALL
     image:
       repository: ghcr.io/k8sgpt-ai/k8sgpt-operator
-      tag: v0.0.14  # x-release-please-version
+      tag: v0.0.16  # x-release-please-version
     resources:
       limits:
         cpu: 500m

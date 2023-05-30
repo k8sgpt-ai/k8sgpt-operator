@@ -1,0 +1,17 @@
+{{ if .Values.grafanaDashboard.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  annotations:
+    {{ .Values.grafanaDashboard.folder.annotation }}: {{ .Values.grafanaDashboard.folder.name }}
+  labels:
+    {{ .Values.grafanaDashboard.label.key }}: {{ .Values.grafanaDashboard.label.value | quote }}
+    app.kubernetes.io/component: configmap
+    app.kubernetes.io/created-by: k8sgpt-operator
+    app.kubernetes.io/part-of: k8sgpt-operator
+  {{- include "chart.labels" . | nindent 4 }}
+  name: k8sgpt-overview
+data:
+  k8sgpt-overview.json: |
+{{ .Files.Get "dashboards/k8sgpt-overview.json" | indent 4}}
+{{ end -}}

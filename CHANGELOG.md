@@ -1,5 +1,41 @@
 # Changelog
 
+## [0.0.16](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.15...v0.0.16) (2023-05-24)
+
+
+### Features
+
+* add additional printer columns to Result CR ([#114](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/114)) ([778357d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/778357d065079a342e4da4f85e07e07b5208456a))
+* update deployment on version change in CR ([#119](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/119)) ([1bb8977](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/1bb8977b1c6ad3d269d843621dbce859d4c43c19))
+
+
+### Bug Fixes
+
+* **deps:** update module sigs.k8s.io/controller-runtime to v0.15.0 ([#116](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/116)) ([49fab66](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/49fab663cafee3838a934aab46dccdc071938b93))
+
+## [0.0.15](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.14...v0.0.15) (2023-05-22)
+
+
+### Features
+
+* add filters parameter to client API ([#96](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/96)) ([6c41ac5](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/6c41ac5f49bf32a62efbe68d44a719a6e72bc28b))
+* add grafana dashboard in helm chart ([#102](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/102)) ([b98b2d2](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/b98b2d20dd64daf038daf2250877c86f3a1ae1d4))
+* parameterise grafana's annotations and labels ([#111](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/111)) ([6d8056e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/6d8056e12b1fe63a9361ec0dc4959a024f9ea243))
+
+
+### Bug Fixes
+
+* **deps:** update module buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go to v1.3.0-20230515081240-6b5b845c638e.1 ([#77](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/77)) ([62aa2cb](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/62aa2cbf3f4b8994c0d5b18b56538ab9ae27d5ce))
+* **deps:** update module github.com/onsi/ginkgo/v2 to v2.9.5 ([#101](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/101)) ([40b8377](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/40b83777ad4eb49c3ebe50831ecefb789f52bca6))
+* **deps:** update module github.com/onsi/gomega to v1.27.7 ([#110](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/110)) ([e8652be](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e8652be9fb2699fd386ac4a6cbc9a165056bf36e))
+
+
+### Other
+
+* **deps:** update actions/setup-go digest to fac708d ([#100](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/100)) ([42af949](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/42af9491e6ec076a800650cf0d32607ceee196b1))
+* **deps:** update helm/kind-action action to v1.7.0 ([#104](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/104)) ([d1bc1ca](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d1bc1ca521ffce95979e15f4a749a669b3b85c62))
+* readme ([#107](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/107)) ([c58f8b4](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c58f8b4d8661e64d4c08c8c22d96c50eb5c2bfc0))
+
 ## [0.0.14](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.13...v0.0.14) (2023-05-12)
 
 
