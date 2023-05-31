@@ -48,6 +48,14 @@ spec:
                 type: boolean
               engine:
                 type: string
+              extraOptions:
+                properties:
+                  backstage:
+                    properties:
+                      enabled:
+                        type: boolean
+                    type: object
+                type: object
               filters:
                 items:
                   type: string

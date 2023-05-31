@@ -23,9 +23,17 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+type Backstage struct {
+	Enabled bool `json:"enabled,omitempty"`
+}
+
 type SecretRef struct {
 	Name string `json:"name,omitempty"`
 	Key  string `json:"key,omitempty"`
+}
+
+type ExtraOptionsRef struct {
+	Backstage *Backstage `json:"backstage,omitempty"`
 }
 
 // K8sGPTSpec defines the desired state of K8sGPT
@@ -35,13 +43,14 @@ type K8sGPTSpec struct {
 	Backend `json:"backend"`
 	BaseUrl string `json:"baseUrl,omitempty"`
 	// +kubebuilder:default:=gpt-3.5-turbo
-	Model    string     `json:"model,omitempty"`
-	Engine   string     `json:"engine,omitempty"`
-	Secret   *SecretRef `json:"secret,omitempty"`
-	Version  string     `json:"version,omitempty"`
-	EnableAI bool       `json:"enableAI,omitempty"`
-	NoCache  bool       `json:"noCache,omitempty"`
-	Filters  []string   `json:"filters,omitempty"`
+	Model        string           `json:"model,omitempty"`
+	Engine       string           `json:"engine,omitempty"`
+	Secret       *SecretRef       `json:"secret,omitempty"`
+	Version      string           `json:"version,omitempty"`
+	EnableAI     bool             `json:"enableAI,omitempty"`
+	NoCache      bool             `json:"noCache,omitempty"`
+	Filters      []string         `json:"filters,omitempty"`
+	ExtraOptions *ExtraOptionsRef `json:"extraOptions,omitempty"`
 }
 
 type Backend string

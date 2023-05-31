@@ -1,6 +1,8 @@
 serviceMonitor:
   enabled: false
   additionalLabels: {}
+  # The namespace where Prometheus expects to find the serviceMonitor
+  # namespace: ""
 grafanaDashboard:
   enabled: false
   folder:
