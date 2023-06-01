@@ -14,6 +14,7 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
 
@@ -23,6 +24,7 @@ import (
 
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/controllers"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -85,9 +87,16 @@ func main() {
 		os.Exit(1)
 	}
 
+	integration, err := integrations.NewIntegrations(mgr.GetClient(), context.Background())
+	if err != nil {
+		setupLog.Error(err, "unable to create REST client to initialise Integrations")
+		os.Exit(1)
+	}
+
 	if err = (&controllers.K8sGPTReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:       mgr.GetClient(),
+		Scheme:       mgr.GetScheme(),
+		Integrations: integration,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "K8sGPT")
 		os.Exit(1)

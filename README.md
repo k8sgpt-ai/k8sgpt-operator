@@ -44,6 +44,9 @@ spec:
   enableAI: true
   # filters:
   #   - Ingress
+  # extraOptions:
+  #   backstage:
+  #     enabled: true
   secret:
     name: k8sgpt-sample-secret
     key: openai-api-key
