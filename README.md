@@ -124,13 +124,15 @@ metadata:
   name: k8sgpt-local-ai
   namespace: default
 spec:
-  model: gpt-3.5-turbo
+  model: ggml-gpt4all-j
   backend: localai
+  baseUrl: http://local-ai.local-ai.svc.cluster.local:8080/v1
   noCache: false
-  version: v0.3.0
+  version: v0.3.4
   enableAI: true
 EOF
 ```
+   Note: ensure that the value of `baseUrl` is a properly constructed [DNS name](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#services) for the LocalAI Service. It should take the form: `http://local-ai.<namespace_local_ai_was_installed_in>.svc.cluster.local:8080/v1`.
 
 4. Same as step 4. in the example above.
 
