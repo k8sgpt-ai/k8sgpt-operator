@@ -140,4 +140,4 @@ EOF
 
 ## Helm values
 
-For details please see [here](chart/values.yaml)
+For details please see [here](chart/operator/values.yaml)
