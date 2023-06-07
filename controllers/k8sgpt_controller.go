@@ -164,22 +164,15 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			if os.Getenv("LOCAL_MODE") != "" {
 				address = "localhost:8080"
 			} else {
-				// Get k8sgpt-deployment service pod ip
-				podList := &corev1.PodList{}
-				listOpts := []client.ListOption{
-					client.InNamespace(k8sgptConfig.Namespace),
-					client.MatchingLabels{"app": "k8sgpt-deployment"},
-				}
-				err := r.List(ctx, podList, listOpts...)
+				// Get service IP and port for k8sgpt-deployment
+				svc := &corev1.Service{}
+				err = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
+					Name: "k8sgpt"}, svc)
 				if err != nil {
 					k8sgptReconcileErrorCount.Inc()
 					return r.finishReconcile(err, false)
 				}
-				if len(podList.Items) == 0 {
-					k8sgptReconcileErrorCount.Inc()
-					return r.finishReconcile(fmt.Errorf("no pods found for k8sgpt-deployment"), false)
-				}
-				address = fmt.Sprintf("%s:8080", podList.Items[0].Status.PodIP)
+				address = fmt.Sprintf("%s:%d", svc.Spec.ClusterIP, svc.Spec.Ports[0].Port)
 			}
 
 			fmt.Printf("Creating new client for %s\n", address)
@@ -221,7 +214,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					Namespace: k8sgptConfig.Namespace,
 				},
 			}
-			if k8sgptConfig.Spec.ExtraOptions.Backstage.Enabled {
+			if k8sgptConfig.Spec.ExtraOptions != nil && k8sgptConfig.Spec.ExtraOptions.Backstage.Enabled {
 				backstageLabel, err := r.Integrations.BackstageLabel(resultSpec)
 				if err != nil {
 					k8sgptReconcileErrorCount.Inc()

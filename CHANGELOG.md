@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.0.17](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.16...v0.0.17) (2023-06-05)
+
+
+### Features
+
+* add backstage support ([#127](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/127)) ([1b267a6](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/1b267a68e49a4e549ce9881ecca90672133aca1c))
+* add controller reference to resources ([#120](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/120)) ([293c07f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/293c07f4fdd9953284e8e41bea0b541a347b2dd5))
+* add namespace selector for ServiceMonitor ([#135](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/135)) ([075caf5](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/075caf5e0999d4ef92027656f3d26ab8bdbfcdef))
+* support arbitrary uid for openshift environments ([#126](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/126)) ([10484eb](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/10484eb3d3768bec2222341e77b65f9338d7cb5a))
+
+
+### Bug Fixes
+
+* check first extraOptions reference ([#139](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/139)) ([d48562d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d48562dc13c4f2f7e6788ae17d55861456c2b240))
+* connection issues ([#140](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/140)) ([0e2eb8c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0e2eb8c72485d24a7770fab3566eb963ef42c4f4))
+* **deps:** update module buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go to v1.30.0-20230524215339-41d88e13ab7e.1 ([#103](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/103)) ([283da2f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/283da2fab9b5815f89a445b4575fbc56d49297b4))
+* **deps:** update module github.com/onsi/ginkgo/v2 to v2.9.7 ([#134](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/134)) ([2563b39](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/2563b397379bb5ad3b53e884d5b8ed7e70535c72))
+
+
+### Other
+
+* add filters to operator helm chart's crd ([#130](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/130)) ([c1a235b](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c1a235bd65cca4559d983a32e295640e887769f6))
+* **deps:** update actions/setup-python digest to bd6b4b6 ([#121](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/121)) ([51deb68](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/51deb68eab84762efb7daf33f7c3fca2685c97f9))
+* **deps:** update google-github-actions/release-please-action digest to 51ee8ae ([#124](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/124)) ([dde7a4c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/dde7a4c21648c97e6cb86552f1d5b999c82b42c8))
+
 ## [0.0.16](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.15...v0.0.16) (2023-05-24)
 
 
