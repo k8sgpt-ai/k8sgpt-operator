@@ -32,7 +32,7 @@ type Sensitive struct {
 
 // ResultSpec defines the desired state of Result
 type ResultSpec struct {
-	Backend      `json:"backend"`
+	Backend      string    `json:"backend"`
 	Kind         string    `json:"kind"`
 	Name         string    `json:"name"`
 	Error        []Failure `json:"error"`

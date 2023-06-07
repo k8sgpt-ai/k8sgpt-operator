@@ -27,6 +27,7 @@ import (
 	kclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/sinks"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
 	"github.com/prometheus/client_golang/prometheus"
 	v1 "k8s.io/api/apps/v1"
@@ -71,6 +72,7 @@ type K8sGPTReconciler struct {
 	client.Client
 	Scheme       *runtime.Scheme
 	Integrations *integrations.Integrations
+	SinkClient   *sinks.Client
 	K8sGPTClient *kclient.Client
 	// This is a map of clients for each deployment
 	k8sGPTClients map[string]*kclient.Client
@@ -124,6 +126,13 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		}
 		// Stop reconciliation as the item is being deleted
 		return r.finishReconcile(nil, false)
+	}
+
+	// Configure sink Webhook
+	var sinkType sinks.ISink
+	if k8sgptConfig.Spec.Sink != nil && k8sgptConfig.Spec.Sink.Type != "" {
+		sinkType = sinks.NewSink(k8sgptConfig.Spec.Sink.Type)
+		sinkType.Configure(*k8sgptConfig, *r.SinkClient)
 	}
 
 	// Check and see if the instance is new or has a K8sGPT deployment in flight
@@ -267,6 +276,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 						k8sgptReconcileErrorCount.Inc()
 						return r.finishReconcile(err, false)
 					} else {
+						sinkType.Emit(result.Spec)
 						k8sgptNumberOfResultsByType.With(prometheus.Labels{
 							"kind": result.Spec.Kind,
 							"name": result.Name,
@@ -277,13 +287,17 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					return r.finishReconcile(err, false)
 				}
 			} else {
-				// If the result already exists we will update it
-				existingResult.Spec = result.Spec
-				existingResult.Labels = result.Labels
-				err = r.Update(ctx, &existingResult)
-				if err != nil {
-					k8sgptReconcileErrorCount.Inc()
-					return r.finishReconcile(err, false)
+				// If the result error and solution has changed, we will update CR
+				updateResult := existingResult.Spec.Details != result.Spec.Details || existingResult.Spec.Name != result.Spec.Name || existingResult.Spec.Backend != result.Spec.Backend
+				if updateResult {
+					existingResult.Spec = result.Spec
+					existingResult.Labels = result.Labels
+					err = r.Update(ctx, &existingResult)
+					if err != nil {
+						k8sgptReconcileErrorCount.Inc()
+						return r.finishReconcile(err, false)
+					}
+					sinkType.Emit(existingResult.Spec)
 				}
 			}
 		}

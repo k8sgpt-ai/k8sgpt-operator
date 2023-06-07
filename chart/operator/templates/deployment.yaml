@@ -77,6 +77,8 @@ spec:
         env:
         - name: KUBERNETES_CLUSTER_DOMAIN
           value: {{ quote .Values.kubernetesClusterDomain }}
+        - name: OPERATOR_SINK_WEBHOOK_TIMEOUT_SECONDS
+          value: {{ quote .Values.controllerManager.manager.sinkWebhookTimeout }}
         image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag
           | default .Chart.AppVersion }}
         livenessProbe:

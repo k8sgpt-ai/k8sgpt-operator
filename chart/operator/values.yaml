@@ -29,6 +29,7 @@ controllerManager:
         cpu: 5m
         memory: 64Mi
   manager:
+    sinkWebhookTimeout: 30s
     containerSecurityContext:
       allowPrivilegeEscalation: false
       capabilities:

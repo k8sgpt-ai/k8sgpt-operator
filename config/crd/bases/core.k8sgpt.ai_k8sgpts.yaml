@@ -72,6 +72,13 @@ spec:
                   name:
                     type: string
                 type: object
+              sink:
+                properties:
+                  type:
+                    type: string
+                  webhook:
+                    type: string
+                type: object
               version:
                 type: string
             required:
