@@ -37,6 +37,7 @@ type ExtraOptionsRef struct {
 }
 
 type WebhookRef struct {
+	// +kubebuilder:validation:Enum=slack
 	Type     string `json:"type,omitempty"`
 	Endpoint string `json:"webhook,omitempty"`
 }

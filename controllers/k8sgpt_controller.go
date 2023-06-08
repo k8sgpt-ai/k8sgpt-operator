@@ -130,7 +130,8 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 	// Configure sink Webhook
 	var sinkType sinks.ISink
-	if k8sgptConfig.Spec.Sink != nil && k8sgptConfig.Spec.Sink.Type != "" {
+	sinkEnabled := k8sgptConfig.Spec.Sink != nil && k8sgptConfig.Spec.Sink.Type != "" && k8sgptConfig.Spec.Sink.Endpoint != ""
+	if sinkEnabled {
 		sinkType = sinks.NewSink(k8sgptConfig.Spec.Sink.Type)
 		sinkType.Configure(*k8sgptConfig, *r.SinkClient)
 	}
@@ -276,7 +277,14 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 						k8sgptReconcileErrorCount.Inc()
 						return r.finishReconcile(err, false)
 					} else {
-						sinkType.Emit(result.Spec)
+						if sinkEnabled {
+							err := sinkType.Emit(result.Spec)
+							if err != nil {
+								k8sgptReconcileErrorCount.Inc()
+								return r.finishReconcile(err, false)
+							}
+						}
+
 						k8sgptNumberOfResultsByType.With(prometheus.Labels{
 							"kind": result.Spec.Kind,
 							"name": result.Name,
@@ -297,7 +305,13 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 						k8sgptReconcileErrorCount.Inc()
 						return r.finishReconcile(err, false)
 					}
-					sinkType.Emit(existingResult.Spec)
+					if sinkEnabled {
+						err := sinkType.Emit(existingResult.Spec)
+						if err != nil {
+							k8sgptReconcileErrorCount.Inc()
+							return r.finishReconcile(err, false)
+						}
+					}
 				}
 			}
 		}
