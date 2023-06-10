@@ -51,6 +51,7 @@ func GetResult(resultSpec v1alpha1.ResultSpec, name, namespace, backend string) 
 	}
 }
 
+// Creates or Updates Result CRs and update their statuses
 func CreateOrUpdateResult(ctx context.Context, c client.Client, result v1alpha1.Result, config v1alpha1.K8sGPT) (string, error) {
 	// Check if the result already exists
 	var existingResult v1alpha1.Result
@@ -61,14 +62,16 @@ func CreateOrUpdateResult(ctx context.Context, c client.Client, result v1alpha1.
 		if errors.IsNotFound(err) {
 			err = c.Create(ctx, &result)
 			if err != nil {
-				return "", err
+				return NoOpResult, err
 			}
 			result.Status.Type = CreatedResult
-			_ = c.Status().Update(ctx, &result)
+			err = c.Status().Update(ctx, &result)
+			if err != nil {
+				return CreatedResult, err
+			}
 			return CreatedResult, nil
-
 		} else {
-			return "", err
+			return NoOpResult, err
 		}
 	}
 
@@ -77,15 +80,14 @@ func CreateOrUpdateResult(ctx context.Context, c client.Client, result v1alpha1.
 	if updateRequired {
 		existingResult.Spec = result.Spec
 		existingResult.Labels = result.Labels
-		err = c.Update(ctx, &existingResult)
 		if err != nil {
-			return "", err
+			return NoOpResult, err
 		}
 		existingResult.Status.Type = UpdatedResult
-		_ = c.Status().Update(ctx, &existingResult)
+		err = c.Status().Update(ctx, &existingResult)
 		return UpdatedResult, err
 	}
 	existingResult.Status.Type = NoOpResult
-	_ = c.Status().Update(ctx, &existingResult)
-	return "", nil
+	err = c.Status().Update(ctx, &existingResult)
+	return NoOpResult, err
 }

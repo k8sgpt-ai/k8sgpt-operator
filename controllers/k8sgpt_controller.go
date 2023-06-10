@@ -243,6 +243,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 				k8sgptReconcileErrorCount.Inc()
 				return r.finishReconcile(err, false)
 			}
+
 			// Update metrics
 			if operation == resources.CreatedResult {
 				k8sgptNumberOfResultsByType.With(prometheus.Labels{
@@ -252,37 +253,58 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			}
 		}
 
-	}
+		// At this stage we are ready to emit Results
+		// We emit when result type Status is created or updated
+		// and when user configures a sink for the first time
+		latestResultList := &corev1alpha1.ResultList{}
+		err = r.List(ctx, latestResultList)
 
-	// At this stage we are ready to emit Results
-	// We emit when result type Status is created or updated
-	// and when user configures a sink for the first time
-	var sinkType sinks.ISink
-	sinkEnabled := k8sgptConfig.Spec.Sink != nil && k8sgptConfig.Spec.Sink.Type != "" && k8sgptConfig.Spec.Sink.Endpoint != ""
-	if sinkEnabled {
-		sinkType = sinks.NewSink(k8sgptConfig.Spec.Sink.Type)
-		sinkType.Configure(*k8sgptConfig, *r.SinkClient)
-		resultList := &corev1alpha1.ResultList{}
-		err = r.List(ctx, resultList)
-		if err != nil {
-			k8sgptReconcileErrorCount.Inc()
-			return r.finishReconcile(err, false)
-		}
-		if len(resultList.Items) > 0 {
-			for _, result := range resultList.Items {
-				if result.Status.Sink == "" {
-					_ = sinkType.Emit(result.Spec)
-					result.Status.Sink = k8sgptConfig.Spec.Sink.Type
-					_ = r.Status().Update(ctx, &result)
-				} else if result.Status.Type != resources.NoOpResult {
-					_ = sinkType.Emit(result.Spec)
-					result.Status.Sink = k8sgptConfig.Spec.Sink.Type
-					_ = r.Status().Update(ctx, &result)
+		var sinkType sinks.ISink
+		if len(latestResultList.Items) > 0 {
+			sinkEnabled := k8sgptConfig.Spec.Sink != nil && k8sgptConfig.Spec.Sink.Type != "" && k8sgptConfig.Spec.Sink.Endpoint != ""
+			if sinkEnabled {
+				sinkType = sinks.NewSink(k8sgptConfig.Spec.Sink.Type)
+				sinkType.Configure(*k8sgptConfig, *r.SinkClient)
+			}
+			for _, result := range latestResultList.Items {
+				var res corev1alpha1.Result
+				_ = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace, Name: result.Name}, &res)
+				if sinkEnabled {
+					if result.Status.Sink == "" {
+						err = sinkType.Emit(result.Spec)
+						if err != nil {
+							k8sgptReconcileErrorCount.Inc()
+							return r.finishReconcile(err, false)
+						}
+
+						res.Status.Sink = k8sgptConfig.Spec.Sink.Type
+						res.Status.Type = resources.NoOpResult
+					} else if result.Status.Type != resources.NoOpResult {
+						err = sinkType.Emit(result.Spec)
+						if err != nil {
+							k8sgptReconcileErrorCount.Inc()
+							return r.finishReconcile(err, false)
+						}
+						res.Status.Sink = k8sgptConfig.Spec.Sink.Type
+						res.Status.Type = resources.NoOpResult
+					}
+					err = r.Status().Update(ctx, &res)
+					if err != nil {
+						k8sgptReconcileErrorCount.Inc()
+						return r.finishReconcile(err, false)
+					}
+				} else {
+					// remove the sink status from results
+					res.Status.Sink = ""
+					err = r.Status().Update(ctx, &res)
+					if err != nil {
+						k8sgptReconcileErrorCount.Inc()
+						return r.finishReconcile(err, false)
+
+					}
 				}
-
 			}
 		}
-
 	}
 
 	return r.finishReconcile(nil, false)
