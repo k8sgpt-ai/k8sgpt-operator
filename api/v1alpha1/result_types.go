@@ -42,8 +42,8 @@ type ResultSpec struct {
 
 // ResultStatus defines the observed state of Result
 type ResultStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	Type string `json:"type,omitempty"`
+	Sink string `json:"sink,omitempty"`
 }
 
 //+kubebuilder:object:root=true

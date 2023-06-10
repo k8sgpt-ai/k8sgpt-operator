@@ -32,8 +32,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -128,14 +126,6 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return r.finishReconcile(nil, false)
 	}
 
-	// Configure sink Webhook
-	var sinkType sinks.ISink
-	sinkEnabled := k8sgptConfig.Spec.Sink != nil && k8sgptConfig.Spec.Sink.Type != "" && k8sgptConfig.Spec.Sink.Endpoint != ""
-	if sinkEnabled {
-		sinkType = sinks.NewSink(k8sgptConfig.Spec.Sink.Type)
-		sinkType.Configure(*k8sgptConfig, *r.SinkClient)
-	}
-
 	// Check and see if the instance is new or has a K8sGPT deployment in flight
 	deployment := v1.Deployment{}
 	err = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
@@ -212,29 +202,11 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		}
 		// Parse the k8sgpt-deployment response into a list of results
 		k8sgptNumberOfResults.Set(float64(len(response.Results)))
-		rawResults := make(map[string]corev1alpha1.Result)
-		for _, resultSpec := range response.Results {
-			resultSpec.Backend = k8sgptConfig.Spec.Backend
-			name := strings.ReplaceAll(resultSpec.Name, "-", "")
-			name = strings.ReplaceAll(name, "/", "")
-			result := corev1alpha1.Result{
-				Spec: resultSpec,
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: k8sgptConfig.Namespace,
-				},
-			}
-			if k8sgptConfig.Spec.ExtraOptions != nil && k8sgptConfig.Spec.ExtraOptions.Backstage.Enabled {
-				backstageLabel, err := r.Integrations.BackstageLabel(resultSpec)
-				if err != nil {
-					k8sgptReconcileErrorCount.Inc()
-					return r.finishReconcile(err, false)
-				}
-				result.ObjectMeta.Labels = backstageLabel
-			}
-			rawResults[name] = result
+		rawResults, err := resources.MapResults(*r.Integrations, response.Results, *k8sgptConfig)
+		if err != nil {
+			k8sgptReconcileErrorCount.Inc()
+			return r.finishReconcile(err, false)
 		}
-
 		// Prior to creating or updating any results we will delete any stale results that
 		// no longer are relevent, we can do this by using the resultSpec composed name against
 		// the custom resource name
@@ -266,53 +238,48 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		// them as needed
 		for _, result := range rawResults {
 			// Check if the result already exists
-			var existingResult corev1alpha1.Result
-			err = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
-				Name: result.Name}, &existingResult)
+			operation, err := resources.CreateOrUpdateResult(ctx, r.Client, result, *k8sgptConfig)
 			if err != nil {
-				// if the result doesn't exist, we will create it
-				if errors.IsNotFound(err) {
-					err = r.Create(ctx, &result)
-					if err != nil {
-						k8sgptReconcileErrorCount.Inc()
-						return r.finishReconcile(err, false)
-					} else {
-						if sinkEnabled {
-							err := sinkType.Emit(result.Spec)
-							if err != nil {
-								k8sgptReconcileErrorCount.Inc()
-								return r.finishReconcile(err, false)
-							}
-						}
+				k8sgptReconcileErrorCount.Inc()
+				return r.finishReconcile(err, false)
+			}
+			// Update metrics
+			if operation == resources.CreatedResult {
+				k8sgptNumberOfResultsByType.With(prometheus.Labels{
+					"kind": result.Spec.Kind,
+					"name": result.Name,
+				}).Inc()
+			}
+		}
 
-						k8sgptNumberOfResultsByType.With(prometheus.Labels{
-							"kind": result.Spec.Kind,
-							"name": result.Name,
-						}).Inc()
-					}
-				} else {
-					k8sgptReconcileErrorCount.Inc()
-					return r.finishReconcile(err, false)
+	}
+
+	// At this stage we are ready to emit Results
+	// We emit when result type Status is created or updated
+	// and when user configures a sink for the first time
+	var sinkType sinks.ISink
+	sinkEnabled := k8sgptConfig.Spec.Sink != nil && k8sgptConfig.Spec.Sink.Type != "" && k8sgptConfig.Spec.Sink.Endpoint != ""
+	if sinkEnabled {
+		sinkType = sinks.NewSink(k8sgptConfig.Spec.Sink.Type)
+		sinkType.Configure(*k8sgptConfig, *r.SinkClient)
+		resultList := &corev1alpha1.ResultList{}
+		err = r.List(ctx, resultList)
+		if err != nil {
+			k8sgptReconcileErrorCount.Inc()
+			return r.finishReconcile(err, false)
+		}
+		if len(resultList.Items) > 0 {
+			for _, result := range resultList.Items {
+				if result.Status.Sink == "" {
+					_ = sinkType.Emit(result.Spec)
+					result.Status.Sink = k8sgptConfig.Spec.Sink.Type
+					_ = r.Status().Update(ctx, &result)
+				} else if result.Status.Type != resources.NoOpResult {
+					_ = sinkType.Emit(result.Spec)
+					result.Status.Sink = k8sgptConfig.Spec.Sink.Type
+					_ = r.Status().Update(ctx, &result)
 				}
-			} else {
-				// If the result error and solution has changed, we will update CR
-				updateResult := existingResult.Spec.Details != result.Spec.Details || existingResult.Spec.Name != result.Spec.Name || existingResult.Spec.Backend != result.Spec.Backend
-				if updateResult {
-					existingResult.Spec = result.Spec
-					existingResult.Labels = result.Labels
-					err = r.Update(ctx, &existingResult)
-					if err != nil {
-						k8sgptReconcileErrorCount.Inc()
-						return r.finishReconcile(err, false)
-					}
-					if sinkEnabled {
-						err := sinkType.Emit(existingResult.Spec)
-						if err != nil {
-							k8sgptReconcileErrorCount.Inc()
-							return r.finishReconcile(err, false)
-						}
-					}
-				}
+
 			}
 		}
 
