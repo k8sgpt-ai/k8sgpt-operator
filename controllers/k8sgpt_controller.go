@@ -277,17 +277,16 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 							return r.finishReconcile(err, false)
 						}
 
-						res.Status.Sink = k8sgptConfig.Spec.Sink.Type
-						res.Status.Type = resources.NoOpResult
 					} else if result.Status.Type != resources.NoOpResult {
 						err = sinkType.Emit(result.Spec)
 						if err != nil {
 							k8sgptReconcileErrorCount.Inc()
 							return r.finishReconcile(err, false)
 						}
-						res.Status.Sink = k8sgptConfig.Spec.Sink.Type
-						res.Status.Type = resources.NoOpResult
 					}
+					res.Status.Sink = k8sgptConfig.Spec.Sink.Type
+					res.Status.Type = resources.NoOpResult
+
 					err = r.Status().Update(ctx, &res)
 					if err != nil {
 						k8sgptReconcileErrorCount.Inc()
