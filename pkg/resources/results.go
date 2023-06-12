@@ -80,6 +80,7 @@ func CreateOrUpdateResult(ctx context.Context, c client.Client, result v1alpha1.
 	if updateRequired {
 		existingResult.Spec = result.Spec
 		existingResult.Labels = result.Labels
+		err = c.Update(ctx, &existingResult)
 		if err != nil {
 			return NoOpResult, err
 		}
