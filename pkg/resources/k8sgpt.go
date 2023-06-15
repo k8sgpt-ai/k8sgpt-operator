@@ -181,14 +181,14 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 						{
 							Name:            "k8sgpt",
 							ImagePullPolicy: v1.PullAlways,
-							Image:           "ghcr.io/k8sgpt-ai/k8sgpt:" + config.Spec.Version,
+							Image:           "ghcr.io/k8sgpt-ai/k8sgpt:" + config.Spec.AI.Version,
 							Args: []string{
 								"serve",
 							},
 							Env: []v1.EnvVar{
 								{
 									Name:  "K8SGPT_MODEL",
-									Value: config.Spec.Model,
+									Value: config.Spec.AI.Model,
 								},
 								{
 									Name:  "K8SGPT_BACKEND",
@@ -223,7 +223,7 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 				ValueFrom: &v1.EnvVarSource{
 					SecretKeyRef: &v1.SecretKeySelector{
 						LocalObjectReference: v1.LocalObjectReference{
-							Name: config.Spec.RemoteCache.Credentials.Name,
+							Name: config.Spec.RemoteCache.Secret.Name,
 						},
 						Key: key,
 					},
@@ -233,19 +233,19 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 				deployment.Spec.Template.Spec.Containers[0].Env, envVar,
 			)
 		}
-		addRemoteCacheEnvVar("AWS_ACCESS_KEY_ID", config.Spec.RemoteCache.Credentials.AccessKeyID)
-		addRemoteCacheEnvVar("AWS_SECRET_ACCESS_KEY", config.Spec.RemoteCache.Credentials.SecretAccessKey)
+		addRemoteCacheEnvVar("AWS_ACCESS_KEY_ID", "access_key_id")
+		addRemoteCacheEnvVar("AWS_SECRET_ACCESS_KEY", "secret_access_key")
 
 	}
-	if config.Spec.Secret != nil {
+	if config.Spec.AI.Secret != nil {
 		password := v1.EnvVar{
 			Name: "K8SGPT_PASSWORD",
 			ValueFrom: &v1.EnvVarSource{
 				SecretKeyRef: &v1.SecretKeySelector{
 					LocalObjectReference: v1.LocalObjectReference{
-						Name: config.Spec.Secret.Name,
+						Name: config.Spec.AI.Secret.Name,
 					},
-					Key: config.Spec.Secret.Key,
+					Key: config.Spec.AI.Secret.Key,
 				},
 			},
 		}
@@ -263,16 +263,16 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 		)
 	}
 	// Engine is required only when azureopenai is the ai backend
-	if config.Spec.Engine != "" && config.Spec.Backend == v1alpha1.AzureOpenAI {
+	if config.Spec.AI.Engine != "" && config.Spec.Backend == v1alpha1.AzureOpenAI {
 		engine := v1.EnvVar{
 			Name:  "K8SGPT_ENGINE",
-			Value: config.Spec.Engine,
+			Value: config.Spec.AI.Engine,
 		}
 		deployment.Spec.Template.Spec.Containers[0].Env = append(
 			deployment.Spec.Template.Spec.Containers[0].Env, engine,
 		)
-	} else if config.Spec.Engine != "" && config.Spec.Backend != v1alpha1.AzureOpenAI {
-		return &appsv1.Deployment{}, err.New("Engine is supported only by azureopenai provider.")
+	} else if config.Spec.AI.Engine != "" && config.Spec.Backend != v1alpha1.AzureOpenAI {
+		return &appsv1.Deployment{}, err.New("engine is supported only by azureopenai provider")
 	}
 	return &deployment, nil
 }
@@ -323,10 +323,10 @@ func Sync(ctx context.Context, c client.Client,
 		case Create:
 
 			// before creation we will check to see if the secret exists if used as a ref
-			if config.Spec.Secret != nil {
+			if config.Spec.AI.Secret != nil {
 
 				secret := &v1.Secret{}
-				er := c.Get(ctx, types.NamespacedName{Name: config.Spec.Secret.Name,
+				er := c.Get(ctx, types.NamespacedName{Name: config.Spec.AI.Secret.Name,
 					Namespace: config.Namespace}, secret)
 				if er != nil {
 					return err.New("references secret does not exist, cannot create deployment")

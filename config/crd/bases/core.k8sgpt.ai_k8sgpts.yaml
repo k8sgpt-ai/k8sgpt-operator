@@ -35,6 +35,31 @@ spec:
           spec:
             description: K8sGPTSpec defines the desired state of K8sGPT
             properties:
+              ai:
+                default: gpt-3.5-turbo
+                properties:
+                  enableAI:
+                    type: boolean
+                  engine:
+                    type: string
+                  filters:
+                    items:
+                      type: string
+                    type: array
+                  model:
+                    type: string
+                  noCache:
+                    type: boolean
+                  secret:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                    type: object
+                  version:
+                    type: string
+                type: object
               backend:
                 default: openai
                 enum:
@@ -44,55 +69,27 @@ spec:
                 type: string
               baseUrl:
                 type: string
-              enableAI:
-                type: boolean
-              engine:
-                type: string
-              filters:
-                items:
-                  type: string
-                type: array
-              model:
-                default: gpt-3.5-turbo
-                type: string
-              noCache:
-                type: boolean
               remoteCache:
                 properties:
                   bucketName:
                     type: string
-                  credentials:
+                  credentialSecret:
                     properties:
                       access_key_id:
                         type: string
                       name:
                         type: string
-                      secret_acess_key:
+                      secret_access_key:
                         type: string
                     type: object
                   region:
                     type: string
                 type: object
-              secret:
-                properties:
-                  key:
-                    type: string
-                  name:
-                    type: string
-                type: object
-              version:
-                type: string
             required:
             - backend
             type: object
           status:
             description: K8sGPTStatus defines the observed state of K8sGPT
-            properties:
-              initialized:
-                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
-                  of cluster Important: Run "make" to regenerate code after modifying
-                  this file'
-                type: boolean
             type: object
         type: object
     served: true

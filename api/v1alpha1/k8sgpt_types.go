@@ -23,21 +23,26 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+// Currently the secret is only supported in same namespace as the operator/deployment
 type SecretRef struct {
 	Name string `json:"name,omitempty"`
 	Key  string `json:"key,omitempty"`
 }
 
-type CredentialsRef struct {
-	Name            string `json:"name,omitempty"`
-	AccessKeyID     string `json:"access_key_id,omitempty"`
-	SecretAccessKey string `json:"secret_acess_key,omitempty"`
+type RemoteCacheRef struct {
+	Secret     *SecretRef `json:"secret,omitempty"`
+	BucketName string     `json:"bucketName,omitempty"`
+	Region     string     `json:"region,omitempty"`
 }
 
-type RemoteCacheRef struct {
-	Credentials *CredentialsRef `json:"credentials,omitempty"`
-	BucketName  string          `json:"bucketName,omitempty"`
-	Region      string          `json:"region,omitempty"`
+type AI struct {
+	Model   string     `json:"model,omitempty"`
+	Engine  string     `json:"engine,omitempty"`
+	Secret  *SecretRef `json:"secret,omitempty"`
+	Version string     `json:"version,omitempty"`
+	Enable  bool       `json:"enableAI,omitempty"`
+	NoCache bool       `json:"noCache,omitempty"`
+	Filters []string   `json:"filters,omitempty"`
 }
 
 // K8sGPTSpec defines the desired state of K8sGPT
@@ -47,13 +52,7 @@ type K8sGPTSpec struct {
 	Backend `json:"backend"`
 	BaseUrl string `json:"baseUrl,omitempty"`
 	// +kubebuilder:default:=gpt-3.5-turbo
-	Model       string          `json:"model,omitempty"`
-	Engine      string          `json:"engine,omitempty"`
-	Secret      *SecretRef      `json:"secret,omitempty"`
-	Version     string          `json:"version,omitempty"`
-	EnableAI    bool            `json:"enableAI,omitempty"`
-	NoCache     bool            `json:"noCache,omitempty"`
-	Filters     []string        `json:"filters,omitempty"`
+	AI          *AI             `json:"ai,omitempty"`
 	RemoteCache *RemoteCacheRef `json:"remoteCache,omitempty"`
 }
 

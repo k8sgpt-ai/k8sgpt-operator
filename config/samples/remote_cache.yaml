@@ -9,7 +9,12 @@ spec:
     backend: openai
     noCache: false
     version: v0.3.0
-    enable: true
+    enableAI: true
     secret:
       name: k8sgpt-sample-secret
-
+      key: openai-api-key
+  remoteCache:
+    secret:
+      name: k8sgpt-cache-secret
+    bucketName: k8sgpt-sample-bucket
+    region: eu-west-1

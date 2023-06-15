@@ -16,10 +16,10 @@ func (c *Client) ProcessAnalysis(config *v1alpha1.K8sGPT) (*common.K8sGPTReponse
 	client := rpc.NewServerServiceClient(c.conn)
 
 	req := &schemav1.AnalyzeRequest{
-		Explain: config.Spec.EnableAI,
-		Nocache: config.Spec.NoCache,
+		Explain: config.Spec.AI.Enable,
+		Nocache: config.Spec.AI.NoCache,
 		Backend: string(config.Spec.Backend),
-		Filters: config.Spec.Filters,
+		Filters: config.Spec.AI.Filters,
 	}
 
 	res, err := client.Analyze(context.Background(), req)

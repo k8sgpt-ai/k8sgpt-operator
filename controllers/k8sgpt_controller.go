@@ -148,10 +148,10 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		// Check the version of the deployment image matches the version set in the K8sGPT CR
 		imageURI := deployment.Spec.Template.Spec.Containers[0].Image
 		imageVersion := strings.Split(imageURI, ":")[1]
-		if imageVersion != k8sgptConfig.Spec.Version {
+		if imageVersion != k8sgptConfig.Spec.AI.Version {
 			// Update the deployment image
 			deployment.Spec.Template.Spec.Containers[0].Image = fmt.Sprintf("%s:%s",
-				strings.Split(imageURI, ":")[0], k8sgptConfig.Spec.Version)
+				strings.Split(imageURI, ":")[0], k8sgptConfig.Spec.AI.Version)
 			err = r.Update(ctx, &deployment)
 			if err != nil {
 				k8sgptReconcileErrorCount.Inc()
