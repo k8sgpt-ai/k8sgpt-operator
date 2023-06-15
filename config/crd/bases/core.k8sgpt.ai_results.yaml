@@ -83,7 +83,7 @@ spec:
             properties:
               lifecycle:
                 type: string
-              sink:
+              webhook:
                 type: string
             type: object
         type: object

@@ -256,8 +256,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 		}
 
-		// At this stage we are ready to emit Results
-		// We emit when result type Status is created or updated
+		// We emit when result Status is not historical
 		// and when user configures a sink for the first time
 		latestResultList := &corev1alpha1.ResultList{}
 		if err := r.List(ctx, latestResultList); err != nil {
@@ -281,16 +280,16 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			}
 
 			if sinkEnabled {
-				if res.Status.LifeCycle != string(resources.NoOpResult) || res.Status.Sink == "" {
+				if res.Status.LifeCycle != string(resources.NoOpResult) || res.Status.Webhook == "" {
 					if err := sinkType.Emit(res.Spec); err != nil {
 						k8sgptReconcileErrorCount.Inc()
 						return r.finishReconcile(err, false)
 					}
-					res.Status.Sink = k8sgptConfig.Spec.Sink.Type
+					res.Status.Webhook = k8sgptConfig.Spec.Sink.Endpoint
 				}
 			} else {
-				// Remove the sink status from results
-				res.Status.Sink = ""
+				// Remove the Webhook status from results
+				res.Status.Webhook = ""
 			}
 			if err := r.Status().Update(ctx, &res); err != nil {
 				k8sgptReconcileErrorCount.Inc()
