@@ -27,12 +27,11 @@ import (
 	kclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/sinks"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
 	"github.com/prometheus/client_golang/prometheus"
 	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -71,6 +70,7 @@ type K8sGPTReconciler struct {
 	client.Client
 	Scheme       *runtime.Scheme
 	Integrations *integrations.Integrations
+	SinkClient   *sinks.Client
 	K8sGPTClient *kclient.Client
 	// This is a map of clients for each deployment
 	k8sGPTClients map[string]*kclient.Client
@@ -202,29 +202,11 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		}
 		// Parse the k8sgpt-deployment response into a list of results
 		k8sgptNumberOfResults.Set(float64(len(response.Results)))
-		rawResults := make(map[string]corev1alpha1.Result)
-		for _, resultSpec := range response.Results {
-			resultSpec.Backend = k8sgptConfig.Spec.Backend
-			name := strings.ReplaceAll(resultSpec.Name, "-", "")
-			name = strings.ReplaceAll(name, "/", "")
-			result := corev1alpha1.Result{
-				Spec: resultSpec,
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: k8sgptConfig.Namespace,
-				},
-			}
-			if k8sgptConfig.Spec.ExtraOptions != nil && k8sgptConfig.Spec.ExtraOptions.Backstage.Enabled {
-				backstageLabel, err := r.Integrations.BackstageLabel(resultSpec)
-				if err != nil {
-					k8sgptReconcileErrorCount.Inc()
-					return r.finishReconcile(err, false)
-				}
-				result.ObjectMeta.Labels = backstageLabel
-			}
-			rawResults[name] = result
+		rawResults, err := resources.MapResults(*r.Integrations, response.Results, *k8sgptConfig)
+		if err != nil {
+			k8sgptReconcileErrorCount.Inc()
+			return r.finishReconcile(err, false)
 		}
-
 		// Prior to creating or updating any results we will delete any stale results that
 		// no longer are relevent, we can do this by using the resultSpec composed name against
 		// the custom resource name
@@ -255,39 +237,65 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		// At this point we are able to loop through our rawResults and create them or update
 		// them as needed
 		for _, result := range rawResults {
-			// Check if the result already exists
-			var existingResult corev1alpha1.Result
-			err = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
-				Name: result.Name}, &existingResult)
+			operation, err := resources.CreateOrUpdateResult(ctx, r.Client, result)
 			if err != nil {
-				// if the result doesn't exist, we will create it
-				if errors.IsNotFound(err) {
-					err = r.Create(ctx, &result)
-					if err != nil {
-						k8sgptReconcileErrorCount.Inc()
-						return r.finishReconcile(err, false)
-					} else {
-						k8sgptNumberOfResultsByType.With(prometheus.Labels{
-							"kind": result.Spec.Kind,
-							"name": result.Name,
-						}).Inc()
-					}
-				} else {
-					k8sgptReconcileErrorCount.Inc()
-					return r.finishReconcile(err, false)
-				}
-			} else {
-				// If the result already exists we will update it
-				existingResult.Spec = result.Spec
-				existingResult.Labels = result.Labels
-				err = r.Update(ctx, &existingResult)
-				if err != nil {
-					k8sgptReconcileErrorCount.Inc()
-					return r.finishReconcile(err, false)
-				}
+				k8sgptReconcileErrorCount.Inc()
+				return r.finishReconcile(err, false)
+
 			}
+
+			// Update metrics
+			if operation == resources.CreatedResult {
+				k8sgptNumberOfResultsByType.With(prometheus.Labels{
+					"kind": result.Spec.Kind,
+					"name": result.Name,
+				}).Inc()
+			} else if operation == resources.UpdatedResult {
+				fmt.Printf("Updated successfully %s \n", result.Name)
+			}
+
 		}
 
+		// We emit when result Status is not historical
+		// and when user configures a sink for the first time
+		latestResultList := &corev1alpha1.ResultList{}
+		if err := r.List(ctx, latestResultList); err != nil {
+			return r.finishReconcile(err, false)
+		}
+		if len(latestResultList.Items) == 0 {
+			return r.finishReconcile(nil, false)
+		}
+		sinkEnabled := k8sgptConfig.Spec.Sink != nil && k8sgptConfig.Spec.Sink.Type != "" && k8sgptConfig.Spec.Sink.Endpoint != ""
+
+		var sinkType sinks.ISink
+		if sinkEnabled {
+			sinkType = sinks.NewSink(k8sgptConfig.Spec.Sink.Type)
+			sinkType.Configure(*k8sgptConfig, *r.SinkClient)
+		}
+
+		for _, result := range latestResultList.Items {
+			var res corev1alpha1.Result
+			if err := r.Get(ctx, client.ObjectKey{Namespace: result.Namespace, Name: result.Name}, &res); err != nil {
+				return r.finishReconcile(err, false)
+			}
+
+			if sinkEnabled {
+				if res.Status.LifeCycle != string(resources.NoOpResult) || res.Status.Webhook == "" {
+					if err := sinkType.Emit(res.Spec); err != nil {
+						k8sgptReconcileErrorCount.Inc()
+						return r.finishReconcile(err, false)
+					}
+					res.Status.Webhook = k8sgptConfig.Spec.Sink.Endpoint
+				}
+			} else {
+				// Remove the Webhook status from results
+				res.Status.Webhook = ""
+			}
+			if err := r.Status().Update(ctx, &res); err != nil {
+				k8sgptReconcileErrorCount.Inc()
+				return r.finishReconcile(err, false)
+			}
+		}
 	}
 
 	return r.finishReconcile(nil, false)

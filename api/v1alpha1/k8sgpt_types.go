@@ -36,11 +36,17 @@ type ExtraOptionsRef struct {
 	Backstage *Backstage `json:"backstage,omitempty"`
 }
 
+type WebhookRef struct {
+	// +kubebuilder:validation:Enum=slack
+	Type     string `json:"type,omitempty"`
+	Endpoint string `json:"webhook,omitempty"`
+}
+
 // K8sGPTSpec defines the desired state of K8sGPT
 type K8sGPTSpec struct {
 	// +kubebuilder:default:=openai
 	// +kubebuilder:validation:Enum=openai;localai;azureopenai
-	Backend `json:"backend"`
+	Backend string `json:"backend"`
 	BaseUrl string `json:"baseUrl,omitempty"`
 	// +kubebuilder:default:=gpt-3.5-turbo
 	Model        string           `json:"model,omitempty"`
@@ -51,14 +57,13 @@ type K8sGPTSpec struct {
 	NoCache      bool             `json:"noCache,omitempty"`
 	Filters      []string         `json:"filters,omitempty"`
 	ExtraOptions *ExtraOptionsRef `json:"extraOptions,omitempty"`
+	Sink         *WebhookRef      `json:"sink,omitempty"`
 }
 
-type Backend string
-
 const (
-	OpenAI      Backend = "openai"
-	AzureOpenAI Backend = "azureopenai"
-	LocalAI     Backend = "localai"
+	OpenAI      = "openai"
+	AzureOpenAI = "azureopenai"
+	LocalAI     = "localai"
 )
 
 // K8sGPTStatus defines the observed state of K8sGPT
