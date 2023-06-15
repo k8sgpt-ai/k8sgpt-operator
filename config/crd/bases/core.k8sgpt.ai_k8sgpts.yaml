@@ -37,6 +37,15 @@ spec:
             properties:
               ai:
                 properties:
+                  backend:
+                    default: openai
+                    enum:
+                    - openai
+                    - localai
+                    - azureopenai
+                    type: string
+                  baseUrl:
+                    type: string
                   enable:
                     type: boolean
                   engine:
@@ -50,6 +59,8 @@ spec:
                       name:
                         type: string
                     type: object
+                required:
+                - backend
                 type: object
               extraOptions:
                 properties:
