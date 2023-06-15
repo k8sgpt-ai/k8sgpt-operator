@@ -81,9 +81,9 @@ spec:
           status:
             description: ResultStatus defines the observed state of Result
             properties:
-              sink:
+              lifecycle:
                 type: string
-              type:
+              sink:
                 type: string
             type: object
         type: object

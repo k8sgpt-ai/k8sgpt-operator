@@ -237,11 +237,11 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		// At this point we are able to loop through our rawResults and create them or update
 		// them as needed
 		for _, result := range rawResults {
-			// Check if the result already exists
-			operation, err := resources.CreateOrUpdateResult(ctx, r.Client, result, *k8sgptConfig)
+			operation, err := resources.CreateOrUpdateResult(ctx, r.Client, result)
 			if err != nil {
 				k8sgptReconcileErrorCount.Inc()
 				return r.finishReconcile(err, false)
+
 			}
 
 			// Update metrics
@@ -250,57 +250,51 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					"kind": result.Spec.Kind,
 					"name": result.Name,
 				}).Inc()
+			} else if operation == resources.UpdatedResult {
+				fmt.Printf("Updated successfully %s \n", result.Name)
 			}
+
 		}
 
 		// At this stage we are ready to emit Results
 		// We emit when result type Status is created or updated
 		// and when user configures a sink for the first time
 		latestResultList := &corev1alpha1.ResultList{}
-		err = r.List(ctx, latestResultList)
+		if err := r.List(ctx, latestResultList); err != nil {
+			return r.finishReconcile(err, false)
+		}
+		if len(latestResultList.Items) == 0 {
+			return r.finishReconcile(err, false)
+		}
+		sinkEnabled := k8sgptConfig.Spec.Sink != nil && k8sgptConfig.Spec.Sink.Type != "" && k8sgptConfig.Spec.Sink.Endpoint != ""
 
 		var sinkType sinks.ISink
-		if len(latestResultList.Items) > 0 {
-			sinkEnabled := k8sgptConfig.Spec.Sink != nil && k8sgptConfig.Spec.Sink.Type != "" && k8sgptConfig.Spec.Sink.Endpoint != ""
-			if sinkEnabled {
-				sinkType = sinks.NewSink(k8sgptConfig.Spec.Sink.Type)
-				sinkType.Configure(*k8sgptConfig, *r.SinkClient)
-			}
-			for _, result := range latestResultList.Items {
-				var res corev1alpha1.Result
-				_ = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace, Name: result.Name}, &res)
-				if sinkEnabled {
-					if res.Status.Sink == "" {
-						err = sinkType.Emit(res.Spec)
-						if err != nil {
-							k8sgptReconcileErrorCount.Inc()
-							return r.finishReconcile(err, false)
-						}
+		if sinkEnabled {
+			sinkType = sinks.NewSink(k8sgptConfig.Spec.Sink.Type)
+			sinkType.Configure(*k8sgptConfig, *r.SinkClient)
+		}
 
-					} else if res.Status.Type != resources.NoOpResult {
-						err = sinkType.Emit(res.Spec)
-						if err != nil {
-							k8sgptReconcileErrorCount.Inc()
-							return r.finishReconcile(err, false)
-						}
+		for _, result := range latestResultList.Items {
+			var res corev1alpha1.Result
+			if err := r.Get(ctx, client.ObjectKey{Namespace: result.Namespace, Name: result.Name}, &res); err != nil {
+				return r.finishReconcile(err, false)
+			}
+
+			if sinkEnabled {
+				if res.Status.LifeCycle != string(resources.NoOpResult) || res.Status.Sink == "" {
+					if err := sinkType.Emit(res.Spec); err != nil {
+						k8sgptReconcileErrorCount.Inc()
+						return r.finishReconcile(err, false)
 					}
 					res.Status.Sink = k8sgptConfig.Spec.Sink.Type
-
-					err = r.Status().Update(ctx, &res)
-					if err != nil {
-						k8sgptReconcileErrorCount.Inc()
-						return r.finishReconcile(err, false)
-					}
-				} else {
-					// remove the sink status from results
-					res.Status.Sink = ""
-					err = r.Status().Update(ctx, &res)
-					if err != nil {
-						k8sgptReconcileErrorCount.Inc()
-						return r.finishReconcile(err, false)
-
-					}
 				}
+			} else {
+				// Remove the sink status from results
+				res.Status.Sink = ""
+			}
+			if err := r.Status().Update(ctx, &res); err != nil {
+				k8sgptReconcileErrorCount.Inc()
+				return r.finishReconcile(err, false)
 			}
 		}
 	}

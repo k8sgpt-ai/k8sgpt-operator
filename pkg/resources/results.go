@@ -2,6 +2,7 @@ package resources
 
 import (
 	"context"
+	"reflect"
 	"strings"
 
 	"github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
@@ -11,10 +12,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+type ResultOperation string
+
 const (
-	CreatedResult string = "created"
-	UpdatedResult        = "updated"
-	NoOpResult           = "historical"
+	CreatedResult ResultOperation = "created"
+	UpdatedResult                 = "updated"
+	NoOpResult                    = "historical"
 )
 
 func MapResults(i integrations.Integrations, resultsSpec []v1alpha1.ResultSpec, config v1alpha1.K8sGPT) (map[string]v1alpha1.Result, error) {
@@ -50,45 +53,32 @@ func GetResult(resultSpec v1alpha1.ResultSpec, name, namespace, backend string) 
 		},
 	}
 }
-
-// Creates or Updates Result CRs and update their statuses
-func CreateOrUpdateResult(ctx context.Context, c client.Client, result v1alpha1.Result, config v1alpha1.K8sGPT) (string, error) {
-	// Check if the result already exists
-	var existingResult v1alpha1.Result
-	err := c.Get(ctx, client.ObjectKey{Namespace: config.Namespace,
-		Name: result.Name}, &existingResult)
-	if err != nil {
-		// if the result doesn't exist, we will create it
-		if errors.IsNotFound(err) {
-			err = c.Create(ctx, &result)
-			if err != nil {
-				return NoOpResult, err
-			}
-			result.Status.Type = CreatedResult
-			err = c.Status().Update(ctx, &result)
-			if err != nil {
-				return CreatedResult, err
-			}
-			return CreatedResult, nil
-		} else {
+func CreateOrUpdateResult(ctx context.Context, c client.Client, res v1alpha1.Result) (ResultOperation, error) {
+	var existing v1alpha1.Result
+	if err := c.Get(ctx, client.ObjectKey{Namespace: res.Namespace, Name: res.Name}, &existing); err != nil {
+		if !errors.IsNotFound(err) {
 			return NoOpResult, err
 		}
-	}
-
-	// If the result error and solution has changed, we will update CR
-	updateRequired := existingResult.Spec.Details != result.Spec.Details || existingResult.Spec.Name != result.Spec.Name || existingResult.Spec.Backend != result.Spec.Backend
-	if updateRequired {
-		existingResult.Spec = result.Spec
-		existingResult.Labels = result.Labels
-		err = c.Update(ctx, &existingResult)
-		if err != nil {
+		if err := c.Create(ctx, &res); err != nil {
 			return NoOpResult, err
 		}
-		existingResult.Status.Type = UpdatedResult
-		err = c.Status().Update(ctx, &existingResult)
-		return UpdatedResult, err
+		return CreatedResult, nil
 	}
-	existingResult.Status.Type = NoOpResult
-	err = c.Status().Update(ctx, &existingResult)
-	return NoOpResult, err
+	if existing.Spec.Details == res.Spec.Details && reflect.DeepEqual(res.Labels, existing.Labels) {
+		existing.Status.LifeCycle = string(NoOpResult)
+		err := c.Status().Update(ctx, &existing)
+		return NoOpResult, err
+	}
+
+	existing.Spec = res.Spec
+	existing.Labels = res.Labels
+	if err := c.Update(ctx, &existing); err != nil {
+		return NoOpResult, err
+	}
+	existing.Status.LifeCycle = string(UpdatedResult)
+	if err := c.Status().Update(ctx, &existing); err != nil {
+		return NoOpResult, err
+	}
+
+	return UpdatedResult, nil
 }
