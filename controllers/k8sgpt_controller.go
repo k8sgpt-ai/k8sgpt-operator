@@ -24,7 +24,9 @@ import (
 
 	"github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
+
 	kclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
 	"github.com/prometheus/client_golang/prometheus"
@@ -70,6 +72,7 @@ var (
 type K8sGPTReconciler struct {
 	client.Client
 	Scheme       *runtime.Scheme
+	Integrations *integrations.Integrations
 	K8sGPTClient *kclient.Client
 }
 
@@ -166,8 +169,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 			return r.finishReconcile(nil, false)
 		}
-		// If the deployment is active, we will query it directly for analysis data
-		// Create a new client
+
 		return r.ConnectAndProcess(ctx, k8sgptConfig)
 	}
 

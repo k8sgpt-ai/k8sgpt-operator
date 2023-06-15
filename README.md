@@ -39,8 +39,11 @@ metadata:
 spec:
   noCache: false
   version: v0.3.8
-  # filters:
-  #   - Ingress
+# filters:
+#   - Ingress
+# extraOptions:
+#   backstage:
+#     enabled: true
   ai:
     model: gpt-3.5-turbo
     backend: openai
@@ -170,13 +173,15 @@ metadata:
   namespace: default
 spec:
   ai:
-    model: gpt-3.5-turbo
+    model: ggml-gpt4all-j
     backend: localai
+    baseUrl: http://local-ai.local-ai.svc.cluster.local:8080/v1                                  
     noCache: false
     version: v0.3.8
     enable: true
 EOF
 ```
+   Note: ensure that the value of `baseUrl` is a properly constructed [DNS name](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#services) for the LocalAI Service. It should take the form: `http://local-ai.<namespace_local_ai_was_installed_in>.svc.cluster.local:8080/v1`.
 
 4. Same as step 4. in the example above.
 
@@ -184,4 +189,4 @@ EOF
 
 ## Helm values
 
-For details please see [here](chart/values.yaml)
+For details please see [here](chart/operator/values.yaml)

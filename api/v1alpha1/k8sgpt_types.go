@@ -23,11 +23,19 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// Currently the secret is only supported in same namespace as the operator/deployment
+type Backstage struct {
+	Enabled bool `json:"enabled,omitempty"`
+}
+
+type ExtraOptionsRef struct {
+	Backstage *Backstage `json:"backstage,omitempty"`
+}
+
 type SecretRef struct {
 	Name string `json:"name,omitempty"`
 	Key  string `json:"key,omitempty"`
 }
+
 
 type RemoteCacheRef struct {
 	Secret     *SecretRef `json:"secret,omitempty"`
@@ -36,11 +44,6 @@ type RemoteCacheRef struct {
 }
 
 type AI struct {
-	// +kubebuilder:default:=openai
-	// +kubebuilder:validation:Enum=openai;localai;azureopenai
-	Backend `json:"backend"`
-	BaseUrl string `json:"baseUrl,omitempty"`
-	// +kubebuilder:default:=gpt-3.5-turbo
 	Model  string     `json:"model,omitempty"`
 	Engine string     `json:"engine,omitempty"`
 	Secret *SecretRef `json:"secret,omitempty"`
@@ -54,6 +57,7 @@ type K8sGPTSpec struct {
 	NoCache     bool            `json:"noCache,omitempty"`
 	Version     string          `json:"version,omitempty"`
 	Filters     []string        `json:"filters,omitempty"`
+	ExtraOptions *ExtraOptionsRef `json:"extraOptions,omitempty"`
 }
 
 type Backend string
