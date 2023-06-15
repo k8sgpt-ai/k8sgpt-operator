@@ -70,6 +70,11 @@ spec:
             type: object
           status:
             description: ResultStatus defines the observed state of Result
+            properties:
+              lifecycle:
+                type: string
+              webhook:
+                type: string
             type: object
         type: object
     served: true
