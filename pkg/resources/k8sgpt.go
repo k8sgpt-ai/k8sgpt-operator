@@ -181,7 +181,7 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 						{
 							Name:            "k8sgpt",
 							ImagePullPolicy: v1.PullAlways,
-							Image:           "ghcr.io/k8sgpt-ai/k8sgpt:" + config.Spec.AI.Version,
+							Image:           "ghcr.io/k8sgpt-ai/k8sgpt:" + config.Spec.Version,
 							Args: []string{
 								"serve",
 							},
@@ -192,7 +192,7 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 								},
 								{
 									Name:  "K8SGPT_BACKEND",
-									Value: string(config.Spec.Backend),
+									Value: string(config.Spec.AI.Backend),
 								},
 							},
 							Ports: []v1.ContainerPort{
@@ -253,17 +253,17 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 			deployment.Spec.Template.Spec.Containers[0].Env, password,
 		)
 	}
-	if config.Spec.BaseUrl != "" {
+	if config.Spec.AI.BaseUrl != "" {
 		baseUrl := v1.EnvVar{
 			Name:  "K8SGPT_BASEURL",
-			Value: config.Spec.BaseUrl,
+			Value: config.Spec.AI.BaseUrl,
 		}
 		deployment.Spec.Template.Spec.Containers[0].Env = append(
 			deployment.Spec.Template.Spec.Containers[0].Env, baseUrl,
 		)
 	}
 	// Engine is required only when azureopenai is the ai backend
-	if config.Spec.AI.Engine != "" && config.Spec.Backend == v1alpha1.AzureOpenAI {
+	if config.Spec.AI.Engine != "" && config.Spec.AI.Backend == v1alpha1.AzureOpenAI {
 		engine := v1.EnvVar{
 			Name:  "K8SGPT_ENGINE",
 			Value: config.Spec.AI.Engine,
@@ -271,7 +271,7 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 		deployment.Spec.Template.Spec.Containers[0].Env = append(
 			deployment.Spec.Template.Spec.Containers[0].Env, engine,
 		)
-	} else if config.Spec.AI.Engine != "" && config.Spec.Backend != v1alpha1.AzureOpenAI {
+	} else if config.Spec.AI.Engine != "" && config.Spec.AI.Backend != v1alpha1.AzureOpenAI {
 		return &appsv1.Deployment{}, err.New("engine is supported only by azureopenai provider")
 	}
 	return &deployment, nil

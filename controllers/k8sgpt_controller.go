@@ -22,6 +22,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	kclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
@@ -32,6 +33,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -69,8 +71,6 @@ type K8sGPTReconciler struct {
 	client.Client
 	Scheme       *runtime.Scheme
 	K8sGPTClient *kclient.Client
-	// This is a map of clients for each deployment
-	k8sGPTClients map[string]*kclient.Client
 }
 
 // +kubebuilder:rbac:groups=core.k8sgpt.ai,resources=k8sgpts,verbs=get;list;watch;create;update;patch;delete
@@ -108,7 +108,13 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		if utils.ContainsString(k8sgptConfig.GetFinalizers(), FinalizerName) {
 
 			if k8sgptConfig.Spec.RemoteCache != nil {
-				err := r.k8sGPTClients[k8sgptConfig.Name].RemoveConfig(k8sgptConfig)
+				connClient, err := r.createConnectionClient(ctx, k8sgptConfig)
+				if err != nil {
+					k8sgptReconcileErrorCount.Inc()
+					return r.finishReconcile(err, false)
+				}
+
+				err = connClient.RemoveConfig(k8sgptConfig)
 				if err != nil {
 					k8sgptReconcileErrorCount.Inc()
 					return r.finishReconcile(err, false)
@@ -148,10 +154,10 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		// Check the version of the deployment image matches the version set in the K8sGPT CR
 		imageURI := deployment.Spec.Template.Spec.Containers[0].Image
 		imageVersion := strings.Split(imageURI, ":")[1]
-		if imageVersion != k8sgptConfig.Spec.AI.Version {
+		if imageVersion != k8sgptConfig.Spec.Version {
 			// Update the deployment image
 			deployment.Spec.Template.Spec.Containers[0].Image = fmt.Sprintf("%s:%s",
-				strings.Split(imageURI, ":")[0], k8sgptConfig.Spec.AI.Version)
+				strings.Split(imageURI, ":")[0], k8sgptConfig.Spec.Version)
 			err = r.Update(ctx, &deployment)
 			if err != nil {
 				k8sgptReconcileErrorCount.Inc()
@@ -160,146 +166,157 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 			return r.finishReconcile(nil, false)
 		}
-
 		// If the deployment is active, we will query it directly for analysis data
-		if _, ok := r.k8sGPTClients[k8sgptConfig.Name]; !ok {
-			// Create a new client
-			var address string
-			if os.Getenv("LOCAL_MODE") != "" {
-				address = "localhost:8080"
-			} else {
-				// Get k8sgpt-deployment service pod ip
-				podList := &corev1.PodList{}
-				listOpts := []client.ListOption{
-					client.InNamespace(k8sgptConfig.Namespace),
-					client.MatchingLabels{"app": "k8sgpt-deployment"},
-				}
-				err := r.List(ctx, podList, listOpts...)
-				if err != nil {
-					k8sgptReconcileErrorCount.Inc()
-					return r.finishReconcile(err, false)
-				}
-				if len(podList.Items) == 0 {
-					k8sgptReconcileErrorCount.Inc()
-					return r.finishReconcile(fmt.Errorf("no pods found for k8sgpt-deployment"), false)
-				}
-				address = fmt.Sprintf("%s:8080", podList.Items[0].Status.PodIP)
-			}
-
-			fmt.Printf("Creating new client for %s\n", address)
-			// Test if the port is open
-			conn, err := net.DialTimeout("tcp", address, 1*time.Second)
-			if err != nil {
-				k8sgptReconcileErrorCount.Inc()
-				return r.finishReconcile(err, false)
-			}
-
-			fmt.Printf("Connection established between %s and localhost with time out of %d seconds.\n", address, int64(1))
-			fmt.Printf("Remote Address : %s \n", conn.RemoteAddr().String())
-			fmt.Printf("Local Address : %s \n", conn.LocalAddr().String())
-
-			k8sgptClient, err := kclient.NewClient(address)
-			if err != nil {
-				k8sgptReconcileErrorCount.Inc()
-				return r.finishReconcile(err, false)
-			}
-			r.k8sGPTClients[k8sgptConfig.Name] = k8sgptClient
-		}
-
-		if k8sgptConfig.Spec.RemoteCache != nil {
-			err := r.k8sGPTClients[k8sgptConfig.Name].AddConfig(k8sgptConfig)
-			if err != nil {
-				k8sgptReconcileErrorCount.Inc()
-				return r.finishReconcile(err, false)
-			}
-		}
-
-		response, err := r.k8sGPTClients[k8sgptConfig.Name].ProcessAnalysis(k8sgptConfig)
-		if err != nil {
-			k8sgptReconcileErrorCount.Inc()
-			return r.finishReconcile(err, false)
-		}
-		// Parse the k8sgpt-deployment response into a list of results
-		k8sgptNumberOfResults.Set(float64(len(response.Results)))
-		rawResults := make(map[string]corev1alpha1.Result)
-		for _, resultSpec := range response.Results {
-			resultSpec.Backend = k8sgptConfig.Spec.Backend
-			name := strings.ReplaceAll(resultSpec.Name, "-", "")
-			name = strings.ReplaceAll(name, "/", "")
-			result := corev1alpha1.Result{
-				Spec: resultSpec,
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: k8sgptConfig.Namespace,
-				},
-			}
-			rawResults[name] = result
-		}
-
-		// Prior to creating or updating any results we will delete any stale results that
-		// no longer are relevent, we can do this by using the resultSpec composed name against
-		// the custom resource name
-		resultList := &corev1alpha1.ResultList{}
-		err = r.List(ctx, resultList)
-		if err != nil {
-			k8sgptReconcileErrorCount.Inc()
-			return r.finishReconcile(err, false)
-		}
-		if len(resultList.Items) > 0 {
-			// If the result does not exist in the map we will delete it
-			for _, result := range resultList.Items {
-				fmt.Printf("Checking if %s is still relevant\n", result.Name)
-				if _, ok := rawResults[result.Name]; !ok {
-					err = r.Delete(ctx, &result)
-					if err != nil {
-						k8sgptReconcileErrorCount.Inc()
-						return r.finishReconcile(err, false)
-					} else {
-						k8sgptNumberOfResultsByType.With(prometheus.Labels{
-							"kind": result.Spec.Kind,
-							"name": result.Name,
-						}).Dec()
-					}
-				}
-			}
-		}
-		// At this point we are able to loop through our rawResults and create them or update
-		// them as needed
-		for _, result := range rawResults {
-			// Check if the result already exists
-			var existingResult corev1alpha1.Result
-			err = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
-				Name: result.Name}, &existingResult)
-			if err != nil {
-				// if the result already exists, we will update it
-				if errors.IsNotFound(err) {
-					err = r.Create(ctx, &result)
-					if err != nil {
-						k8sgptReconcileErrorCount.Inc()
-						return r.finishReconcile(err, false)
-					} else {
-						k8sgptNumberOfResultsByType.With(prometheus.Labels{
-							"kind": result.Spec.Kind,
-							"name": result.Name,
-						}).Inc()
-					}
-				} else {
-					k8sgptReconcileErrorCount.Inc()
-					return r.finishReconcile(err, false)
-				}
-			} else {
-				// If the result already exists we will update it
-				existingResult.Spec = result.Spec
-				err = r.Update(ctx, &existingResult)
-				if err != nil {
-					k8sgptReconcileErrorCount.Inc()
-					return r.finishReconcile(err, false)
-				}
-			}
-		}
-
+		// Create a new client
+		return r.ConnectAndProcess(ctx, k8sgptConfig)
 	}
 
+	return r.finishReconcile(nil, false)
+}
+
+func (r *K8sGPTReconciler) createConnectionClient(ctx context.Context, k8sgptConfig *v1alpha1.K8sGPT) (*kclient.Client, error) {
+	// Create client endpoint
+	var address string
+	if os.Getenv("LOCAL_MODE") != "" {
+		address = "localhost:8080"
+	} else {
+		// Get k8sgpt-deployment service pod ip
+		podList := &corev1.PodList{}
+		listOpts := []client.ListOption{
+			client.InNamespace(k8sgptConfig.Namespace),
+			client.MatchingLabels{"app": "k8sgpt-deployment"},
+		}
+		err := r.List(ctx, podList, listOpts...)
+		if err != nil {
+			k8sgptReconcileErrorCount.Inc()
+			return nil, err
+		}
+		if len(podList.Items) == 0 {
+			k8sgptReconcileErrorCount.Inc()
+			return nil, err
+		}
+		address = fmt.Sprintf("%s:8080", podList.Items[0].Status.PodIP)
+	}
+
+	fmt.Printf("Creating new client for %s\n", address)
+	// Test if the port is open
+	conn, err := net.DialTimeout("tcp", address, 1*time.Second)
+	if err != nil {
+		k8sgptReconcileErrorCount.Inc()
+		return nil, err
+	}
+
+	fmt.Printf("Connection established between %s and localhost with time out of %d seconds.\n", address, int64(1))
+	fmt.Printf("Remote Address : %s \n", conn.RemoteAddr().String())
+	fmt.Printf("Local Address : %s \n", conn.LocalAddr().String())
+
+	client, err := kclient.NewClient(address)
+	if err != nil {
+		k8sgptReconcileErrorCount.Inc()
+		return nil, err
+	}
+
+	return client, nil
+}
+
+func (r *K8sGPTReconciler) ConnectAndProcess(ctx context.Context, k8sgptConfig *v1alpha1.K8sGPT) (ctrl.Result, error) {
+
+	client, err := r.createConnectionClient(ctx, k8sgptConfig)
+	if err != nil {
+		k8sgptReconcileErrorCount.Inc()
+		return r.finishReconcile(err, false)
+	}
+	if k8sgptConfig.Spec.RemoteCache != nil {
+		err := client.AddConfig(k8sgptConfig)
+		if err != nil {
+			k8sgptReconcileErrorCount.Inc()
+			return r.finishReconcile(err, false)
+		}
+	}
+
+	response, err := client.ProcessAnalysis(k8sgptConfig)
+	if err != nil {
+		k8sgptReconcileErrorCount.Inc()
+		return r.finishReconcile(err, false)
+	}
+	// Parse the k8sgpt-deployment response into a list of results
+	k8sgptNumberOfResults.Set(float64(len(response.Results)))
+	rawResults := make(map[string]corev1alpha1.Result)
+	for _, resultSpec := range response.Results {
+		resultSpec.Backend = k8sgptConfig.Spec.AI.Backend
+		name := strings.ReplaceAll(resultSpec.Name, "-", "")
+		name = strings.ReplaceAll(name, "/", "")
+		result := corev1alpha1.Result{
+			Spec: resultSpec,
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      name,
+				Namespace: k8sgptConfig.Namespace,
+			},
+		}
+		rawResults[name] = result
+	}
+
+	// Prior to creating or updating any results we will delete any stale results that
+	// no longer are relevent, we can do this by using the resultSpec composed name against
+	// the custom resource name
+	resultList := &corev1alpha1.ResultList{}
+	err = r.List(ctx, resultList)
+	if err != nil {
+		k8sgptReconcileErrorCount.Inc()
+		return r.finishReconcile(err, false)
+	}
+	if len(resultList.Items) > 0 {
+		// If the result does not exist in the map we will delete it
+		for _, result := range resultList.Items {
+			fmt.Printf("Checking if %s is still relevant\n", result.Name)
+			if _, ok := rawResults[result.Name]; !ok {
+				err = r.Delete(ctx, &result)
+				if err != nil {
+					k8sgptReconcileErrorCount.Inc()
+					return r.finishReconcile(err, false)
+				} else {
+					k8sgptNumberOfResultsByType.With(prometheus.Labels{
+						"kind": result.Spec.Kind,
+						"name": result.Name,
+					}).Dec()
+				}
+			}
+		}
+	}
+	// At this point we are able to loop through our rawResults and create them or update
+	// them as needed
+	for _, result := range rawResults {
+		// Check if the result already exists
+		var existingResult corev1alpha1.Result
+		err = r.Get(ctx, types.NamespacedName{Namespace: k8sgptConfig.Namespace,
+			Name: result.Name}, &existingResult)
+		if err != nil {
+			// if the result already exists, we will update it
+			if errors.IsNotFound(err) {
+				err = r.Create(ctx, &result)
+				if err != nil {
+					k8sgptReconcileErrorCount.Inc()
+					return r.finishReconcile(err, false)
+				} else {
+					k8sgptNumberOfResultsByType.With(prometheus.Labels{
+						"kind": result.Spec.Kind,
+						"name": result.Name,
+					}).Inc()
+				}
+			} else {
+				k8sgptReconcileErrorCount.Inc()
+				return r.finishReconcile(err, false)
+			}
+		} else {
+			// If the result already exists we will update it
+			existingResult.Spec = result.Spec
+			err = r.Update(ctx, &existingResult)
+			if err != nil {
+				k8sgptReconcileErrorCount.Inc()
+				return r.finishReconcile(err, false)
+			}
+		}
+	}
 	return r.finishReconcile(nil, false)
 }
 
@@ -309,7 +326,6 @@ func (r *K8sGPTReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&corev1alpha1.K8sGPT{}).
 		Complete(r)
 
-	r.k8sGPTClients = make(map[string]*kclient.Client)
 	metrics.Registry.MustRegister(k8sgptReconcileErrorCount, k8sgptNumberOfResults, k8sgptNumberOfResultsByType)
 
 	return c

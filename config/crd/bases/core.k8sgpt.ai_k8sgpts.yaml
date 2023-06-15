@@ -36,57 +36,59 @@ spec:
             description: K8sGPTSpec defines the desired state of K8sGPT
             properties:
               ai:
-                default: gpt-3.5-turbo
                 properties:
-                  enableAI:
+                  backend:
+                    default: openai
+                    enum:
+                    - openai
+                    - localai
+                    - azureopenai
+                    type: string
+                  baseUrl:
+                    type: string
+                  enable:
                     type: boolean
                   engine:
                     type: string
-                  filters:
-                    items:
-                      type: string
-                    type: array
                   model:
+                    default: gpt-3.5-turbo
                     type: string
-                  noCache:
-                    type: boolean
                   secret:
+                    description: Currently the secret is only supported in same namespace
+                      as the operator/deployment
                     properties:
                       key:
                         type: string
                       name:
                         type: string
                     type: object
-                  version:
-                    type: string
+                required:
+                - backend
                 type: object
-              backend:
-                default: openai
-                enum:
-                - openai
-                - localai
-                - azureopenai
-                type: string
-              baseUrl:
-                type: string
+              filters:
+                items:
+                  type: string
+                type: array
+              noCache:
+                type: boolean
               remoteCache:
                 properties:
                   bucketName:
                     type: string
-                  credentialSecret:
+                  region:
+                    type: string
+                  secret:
+                    description: Currently the secret is only supported in same namespace
+                      as the operator/deployment
                     properties:
-                      access_key_id:
+                      key:
                         type: string
                       name:
                         type: string
-                      secret_access_key:
-                        type: string
                     type: object
-                  region:
-                    type: string
                 type: object
-            required:
-            - backend
+              version:
+                type: string
             type: object
           status:
             description: K8sGPTStatus defines the observed state of K8sGPT

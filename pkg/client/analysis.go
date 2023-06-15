@@ -17,9 +17,9 @@ func (c *Client) ProcessAnalysis(config *v1alpha1.K8sGPT) (*common.K8sGPTReponse
 
 	req := &schemav1.AnalyzeRequest{
 		Explain: config.Spec.AI.Enable,
-		Nocache: config.Spec.AI.NoCache,
-		Backend: string(config.Spec.Backend),
-		Filters: config.Spec.AI.Filters,
+		Nocache: config.Spec.NoCache,
+		Backend: string(config.Spec.AI.Backend),
+		Filters: config.Spec.Filters,
 	}
 
 	res, err := client.Analyze(context.Background(), req)

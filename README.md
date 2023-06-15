@@ -37,16 +37,17 @@ metadata:
   name: k8sgpt-sample
   namespace: k8sgpt-operator-system
 spec:
-  model: gpt-3.5-turbo
-  backend: openai
   noCache: false
-  version: v0.3.5
-  enableAI: true
+  version: v0.3.8
   # filters:
   #   - Ingress
-  secret:
-    name: k8sgpt-sample-secret
-    key: openai-api-key
+  ai:
+    model: gpt-3.5-turbo
+    backend: openai
+    enable: true
+    secret:
+      name: k8sgpt-sample-secret
+      key: openai-api-key
 EOF
 ```
 
@@ -73,13 +74,17 @@ you will be able to see the Results objects of the analysis after some minutes (
 
 1. Install the operator from the [Installation](#installation) section.
 
-2. Create secret:
-```sh
-kubectl create secret generic k8sgpt-sample-cache-secret --from-literal=access_key_id=<AWS_ACCESS_KEY_ID>  --from-literal=secret_access_key=<AWS_SECRET_ACCESS_KEY> -n k8sgpt-
-operator-system
+2. Create secrets:
+
+``````sh 
+kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key=$OPENAI_TOKEN -n k8sgpt-operator-system
 ```
 
-3. Apply the K8sGPT configuration object:
+```sh
+kubectl create secret generic k8sgpt-sample-cache-secret --from-literal=access_key_id=$AWS_ACCESS_KEY_ID --from-literal=secret_access_key=$AWS_SECRET_ACCESS_KEY -n k8sgpt-operator-system
+```
+
+1. Apply the K8sGPT configuration object:
 ```
 kubectl apply -f - << EOF
 apiVersion: core.k8sgpt.ai/v1alpha1
@@ -88,20 +93,20 @@ metadata:
   name: k8sgpt-sample
   namespace: k8sgpt-operator-system
 spec:
+  noCache: false
+  version: v0.3.8
   ai:
     model: gpt-3.5-turbo
     backend: openai
-    noCache: false
-    version: v0.3.0
-    enableAI: true
+    enable: true
     secret:
       name: k8sgpt-sample-secret
       key: openai-api-key
   remoteCache:
     secret:
       name: k8sgpt-sample-cache-secret 
-    bucketName: foo
-    region: us-west-1
+    bucketName: foobark8sgpt
+    region: us-west-2
 EOF
 ```
 
@@ -130,16 +135,17 @@ metadata:
   name: k8sgpt-sample
   namespace: k8sgpt-operator-system
 spec:
-  model: gpt-35-turbo
-  backend: azureopenai
-  baseUrl: https://k8sgpt.openai.azure.com/
-  engine: llm
   noCache: false
-  version: v0.3.2
-  enableAI: true
-  secret:
-    name: k8sgpt-sample-secret
-    key: azure-api-key
+  version: v0.3.8
+  ai:
+    model: gpt-35-turbo
+    backend: azureopenai
+    baseUrl: https://k8sgpt.openai.azure.com/
+    engine: llm
+    enable: true
+    secret:
+      name: k8sgpt-sample-secret
+      key: azure-api-key
 EOF
 ```
 
@@ -163,11 +169,12 @@ metadata:
   name: k8sgpt-local-ai
   namespace: default
 spec:
-  model: gpt-3.5-turbo
-  backend: localai
-  noCache: false
-  version: v0.3.0
-  enableAI: true
+  ai:
+    model: gpt-3.5-turbo
+    backend: localai
+    noCache: false
+    version: v0.3.8
+    enable: true
 EOF
 ```
 

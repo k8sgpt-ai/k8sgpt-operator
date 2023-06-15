@@ -4,11 +4,11 @@ metadata:
   name: k8sgpt-sample
   namespace: k8sgpt-operator-system
 spec:
+  noCache: false
+  version: v0.3.0
   ai:
     model: gpt-3.5-turbo
     backend: openai
-    noCache: false
-    version: v0.3.0
     enableAI: true
     secret:
       name: k8sgpt-sample-secret
