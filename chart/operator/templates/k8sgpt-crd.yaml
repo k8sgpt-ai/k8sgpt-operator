@@ -35,19 +35,33 @@ spec:
           spec:
             description: K8sGPTSpec defines the desired state of K8sGPT
             properties:
-              backend:
-                default: openai
-                enum:
-                - openai
-                - localai
-                - azureopenai
-                type: string
-              baseUrl:
-                type: string
-              enableAI:
-                type: boolean
-              engine:
-                type: string
+              ai:
+                properties:
+                  backend:
+                    default: openai
+                    enum:
+                    - openai
+                    - localai
+                    - azureopenai
+                    type: string
+                  baseUrl:
+                    type: string
+                  enable:
+                    type: boolean
+                  engine:
+                    type: string
+                  model:
+                    type: string
+                  secret:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                    type: object
+                required:
+                - backend
+                type: object
               extraOptions:
                 properties:
                   backstage:
@@ -56,21 +70,25 @@ spec:
                         type: boolean
                     type: object
                 type: object
-              model:
-                default: gpt-3.5-turbo
-                type: string
-              noCache:
-                type: boolean
               filters:
                 items:
                   type: string
                 type: array
-              secret:
+              noCache:
+                type: boolean
+              remoteCache:
                 properties:
-                  key:
+                  bucketName:
                     type: string
-                  name:
+                  region:
                     type: string
+                  secret:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                    type: object
                 type: object
               version:
                 type: string
