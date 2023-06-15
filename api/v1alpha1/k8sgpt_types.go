@@ -36,7 +36,6 @@ type SecretRef struct {
 	Key  string `json:"key,omitempty"`
 }
 
-
 type RemoteCacheRef struct {
 	Secret     *SecretRef `json:"secret,omitempty"`
 	BucketName string     `json:"bucketName,omitempty"`
@@ -44,19 +43,23 @@ type RemoteCacheRef struct {
 }
 
 type AI struct {
-	Model  string     `json:"model,omitempty"`
-	Engine string     `json:"engine,omitempty"`
-	Secret *SecretRef `json:"secret,omitempty"`
-	Enable bool       `json:"enable,omitempty"`
+	// +kubebuilder:default:=openai
+	// +kubebuilder:validation:Enum=openai;localai;azureopenai
+	Backend `json:"backend"`
+	BaseUrl string     `json:"baseUrl,omitempty"`
+	Model   string     `json:"model,omitempty"`
+	Engine  string     `json:"engine,omitempty"`
+	Secret  *SecretRef `json:"secret,omitempty"`
+	Enable  bool       `json:"enable,omitempty"`
 }
 
 // K8sGPTSpec defines the desired state of K8sGPT
 type K8sGPTSpec struct {
-	AI          *AI             `json:"ai,omitempty"`
-	RemoteCache *RemoteCacheRef `json:"remoteCache,omitempty"`
-	NoCache     bool            `json:"noCache,omitempty"`
-	Version     string          `json:"version,omitempty"`
-	Filters     []string        `json:"filters,omitempty"`
+	AI           *AI              `json:"ai,omitempty"`
+	RemoteCache  *RemoteCacheRef  `json:"remoteCache,omitempty"`
+	NoCache      bool             `json:"noCache,omitempty"`
+	Version      string           `json:"version,omitempty"`
+	Filters      []string         `json:"filters,omitempty"`
 	ExtraOptions *ExtraOptionsRef `json:"extraOptions,omitempty"`
 }
 
