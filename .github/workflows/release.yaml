@@ -28,7 +28,7 @@ jobs:
     # Release-please creates a PR that tracks all changes
     steps:
       - name: Checkout
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
 
       - uses: google-github-actions/release-please-action@51ee8ae2605bd5ce1cfdcc5938684908f1cd9f69 # v3
         id: release
@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     if: needs.release-please.outputs.releases_created == 'true'
     steps:
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
       - name: Publish Helm chart
         uses: stefanprodan/helm-gh-pages@master
         with:
@@ -71,23 +71,23 @@ jobs:
       IMAGE_NAME: k8sgpt-operator
     steps:
       - name: Checkout
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
         with:
           submodules: recursive
 
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@4b4e9c3e2d4531116a6f8ba8e71fc6e2cb6e6c8c # v2
+        uses: docker/setup-buildx-action@ecf95283f03858871ff00b787d79c419715afc34 # v2
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2
+        uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2
         with:
           registry: "ghcr.io"
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Docker Image
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671 # v4
+        uses: docker/build-push-action@2eb1c1961a95fc15694676618e422e8ba1d63825 # v4
         with:
           context: .
           file: ./Dockerfile
