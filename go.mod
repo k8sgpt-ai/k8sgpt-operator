@@ -7,7 +7,7 @@ require (
 	buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.30.0-20230524215339-41d88e13ab7e.1
 	github.com/onsi/ginkgo/v2 v2.10.0
 	github.com/onsi/gomega v1.27.8
-	github.com/prometheus/client_golang v1.15.1
+	github.com/prometheus/client_golang v1.16.0
 	google.golang.org/grpc v1.55.0
 	k8s.io/api v0.27.2
 	k8s.io/apimachinery v0.27.2
@@ -70,7 +70,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_model v0.4.0 // indirect
 	github.com/prometheus/common v0.42.0 // indirect
-	github.com/prometheus/procfs v0.9.0 // indirect
+	github.com/prometheus/procfs v0.10.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spf13/cobra v1.6.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
