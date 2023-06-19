@@ -50,13 +50,16 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 				Namespace: Namespace,
 			},
 			Spec: K8sGPTSpec{
-				Backend:  OpenAI,
-				BaseUrl:  baseUrl,
-				Model:    model,
-				Secret:   &secretRef,
-				Version:  version,
-				EnableAI: true,
-				NoCache:  true,
+				AI: &AISpec{
+					Backend: OpenAI,
+					BaseUrl: baseUrl,
+					Model:   model,
+					Enabled: true,
+					Secret:  &secretRef,
+				},
+				Version: version,
+
+				NoCache: true,
 			},
 		}
 
@@ -69,13 +72,16 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 				Namespace: Namespace,
 			},
 			Spec: K8sGPTSpec{
-				Backend:  AzureOpenAI,
-				BaseUrl:  baseUrl,
-				Model:    model,
-				Secret:   &secretRef,
-				Version:  version,
-				EnableAI: false,
-				NoCache:  false,
+				AI: &AISpec{
+					Backend: OpenAI,
+					BaseUrl: baseUrl,
+					Model:   model,
+					Secret:  &secretRef,
+					Enabled: false,
+				},
+				Version: version,
+
+				NoCache: false,
 			},
 		}
 
@@ -132,10 +138,10 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			// Get the K8sGPT CRDs by the name and namespace.
 			Expect(fakeClient.Get(ctx, typeNamespace, &k8sGPTObject)).Should(Succeed())
 			// Update the K8sGPT CRDs.
-			k8sGPTObject.Spec.EnableAI = false
+			k8sGPTObject.Spec.AI.Enabled = false
 			Expect(fakeClient.Update(ctx, &k8sGPTObject)).Should(Succeed())
 			// check the K8sGPT CRDs should be equal to false
-			Expect(k8sGPTObject.Spec.EnableAI).Should(Equal(false))
+			Expect(k8sGPTObject.Spec.AI.Enabled).Should(Equal(false))
 		})
 
 		// Delete the K8sGPT CRDs.

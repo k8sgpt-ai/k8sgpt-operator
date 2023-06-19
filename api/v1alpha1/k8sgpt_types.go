@@ -42,22 +42,26 @@ type WebhookRef struct {
 	Endpoint string `json:"webhook,omitempty"`
 }
 
-// K8sGPTSpec defines the desired state of K8sGPT
-type K8sGPTSpec struct {
+type AISpec struct {
 	// +kubebuilder:default:=openai
 	// +kubebuilder:validation:Enum=openai;localai;azureopenai
 	Backend string `json:"backend"`
 	BaseUrl string `json:"baseUrl,omitempty"`
 	// +kubebuilder:default:=gpt-3.5-turbo
-	Model        string           `json:"model,omitempty"`
-	Engine       string           `json:"engine,omitempty"`
-	Secret       *SecretRef       `json:"secret,omitempty"`
+	Model   string     `json:"model,omitempty"`
+	Engine  string     `json:"engine,omitempty"`
+	Secret  *SecretRef `json:"secret,omitempty"`
+	Enabled bool       `json:"enabled,omitempty"`
+}
+
+// K8sGPTSpec defines the desired state of K8sGPT
+type K8sGPTSpec struct {
 	Version      string           `json:"version,omitempty"`
-	EnableAI     bool             `json:"enableAI,omitempty"`
 	NoCache      bool             `json:"noCache,omitempty"`
 	Filters      []string         `json:"filters,omitempty"`
 	ExtraOptions *ExtraOptionsRef `json:"extraOptions,omitempty"`
 	Sink         *WebhookRef      `json:"sink,omitempty"`
+	AI           *AISpec          `json:"ai,omitempty"`
 }
 
 const (
