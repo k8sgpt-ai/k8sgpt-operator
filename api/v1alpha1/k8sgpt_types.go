@@ -52,6 +52,10 @@ type AISpec struct {
 	Engine  string     `json:"engine,omitempty"`
 	Secret  *SecretRef `json:"secret,omitempty"`
 	Enabled bool       `json:"enabled,omitempty"`
+	// +kubebuilder:default:=true
+	Anonymize bool `json:"anonymized,omitempty"`
+	// +kubebuilder:default:=english
+	Language string `json:"language,omitempty"`
 }
 
 // K8sGPTSpec defines the desired state of K8sGPT

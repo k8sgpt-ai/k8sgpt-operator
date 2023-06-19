@@ -37,6 +37,9 @@ spec:
             properties:
               ai:
                 properties:
+                  anonymized:
+                    default: true
+                    type: boolean
                   backend:
                     default: openai
                     enum:
@@ -49,6 +52,9 @@ spec:
                   enabled:
                     type: boolean
                   engine:
+                    type: string
+                  language:
+                    default: english
                     type: string
                   model:
                     default: gpt-3.5-turbo
