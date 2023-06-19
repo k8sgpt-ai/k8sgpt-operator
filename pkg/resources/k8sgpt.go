@@ -192,7 +192,7 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 								},
 								{
 									Name:  "K8SGPT_BACKEND",
-									Value: string(config.Spec.AI.Backend),
+									Value: config.Spec.AI.Backend,
 								},
 								{
 									Name:  "XDG_CONFIG_HOME",

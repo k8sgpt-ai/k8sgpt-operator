@@ -43,6 +43,8 @@ spec:
     secret:
       name: k8sgpt-sample-secret
       key: openai-api-key
+    # anonymized: false
+    # language: english
   noCache: false
   version: v0.3.0
   # filters:

@@ -34,10 +34,11 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			Key:  "k8s-gpt",
 		}
 
-		kind    = "K8sGPT"
-		baseUrl = "https://api.k8s-gpt.localhost"
-		model   = "345M"
-		version = "v1alpha1"
+		kind     = "K8sGPT"
+		baseUrl  = "https://api.k8s-gpt.localhost"
+		model    = "345M"
+		version  = "v1alpha1"
+		language = "english"
 
 		Namespace = "k8sGPT"
 
@@ -51,11 +52,13 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			},
 			Spec: K8sGPTSpec{
 				AI: &AISpec{
-					Backend: OpenAI,
-					BaseUrl: baseUrl,
-					Model:   model,
-					Enabled: true,
-					Secret:  &secretRef,
+					Backend:   OpenAI,
+					BaseUrl:   baseUrl,
+					Model:     model,
+					Enabled:   true,
+					Secret:    &secretRef,
+					Anonymize: true,
+					Language:  language,
 				},
 				Version: version,
 
@@ -73,11 +76,13 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			},
 			Spec: K8sGPTSpec{
 				AI: &AISpec{
-					Backend: OpenAI,
-					BaseUrl: baseUrl,
-					Model:   model,
-					Secret:  &secretRef,
-					Enabled: false,
+					Backend:   OpenAI,
+					BaseUrl:   baseUrl,
+					Model:     model,
+					Secret:    &secretRef,
+					Enabled:   false,
+					Anonymize: false,
+					Language:  language,
 				},
 				Version: version,
 
