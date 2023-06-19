@@ -46,7 +46,7 @@ spec:
     # anonymized: false
     # language: english
   noCache: false
-  version: v0.3.0
+  version: v0.3.8
   # filters:
   #   - Ingress
   # sink:
@@ -105,7 +105,7 @@ spec:
     baseUrl: https://k8sgpt.openai.azure.com/
     engine: llm
   noCache: false
-  version: v0.3.2
+  version: v0.3.8
 EOF
 ```
 
@@ -135,7 +135,7 @@ spec:
     backend: localai
     baseUrl: http://local-ai.local-ai.svc.cluster.local:8080/v1
   noCache: false
-  version: v0.3.4
+  version: v0.3.8
 EOF
 ```
    Note: ensure that the value of `baseUrl` is a properly constructed [DNS name](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#services) for the LocalAI Service. It should take the form: `http://local-ai.<namespace_local_ai_was_installed_in>.svc.cluster.local:8080/v1`.
