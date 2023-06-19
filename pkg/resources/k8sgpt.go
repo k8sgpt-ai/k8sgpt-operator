@@ -188,11 +188,11 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 							Env: []v1.EnvVar{
 								{
 									Name:  "K8SGPT_MODEL",
-									Value: config.Spec.Model,
+									Value: config.Spec.AI.Model,
 								},
 								{
 									Name:  "K8SGPT_BACKEND",
-									Value: string(config.Spec.Backend),
+									Value: string(config.Spec.AI.Backend),
 								},
 								{
 									Name:  "XDG_CONFIG_HOME",
@@ -236,15 +236,15 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 			},
 		},
 	}
-	if config.Spec.Secret != nil {
+	if config.Spec.AI.Secret != nil {
 		password := v1.EnvVar{
 			Name: "K8SGPT_PASSWORD",
 			ValueFrom: &v1.EnvVarSource{
 				SecretKeyRef: &v1.SecretKeySelector{
 					LocalObjectReference: v1.LocalObjectReference{
-						Name: config.Spec.Secret.Name,
+						Name: config.Spec.AI.Secret.Name,
 					},
-					Key: config.Spec.Secret.Key,
+					Key: config.Spec.AI.Secret.Key,
 				},
 			},
 		}
@@ -252,25 +252,25 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 			deployment.Spec.Template.Spec.Containers[0].Env, password,
 		)
 	}
-	if config.Spec.BaseUrl != "" {
+	if config.Spec.AI.BaseUrl != "" {
 		baseUrl := v1.EnvVar{
 			Name:  "K8SGPT_BASEURL",
-			Value: config.Spec.BaseUrl,
+			Value: config.Spec.AI.BaseUrl,
 		}
 		deployment.Spec.Template.Spec.Containers[0].Env = append(
 			deployment.Spec.Template.Spec.Containers[0].Env, baseUrl,
 		)
 	}
 	// Engine is required only when azureopenai is the ai backend
-	if config.Spec.Engine != "" && config.Spec.Backend == v1alpha1.AzureOpenAI {
+	if config.Spec.AI.Engine != "" && config.Spec.AI.Backend == v1alpha1.AzureOpenAI {
 		engine := v1.EnvVar{
 			Name:  "K8SGPT_ENGINE",
-			Value: config.Spec.Engine,
+			Value: config.Spec.AI.Engine,
 		}
 		deployment.Spec.Template.Spec.Containers[0].Env = append(
 			deployment.Spec.Template.Spec.Containers[0].Env, engine,
 		)
-	} else if config.Spec.Engine != "" && config.Spec.Backend != v1alpha1.AzureOpenAI {
+	} else if config.Spec.AI.Engine != "" && config.Spec.AI.Backend != v1alpha1.AzureOpenAI {
 		return &appsv1.Deployment{}, err.New("Engine is supported only by azureopenai provider.")
 	}
 	return &deployment, nil
@@ -322,10 +322,10 @@ func Sync(ctx context.Context, c client.Client,
 		case Create:
 
 			// before creation we will check to see if the secret exists if used as a ref
-			if config.Spec.Secret != nil {
+			if config.Spec.AI.Secret != nil {
 
 				secret := &v1.Secret{}
-				er := c.Get(ctx, types.NamespacedName{Name: config.Spec.Secret.Name,
+				er := c.Get(ctx, types.NamespacedName{Name: config.Spec.AI.Secret.Name,
 					Namespace: config.Namespace}, secret)
 				if er != nil {
 					return err.New("references secret does not exist, cannot create deployment")

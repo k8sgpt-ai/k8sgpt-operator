@@ -22,7 +22,7 @@ const (
 
 func MapResults(i integrations.Integrations, resultsSpec []v1alpha1.ResultSpec, config v1alpha1.K8sGPT) (map[string]v1alpha1.Result, error) {
 	namespace := config.Namespace
-	backend := config.Spec.Backend
+	backend := config.Spec.AI.Backend
 	backstageEnabled := config.Spec.ExtraOptions != nil && config.Spec.ExtraOptions.Backstage.Enabled
 	rawResults := make(map[string]v1alpha1.Result)
 	for _, resultSpec := range resultsSpec {

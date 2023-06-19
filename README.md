@@ -24,8 +24,7 @@ helm install release k8sgpt/k8sgpt-operator -n k8sgpt-operator-system --create-n
 
 2. Create secret:
 ```sh 
-kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key=$OPENAI_TOKEN -n k8sgpt-
-operator-system
+kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key=$OPENAI_TOKEN -n k8sgpt-operator-system
 ```
 
 3. Apply the K8sGPT configuration object:
@@ -37,11 +36,15 @@ metadata:
   name: k8sgpt-sample
   namespace: k8sgpt-operator-system
 spec:
-  model: gpt-3.5-turbo
-  backend: openai
+  ai:
+    enabled: true
+    model: gpt-3.5-turbo
+    backend: openai
+    secret:
+      name: k8sgpt-sample-secret
+      key: openai-api-key
   noCache: false
   version: v0.3.0
-  enableAI: true
   # filters:
   #   - Ingress
   # sink:
@@ -50,9 +53,6 @@ spec:
   # extraOptions:
   #   backstage:
   #     enabled: true
-  secret:
-    name: k8sgpt-sample-secret
-    key: openai-api-key
 EOF
 ```
 
@@ -81,8 +81,7 @@ you will be able to see the Results objects of the analysis after some minutes (
 
 2. Create secret:
 ```sh 
-kubectl create secret generic k8sgpt-sample-secret --from-literal=azure-api-key=$AZURE_TOKEN -n k8sgpt-
-operator-system
+kubectl create secret generic k8sgpt-sample-secret --from-literal=azure-api-key=$AZURE_TOKEN -n k8sgpt-operator-system
 ```
 
 3. Apply the K8sGPT configuration object:
@@ -94,16 +93,17 @@ metadata:
   name: k8sgpt-sample
   namespace: k8sgpt-operator-system
 spec:
-  model: gpt-35-turbo
-  backend: azureopenai
-  baseUrl: https://k8sgpt.openai.azure.com/
-  engine: llm
+  ai:
+    enabled: true
+    secret:
+      name: k8sgpt-sample-secret
+      key: azure-api-key
+    model: gpt-35-turbo
+    backend: azureopenai
+    baseUrl: https://k8sgpt.openai.azure.com/
+    engine: llm
   noCache: false
   version: v0.3.2
-  enableAI: true
-  secret:
-    name: k8sgpt-sample-secret
-    key: azure-api-key
 EOF
 ```
 
@@ -127,12 +127,13 @@ metadata:
   name: k8sgpt-local-ai
   namespace: default
 spec:
-  model: ggml-gpt4all-j
-  backend: localai
-  baseUrl: http://local-ai.local-ai.svc.cluster.local:8080/v1
+  ai:
+    enabled: true
+    model: ggml-gpt4all-j
+    backend: localai
+    baseUrl: http://local-ai.local-ai.svc.cluster.local:8080/v1
   noCache: false
   version: v0.3.4
-  enableAI: true
 EOF
 ```
    Note: ensure that the value of `baseUrl` is a properly constructed [DNS name](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#services) for the LocalAI Service. It should take the form: `http://local-ai.<namespace_local_ai_was_installed_in>.svc.cluster.local:8080/v1`.

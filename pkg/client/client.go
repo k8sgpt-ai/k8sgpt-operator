@@ -48,9 +48,9 @@ func (c *Client) ProcessAnalysis(deployment v1.Deployment, config *v1alpha1.K8sG
 	client := rpc.NewServerClient(c.conn)
 
 	req := &schemav1.AnalyzeRequest{
-		Explain: config.Spec.EnableAI,
+		Explain: config.Spec.AI.Enabled,
 		Nocache: config.Spec.NoCache,
-		Backend: string(config.Spec.Backend),
+		Backend: string(config.Spec.AI.Backend),
 		Filters: config.Spec.Filters,
 	}
 
