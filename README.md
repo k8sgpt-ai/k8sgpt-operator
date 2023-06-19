@@ -44,6 +44,9 @@ spec:
   enableAI: true
   # filters:
   #   - Ingress
+  # sink:
+  #   type: slack
+  #   webhook: <webhook-url>
   # extraOptions:
   #   backstage:
   #     enabled: true

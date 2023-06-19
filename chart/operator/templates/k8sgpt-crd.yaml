@@ -72,6 +72,15 @@ spec:
                   name:
                     type: string
                 type: object
+              sink:
+                properties:
+                  type:
+                    enum:
+                    - slack
+                    type: string
+                  webhook:
+                    type: string
+                type: object
               version:
                 type: string
             type: object
