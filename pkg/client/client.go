@@ -17,6 +17,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 
 	rpc "buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go/schema/v1/schemav1grpc"
 	schemav1 "buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go/schema/v1"
@@ -24,11 +25,17 @@ import (
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/common"
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // This is the client for communicating with the K8sGPT in cluster deployment
 type Client struct {
 	conn *grpc.ClientConn
+}
+
+func (c *Client) Close() error {
+	return c.conn.Close()
 }
 
 func NewClient(address string) (*Client, error) {
@@ -43,10 +50,26 @@ func NewClient(address string) (*Client, error) {
 	return client, nil
 }
 
+func GenerateAddress(ctx context.Context, cli client.Client, k8sgptConfig *v1alpha1.K8sGPT) (string, error) {
+	var address string
+	if os.Getenv("LOCAL_MODE") != "" {
+		address = "localhost:8080"
+	} else {
+		// Get service IP and port for k8sgpt-deployment
+		svc := &corev1.Service{}
+		err := cli.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
+			Name: "k8sgpt"}, svc)
+		if err != nil {
+			return "", nil
+		}
+		address = fmt.Sprintf("%s:%d", svc.Spec.ClusterIP, svc.Spec.Ports[0].Port)
+	}
+	return address, nil
+}
+
 func (c *Client) ProcessAnalysis(deployment v1.Deployment, config *v1alpha1.K8sGPT) (*common.K8sGPTReponse, error) {
 
-	client := rpc.NewServerClient(c.conn)
-
+	client := rpc.NewServerServiceClient(c.conn)
 	req := &schemav1.AnalyzeRequest{
 		Explain:   config.Spec.AI.Enabled,
 		Nocache:   config.Spec.NoCache,

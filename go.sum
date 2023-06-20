@@ -1,8 +1,17 @@
+buf.build/gen/go/k8sgpt-ai/k8sgpt/bufbuild/connect-go v1.8.0-20230524215339-41d88e13ab7e.1 h1:7RSrwByMqFKjjpx4QO8ZxEYV3H/oW1VMUmI3xbkm2yU=
+buf.build/gen/go/k8sgpt-ai/k8sgpt/bufbuild/connect-go v1.8.0-20230524215339-41d88e13ab7e.1/go.mod h1:P9jTXCmwBtjkW4wZDxkqpJj7FaCKlM+C4gV0AHGnoL4=
+buf.build/gen/go/k8sgpt-ai/k8sgpt/bufbuild/connect-go v1.8.0-20230620082254-6f80f9533908.1 h1:9GY2k4cjPMieJSKYtpJPlAMLaMh+Hy8/Ia3S+hgP5Ys=
+buf.build/gen/go/k8sgpt-ai/k8sgpt/bufbuild/connect-go v1.8.0-20230620082254-6f80f9533908.1/go.mod h1:Rvmr04OFqxFoURTWg9amY3483E0Rt3Hwnk8xBpFALRA=
 buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.3.0-20230515081240-6b5b845c638e.1 h1:u8CQODmTW0EYjXKt0ZSbA/FGuOkA+zRNicNCs97Ud/A=
 buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.3.0-20230515081240-6b5b845c638e.1/go.mod h1:EB1h/5OvQWTeT9JJ2x0NLaboeFOOm3fqkYWKp5ojO7o=
+buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.3.0-20230620082254-6f80f9533908.1 h1:Z0zeGzAumjLyAb/24aiBNyAheT+SDBhlxPfcUy12nPI=
+buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.3.0-20230620082254-6f80f9533908.1/go.mod h1:ydXSuYyk0CN76EA+cjFemhpz87XtuU310GdmkmXUUY8=
 buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.28.1-20230515081240-6b5b845c638e.4/go.mod h1:i/s4ALHwKvjA1oGNKpoHg0FpEOTbufoOm/NdTE6YQAE=
+buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.28.1-20230620082254-6f80f9533908.4/go.mod h1:i/s4ALHwKvjA1oGNKpoHg0FpEOTbufoOm/NdTE6YQAE=
 buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.30.0-20230524215339-41d88e13ab7e.1 h1:Mx0Z+cXHStOU4lkemYYGhvNd40aU9g52sfS2W7D/gzA=
 buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.30.0-20230524215339-41d88e13ab7e.1/go.mod h1:karV92RruD5davytOQq20lDyAqBnai8ajNolo98nu94=
+buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.30.0-20230620082254-6f80f9533908.1 h1:FNJYUdFjROTTKhIQ+VtJCzuWywQU430leJfnkStRRic=
+buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.30.0-20230620082254-6f80f9533908.1/go.mod h1:karV92RruD5davytOQq20lDyAqBnai8ajNolo98nu94=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.38.0/go.mod h1:990N+gfupTy94rShfmMCWGDn0LpTmnzTp2qbd1dvSRU=
