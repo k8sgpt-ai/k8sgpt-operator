@@ -17,8 +17,6 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"net"
-	"os"
 	"strings"
 	"time"
 
@@ -31,7 +29,6 @@ import (
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
 	"github.com/prometheus/client_golang/prometheus"
 	v1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -72,8 +69,6 @@ type K8sGPTReconciler struct {
 	Integrations *integrations.Integrations
 	SinkClient   *sinks.Client
 	K8sGPTClient *kclient.Client
-	// This is a map of clients for each deployment
-	k8sGPTClients map[string]*kclient.Client
 }
 
 // +kubebuilder:rbac:groups=core.k8sgpt.ai,resources=k8sgpts,verbs=get;list;watch;create;update;patch;delete
@@ -158,44 +153,21 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		}
 
 		// If the deployment is active, we will query it directly for analysis data
-		if _, ok := r.k8sGPTClients[k8sgptConfig.Name]; !ok {
-			// Create a new client
-			var address string
-			if os.Getenv("LOCAL_MODE") != "" {
-				address = "localhost:8080"
-			} else {
-				// Get service IP and port for k8sgpt-deployment
-				svc := &corev1.Service{}
-				err = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
-					Name: "k8sgpt"}, svc)
-				if err != nil {
-					k8sgptReconcileErrorCount.Inc()
-					return r.finishReconcile(err, false)
-				}
-				address = fmt.Sprintf("%s:%d", svc.Spec.ClusterIP, svc.Spec.Ports[0].Port)
-			}
-
-			fmt.Printf("Creating new client for %s\n", address)
-			// Test if the port is open
-			conn, err := net.DialTimeout("tcp", address, 1*time.Second)
-			if err != nil {
-				k8sgptReconcileErrorCount.Inc()
-				return r.finishReconcile(err, false)
-			}
-
-			fmt.Printf("Connection established between %s and localhost with time out of %d seconds.\n", address, int64(1))
-			fmt.Printf("Remote Address : %s \n", conn.RemoteAddr().String())
-			fmt.Printf("Local Address : %s \n", conn.LocalAddr().String())
-
-			k8sgptClient, err := kclient.NewClient(address)
-			if err != nil {
-				k8sgptReconcileErrorCount.Inc()
-				return r.finishReconcile(err, false)
-			}
-			r.k8sGPTClients[k8sgptConfig.Name] = k8sgptClient
+		address, err := kclient.GenerateAddress(ctx, r.Client, k8sgptConfig)
+		if err != nil {
+			k8sgptReconcileErrorCount.Inc()
+			return r.finishReconcile(err, false)
 		}
 
-		response, err := r.k8sGPTClients[k8sgptConfig.Name].ProcessAnalysis(deployment, k8sgptConfig)
+		k8sgptClient, err := kclient.NewClient(address)
+		if err != nil {
+			k8sgptReconcileErrorCount.Inc()
+			return r.finishReconcile(err, false)
+		}
+
+		defer k8sgptClient.Close()
+
+		response, err := k8sgptClient.ProcessAnalysis(deployment, k8sgptConfig)
 		if err != nil {
 			k8sgptReconcileErrorCount.Inc()
 			return r.finishReconcile(err, false)
@@ -307,7 +279,6 @@ func (r *K8sGPTReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&corev1alpha1.K8sGPT{}).
 		Complete(r)
 
-	r.k8sGPTClients = make(map[string]*kclient.Client)
 	metrics.Registry.MustRegister(k8sgptReconcileErrorCount, k8sgptNumberOfResults, k8sgptNumberOfResultsByType)
 
 	return c
