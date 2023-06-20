@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.19](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.18...v0.0.19) (2023-06-20)
+
+
+### Features
+
+* refactored plus fixed client ([#162](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/162)) ([3f6355d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/3f6355d526214d05b629d3aaa317e498be69418e))
+
 ## [0.0.18](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.17...v0.0.18) (2023-06-19)
 
 
