@@ -5,6 +5,7 @@ serviceMonitor:
   # namespace: ""
 grafanaDashboard:
   enabled: false
+  namespace: system
   folder:
     annotation: grafana_folder
     name: ai
