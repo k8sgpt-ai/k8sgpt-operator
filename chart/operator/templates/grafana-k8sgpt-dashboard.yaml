@@ -11,7 +11,12 @@ metadata:
     app.kubernetes.io/part-of: k8sgpt-operator
   {{- include "chart.labels" . | nindent 4 }}
   name: k8sgpt-overview
-  namespace: {{ .Values.grafanaDashboard.namespace }}
+spec:
+  {{- if .Values.grafanaDashboard.namespace }}
+  namespaceSelector:
+    matchNames:
+      - {{ include "k8sgpt-operator.namespace" .}}
+  {{- end }}
 data:
   k8sgpt-overview.json: |
 {{ .Files.Get "dashboards/k8sgpt-overview.json" | indent 4}}
