@@ -64,7 +64,7 @@ func CreateOrUpdateResult(ctx context.Context, c client.Client, res v1alpha1.Res
 		}
 		return CreatedResult, nil
 	}
-	if existing.Spec.Details == res.Spec.Details && reflect.DeepEqual(res.Labels, existing.Labels) {
+	if len(existing.Spec.Error) == len(res.Spec.Error) && reflect.DeepEqual(res.Labels, existing.Labels) {
 		existing.Status.LifeCycle = string(NoOpResult)
 		err := c.Status().Update(ctx, &existing)
 		return NoOpResult, err
