@@ -106,7 +106,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		if utils.ContainsString(k8sgptConfig.GetFinalizers(), FinalizerName) {
 
 			// Delete any external resources associated with the instance
-			err := resources.Sync(ctx, r.Client, *k8sgptConfig, resources.Destroy)
+			err := resources.Sync(ctx, r.Client, *k8sgptConfig, resources.DestroyOp)
 			if err != nil {
 				k8sgptReconcileErrorCount.Inc()
 				return r.finishReconcile(err, false)
@@ -125,13 +125,14 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	deployment := v1.Deployment{}
 	err = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
 		Name: "k8sgpt-deployment"}, &deployment)
+	if client.IgnoreNotFound(err) != nil {
+		k8sgptReconcileErrorCount.Inc()
+		return r.finishReconcile(err, false)
+	}
+	err = resources.Sync(ctx, r.Client, *k8sgptConfig, resources.SyncOp)
 	if err != nil {
-
-		err = resources.Sync(ctx, r.Client, *k8sgptConfig, resources.Create)
-		if err != nil {
-			k8sgptReconcileErrorCount.Inc()
-			return r.finishReconcile(err, false)
-		}
+		k8sgptReconcileErrorCount.Inc()
+		return r.finishReconcile(err, false)
 	}
 
 	if deployment.Status.ReadyReplicas > 0 {
