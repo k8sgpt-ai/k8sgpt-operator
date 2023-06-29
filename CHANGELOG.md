@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.0.20](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.19...v0.0.20) (2023-06-29)
+
+
+### Features
+
+* **operator:** add namespace to grafanaDashboard ([#168](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/168)) ([9c31c92](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9c31c9279549f1569b6c6b11326742799bf271ae))
+
+
+### Bug Fixes
+
+* compare the number of errors to update Results ([#167](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/167)) ([e805d2c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e805d2c5e29dd4db96e43bce5b5c3b2cc9c561aa))
+* **deps:** update module google.golang.org/grpc to v1.56.1 ([#165](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/165)) ([79366ab](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/79366abb339a091ee062a6e278da45463251dfef))
+
+
+### Other
+
+* **deps:** update anchore/sbom-action action to v0.14.3 ([#164](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/164)) ([12b2c36](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/12b2c36fc47e5d31cb64f88723ba0a47963cb0b6))
+* **deps:** update google-github-actions/release-please-action digest to 8016a66 ([#170](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/170)) ([6b383e6](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/6b383e65858b7d767a883f954ad7d0025b85f214))
+
 ## [0.0.19](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.18...v0.0.19) (2023-06-20)
 
 
