@@ -27,19 +27,21 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-// enum create or destroy
-type CreateOrDestroy int
+// SyncOrDestroy enum create or destroy
+type SyncOrDestroy int
 
 const (
-	Create CreateOrDestroy = iota
-	Destroy
+	SyncOp SyncOrDestroy = iota
+	DestroyOp
 	DeploymentName = "k8sgpt-deployment"
 )
 
-// Create service for K8sGPT
+// GetService Create service for K8sGPT
 func GetService(config v1alpha1.K8sGPT) (*v1.Service, error) {
 
 	// Create service
@@ -63,7 +65,7 @@ func GetService(config v1alpha1.K8sGPT) (*v1.Service, error) {
 	return &service, nil
 }
 
-// Create Service Account for K8sGPT and bind it to K8sGPT role
+// GetServiceAccount Create Service Account for K8sGPT and bind it to K8sGPT role
 func GetServiceAccount(config v1alpha1.K8sGPT) (*v1.ServiceAccount, error) {
 
 	// Create service account
@@ -77,7 +79,7 @@ func GetServiceAccount(config v1alpha1.K8sGPT) (*v1.ServiceAccount, error) {
 	return &serviceAccount, nil
 }
 
-// Create cluster role binding for K8sGPT
+// GetClusterRoleBinding Create cluster role binding for K8sGPT
 func GetClusterRoleBinding(config v1alpha1.K8sGPT) (*r1.ClusterRoleBinding, error) {
 
 	// Create cluster role binding
@@ -112,7 +114,7 @@ func GetClusterRoleBinding(config v1alpha1.K8sGPT) (*r1.ClusterRoleBinding, erro
 	return &clusterRoleBinding, nil
 }
 
-// Create ClusterRole for K8sGPT with cluster read all
+// GetClusterRole Create ClusterRole for K8sGPT with cluster read all
 func GetClusterRole(config v1alpha1.K8sGPT) (*r1.ClusterRole, error) {
 
 	// Create cluster role
@@ -142,7 +144,7 @@ func GetClusterRole(config v1alpha1.K8sGPT) (*r1.ClusterRole, error) {
 	return &clusterRole, nil
 }
 
-// Create deployment with the latest K8sGPT image
+// GetDeployment Create deployment with the latest K8sGPT image
 func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 
 	// Create deployment
@@ -277,7 +279,7 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 }
 
 func Sync(ctx context.Context, c client.Client,
-	config v1alpha1.K8sGPT, i CreateOrDestroy) error {
+	config v1alpha1.K8sGPT, i SyncOrDestroy) error {
 
 	var objs []client.Object
 
@@ -319,9 +321,9 @@ func Sync(ctx context.Context, c client.Client,
 	// for each object, create or destroy
 	for _, obj := range objs {
 		switch i {
-		case Create:
+		case SyncOp:
 
-			// before creation we will check to see if the secret exists if used as a ref
+			// before creation, we will check to see if the secret exists if used as a ref
 			if config.Spec.AI.Secret != nil {
 
 				secret := &v1.Secret{}
@@ -332,14 +334,14 @@ func Sync(ctx context.Context, c client.Client,
 				}
 			}
 
-			err := c.Create(ctx, obj)
+			err := doSync(ctx, c, obj)
 			if err != nil {
 				// If the object already exists, ignore the error
 				if !errors.IsAlreadyExists(err) {
 					return err
 				}
 			}
-		case Destroy:
+		case DestroyOp:
 			err := c.Delete(ctx, obj)
 			if err != nil {
 				// if the object is not found, ignore the error
@@ -351,4 +353,40 @@ func Sync(ctx context.Context, c client.Client,
 	}
 
 	return nil
+}
+
+func doSync(ctx context.Context, clt client.Client, obj client.Object) error {
+	var mutateFn controllerutil.MutateFn
+	switch obj.GetObjectKind().GroupVersionKind().Kind {
+	case "Deployment":
+		exist := &appsv1.Deployment{}
+		err := clt.Get(context.Background(), client.ObjectKeyFromObject(obj), exist)
+		if err != nil && !errors.IsNotFound(err) {
+			return err
+		} else if err == nil {
+			expect := obj.(*appsv1.Deployment)
+			mutateFn = func() error {
+				exist.Spec = expect.Spec
+				return nil
+			}
+			obj = exist
+		}
+	case "Service":
+		exist := &v1.Service{}
+		err := clt.Get(context.Background(), client.ObjectKeyFromObject(obj), exist)
+		if err != nil && !errors.IsNotFound(err) {
+			return err
+		} else if err == nil {
+			expect := obj.(*v1.Service)
+			mutateFn = func() error {
+				exist.Spec = expect.Spec
+				return nil
+			}
+			obj = exist
+		}
+	}
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		_, err := controllerutil.CreateOrPatch(ctx, clt, obj, mutateFn)
+		return err
+	})
 }
