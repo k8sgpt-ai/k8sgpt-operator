@@ -35,6 +35,9 @@ spec:
           spec:
             description: K8sGPTSpec defines the desired state of K8sGPT
             properties:
+              integrations:
+                trivy:
+                  enabled: true
               ai:
                 properties:
                   anonymized:
