@@ -43,12 +43,21 @@ const (
 
 // GetService Create service for K8sGPT
 func GetService(config v1alpha1.K8sGPT) (*corev1.Service, error) {
-
 	// Create service
 	service := corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "k8sgpt",
 			Namespace: config.Namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					Kind:               config.Kind,
+					Name:               config.Name,
+					UID:                config.UID,
+					APIVersion:         config.APIVersion,
+					BlockOwnerDeletion: utils.PtrBool(true),
+					Controller:         utils.PtrBool(true),
+				},
+			},
 		},
 		Spec: corev1.ServiceSpec{
 			Selector: map[string]string{
@@ -67,12 +76,21 @@ func GetService(config v1alpha1.K8sGPT) (*corev1.Service, error) {
 
 // GetServiceAccount Create Service Account for K8sGPT and bind it to K8sGPT role
 func GetServiceAccount(config v1alpha1.K8sGPT) (*corev1.ServiceAccount, error) {
-
 	// Create service account
 	serviceAccount := corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "k8sgpt",
 			Namespace: config.Namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					Kind:               config.Kind,
+					Name:               config.Name,
+					UID:                config.UID,
+					APIVersion:         config.APIVersion,
+					BlockOwnerDeletion: utils.PtrBool(true),
+					Controller:         utils.PtrBool(true),
+				},
+			},
 		},
 	}
 
