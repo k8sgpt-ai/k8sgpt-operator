@@ -39,7 +39,7 @@ const (
 	DeploymentName = "k8sgpt-deployment"
 )
 
-// Create service for K8sGPT
+// GetService Create service for K8sGPT
 func GetService(config v1alpha1.K8sGPT) (*v1.Service, error) {
 
 	// Create service
@@ -47,6 +47,16 @@ func GetService(config v1alpha1.K8sGPT) (*v1.Service, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "k8sgpt",
 			Namespace: config.Namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					Kind:               config.Kind,
+					Name:               config.Name,
+					UID:                config.UID,
+					APIVersion:         config.APIVersion,
+					BlockOwnerDeletion: utils.PtrBool(true),
+					Controller:         utils.PtrBool(true),
+				},
+			},
 		},
 		Spec: v1.ServiceSpec{
 			Selector: map[string]string{
@@ -63,7 +73,7 @@ func GetService(config v1alpha1.K8sGPT) (*v1.Service, error) {
 	return &service, nil
 }
 
-// Create Service Account for K8sGPT and bind it to K8sGPT role
+// GetServiceAccount Create a Service Account for K8sGPT and bind it to K8sGPT role
 func GetServiceAccount(config v1alpha1.K8sGPT) (*v1.ServiceAccount, error) {
 
 	// Create service account
@@ -71,13 +81,23 @@ func GetServiceAccount(config v1alpha1.K8sGPT) (*v1.ServiceAccount, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "k8sgpt",
 			Namespace: config.Namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					Kind:               config.Kind,
+					Name:               config.Name,
+					UID:                config.UID,
+					APIVersion:         config.APIVersion,
+					BlockOwnerDeletion: utils.PtrBool(true),
+					Controller:         utils.PtrBool(true),
+				},
+			},
 		},
 	}
 
 	return &serviceAccount, nil
 }
 
-// Create cluster role binding for K8sGPT
+// GetClusterRoleBinding Create cluster role binding for K8sGPT
 func GetClusterRoleBinding(config v1alpha1.K8sGPT) (*r1.ClusterRoleBinding, error) {
 
 	// Create cluster role binding
@@ -112,7 +132,7 @@ func GetClusterRoleBinding(config v1alpha1.K8sGPT) (*r1.ClusterRoleBinding, erro
 	return &clusterRoleBinding, nil
 }
 
-// Create ClusterRole for K8sGPT with cluster read all
+// GetClusterRole Create ClusterRole for K8sGPT with cluster read all
 func GetClusterRole(config v1alpha1.K8sGPT) (*r1.ClusterRole, error) {
 
 	// Create cluster role
@@ -142,7 +162,7 @@ func GetClusterRole(config v1alpha1.K8sGPT) (*r1.ClusterRole, error) {
 	return &clusterRole, nil
 }
 
-// Create deployment with the latest K8sGPT image
+// GetDeployment Create deployment with the latest K8sGPT image
 func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 
 	// Create deployment
