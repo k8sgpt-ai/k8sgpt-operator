@@ -17,7 +17,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"os"
+	"time"
 
 	rpc "buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go/schema/v1/schemav1grpc"
 	schemav1 "buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go/schema/v1"
@@ -64,6 +66,17 @@ func GenerateAddress(ctx context.Context, cli client.Client, k8sgptConfig *v1alp
 		}
 		address = fmt.Sprintf("%s:%d", svc.Spec.ClusterIP, svc.Spec.Ports[0].Port)
 	}
+
+	fmt.Printf("Creating new client for %s\n", address)
+	// Test if the port is open
+	conn, err := net.DialTimeout("tcp", address, 1*time.Second)
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Printf("Connection established between %s and localhost with time out of %d seconds.\n", address, int64(1))
+	fmt.Printf("Remote Address : %s \n", conn.RemoteAddr().String())
+
 	return address, nil
 }
 

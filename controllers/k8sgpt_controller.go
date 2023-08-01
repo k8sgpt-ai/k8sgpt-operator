@@ -159,6 +159,8 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			k8sgptReconcileErrorCount.Inc()
 			return r.finishReconcile(err, false)
 		}
+		// Log address
+		fmt.Printf("K8sGPT address: %s\n", address)
 
 		k8sgptClient, err := kclient.NewClient(address)
 		if err != nil {
@@ -216,7 +218,6 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 				return r.finishReconcile(err, false)
 
 			}
-
 			// Update metrics
 			if operation == resources.CreatedResult {
 				k8sgptNumberOfResultsByType.With(prometheus.Labels{
@@ -291,13 +292,13 @@ func (r *K8sGPTReconciler) finishReconcile(err error, requeueImmediate bool) (ct
 		if requeueImmediate {
 			interval = 0
 		}
-		fmt.Printf("Finished Reconciling K8sGPT with error: %s\n", err.Error())
+		fmt.Printf("Finished Reconciling k8sGPT with error: %s\n", err.Error())
 		return ctrl.Result{Requeue: true, RequeueAfter: interval}, err
 	}
 	interval := ReconcileSuccessInterval
 	if requeueImmediate {
 		interval = 0
 	}
-	fmt.Println("Finished Reconciling K8sGPT")
+	fmt.Println("Finished Reconciling k8sGPT")
 	return ctrl.Result{Requeue: true, RequeueAfter: interval}, nil
 }

@@ -2,6 +2,7 @@ package resources
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -62,6 +63,7 @@ func CreateOrUpdateResult(ctx context.Context, c client.Client, res v1alpha1.Res
 		if err := c.Create(ctx, &res); err != nil {
 			return NoOpResult, err
 		}
+		fmt.Printf("Created result %s\n", res.Name)
 		return CreatedResult, nil
 	}
 	if len(existing.Spec.Error) == len(res.Spec.Error) && reflect.DeepEqual(res.Labels, existing.Labels) {
@@ -79,6 +81,6 @@ func CreateOrUpdateResult(ctx context.Context, c client.Client, res v1alpha1.Res
 	if err := c.Status().Update(ctx, &existing); err != nil {
 		return NoOpResult, err
 	}
-
+	fmt.Printf("Updated result %s\n", res.Name)
 	return UpdatedResult, nil
 }
