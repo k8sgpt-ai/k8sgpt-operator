@@ -5,7 +5,7 @@ go 1.19
 require (
 	buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.3.0-20230620082254-6f80f9533908.1
 	buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.30.0-20230620082254-6f80f9533908.1
-	github.com/onsi/ginkgo/v2 v2.11.0
+	github.com/onsi/ginkgo/v2 v2.12.0
 	github.com/onsi/gomega v1.27.10
 	github.com/prometheus/client_golang v1.16.0
 	google.golang.org/grpc v1.57.0
@@ -22,7 +22,7 @@ require (
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/google/pprof v0.0.0-20220608213341-c488b8fa1db3 // indirect
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/tools v0.9.3 // indirect
+	golang.org/x/tools v0.12.0 // indirect
 )
 
 require (
@@ -81,12 +81,12 @@ require (
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
-	golang.org/x/net v0.13.0 // indirect
+	golang.org/x/net v0.14.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect
-	golang.org/x/sync v0.2.0 // indirect
-	golang.org/x/sys v0.10.0 // indirect
-	golang.org/x/term v0.10.0 // indirect
-	golang.org/x/text v0.11.0 // indirect
+	golang.org/x/sync v0.3.0 // indirect
+	golang.org/x/sys v0.11.0 // indirect
+	golang.org/x/term v0.11.0 // indirect
+	golang.org/x/text v0.12.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.3.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
