@@ -170,6 +170,15 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 		defer k8sgptClient.Close()
 
+		// Configure the k8sgpt deployment if required
+		if k8sgptConfig.Spec.RemoteCache != nil {
+			err = k8sgptClient.AddConfig(k8sgptConfig)
+			if err != nil {
+				k8sgptReconcileErrorCount.Inc()
+				return r.finishReconcile(err, false)
+			}
+		}
+
 		response, err := k8sgptClient.ProcessAnalysis(deployment, k8sgptConfig)
 		if err != nil {
 			k8sgptReconcileErrorCount.Inc()

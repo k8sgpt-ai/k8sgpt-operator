@@ -83,6 +83,22 @@ spec:
                 type: array
               noCache:
                 type: boolean
+              remoteCache:
+                properties:
+                  bucketName:
+                    type: string
+                  credentials:
+                    properties:
+                      access_key_id:
+                        type: string
+                      name:
+                        type: string
+                      secret_acess_key:
+                        type: string
+                    type: object
+                  region:
+                    type: string
+                type: object
               sink:
                 properties:
                   type:
