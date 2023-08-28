@@ -36,6 +36,16 @@ type ExtraOptionsRef struct {
 	Backstage *Backstage `json:"backstage,omitempty"`
 }
 
+type CredentialsRef struct {
+	Name string `json:"name,omitempty"`
+}
+
+type RemoteCacheRef struct {
+	Credentials *CredentialsRef `json:"credentials,omitempty"`
+	BucketName  string          `json:"bucketName,omitempty"`
+	Region      string          `json:"region,omitempty"`
+}
+
 type WebhookRef struct {
 	// +kubebuilder:validation:Enum=slack
 	Type     string `json:"type,omitempty"`
@@ -66,6 +76,7 @@ type K8sGPTSpec struct {
 	ExtraOptions *ExtraOptionsRef `json:"extraOptions,omitempty"`
 	Sink         *WebhookRef      `json:"sink,omitempty"`
 	AI           *AISpec          `json:"ai,omitempty"`
+	RemoteCache  *RemoteCacheRef  `json:"remoteCache,omitempty"`
 }
 
 const (

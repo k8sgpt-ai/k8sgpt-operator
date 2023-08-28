@@ -16,6 +16,8 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
+	"math/rand"
 	"os"
 	"time"
 
@@ -64,7 +66,15 @@ func main() {
 	flag.Parse()
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
-
+	if os.Getenv("LOCAL_MODE") != "" {
+		setupLog.Info("Running in local mode")
+		min := 7000
+		max := 8000
+		metricsAddr = fmt.Sprintf(":%d", rand.Intn(max-min+1)+min)
+		probeAddr = fmt.Sprintf(":%d", rand.Intn(max-min+1)+min)
+		setupLog.Info(fmt.Sprintf("Metrics address: %s", metricsAddr))
+		setupLog.Info(fmt.Sprintf("Probe address: %s", probeAddr))
+	}
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
 		MetricsBindAddress:     metricsAddr,
