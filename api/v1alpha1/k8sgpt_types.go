@@ -37,9 +37,7 @@ type ExtraOptionsRef struct {
 }
 
 type CredentialsRef struct {
-	Name            string `json:"name,omitempty"`
-	AccessKeyID     string `json:"access_key_id,omitempty"`
-	SecretAccessKey string `json:"secret_acess_key,omitempty"`
+	Name string `json:"name,omitempty"`
 }
 
 type RemoteCacheRef struct {

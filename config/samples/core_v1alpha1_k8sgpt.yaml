@@ -15,6 +15,6 @@ spec:
   version: v0.3.5
   remoteCache:
     credentials:
-      name: k8sgpt-sample-cache-secret 
+      name: k8sgpt-sample-cache-secret
     bucketName: k8sgpt-debug-test
     region: eu-west-2
