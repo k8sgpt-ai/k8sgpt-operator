@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.0.21](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.20...v0.0.21) (2023-08-28)
+
+
+### Features
+
+* remote config rework ([#201](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/201)) ([44e7c6b](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/44e7c6b3e55f086fcf4c5971e75cf81afbbe518f))
+
+
+### Bug Fixes
+
+* **deps:** update kubernetes packages ([#196](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/196)) ([8cdbb96](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8cdbb96b4985c9766dae5c12888e3bc2e2a4c8d7))
+* **deps:** update module github.com/onsi/ginkgo/v2 to v2.12.0 ([#197](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/197)) ([dd78856](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/dd7885605a025683becf528a37ce88434228a9a4))
+
+
+### Other
+
+* **deps:** update actions/checkout digest to f43a0e5 ([#198](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/198)) ([d06091c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d06091c0ec063731c099c5f9b03f363047f7c57a))
+* **deps:** update actions/setup-go digest to 93397be ([#194](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/194)) ([d01b5a9](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d01b5a965aad6b53b21fda6fb445e1a874deffd5))
+* **deps:** update docker/setup-buildx-action digest to 885d146 ([#200](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/200)) ([def4871](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/def48718b34eb140759cd7cf0face7cbd1154a45))
+* updated schema for integrations support ([#202](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/202)) ([53af89d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/53af89d125afc6b121241658ddc892abd5c0dcfd))
+
 ## [0.0.20](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.19...v0.0.20) (2023-08-01)
 
 
