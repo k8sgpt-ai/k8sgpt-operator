@@ -13,8 +13,8 @@ var _ ISink = (*SlackSink)(nil)
 
 type SlackSink struct {
 	Endpoint string
-	Client   Client
 	K8sGPT   string
+	Client   Client
 }
 
 type SlackMessage struct {
