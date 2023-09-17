@@ -14,6 +14,7 @@ var _ ISink = (*SlackSink)(nil)
 type SlackSink struct {
 	Endpoint string
 	Client   Client
+	K8sGPT   string
 }
 
 type SlackMessage struct {
@@ -28,9 +29,9 @@ type Attachment struct {
 	Title string `json:"title"`
 }
 
-func buildSlackMessage(kind, name, details string) SlackMessage {
+func buildSlackMessage(kind, name, details, k8sgptCR string) SlackMessage {
 	return SlackMessage{
-		Text: fmt.Sprintf(">*K8sGPT analysis of the %s %s*", kind, name),
+		Text: fmt.Sprintf(">*[%s] K8sGPT analysis of the %s %s*", k8sgptCR, kind, name),
 		Attachments: []Attachment{
 			Attachment{
 				Type:  "mrkdwn",
@@ -45,10 +46,12 @@ func buildSlackMessage(kind, name, details string) SlackMessage {
 func (s *SlackSink) Configure(config v1alpha1.K8sGPT, c Client) {
 	s.Endpoint = config.Spec.Sink.Endpoint
 	s.Client = c
+	// take the name of the K8sGPT Custom Resource
+	s.K8sGPT = config.Name
 }
 
 func (s *SlackSink) Emit(results v1alpha1.ResultSpec) error {
-	message := buildSlackMessage(results.Kind, results.Name, results.Details)
+	message := buildSlackMessage(results.Kind, results.Name, results.Details, s.K8sGPT)
 	payload, err := json.Marshal(message)
 	if err != nil {
 		return err
