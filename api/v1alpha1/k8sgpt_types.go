@@ -68,6 +68,15 @@ type AISpec struct {
 	Language string `json:"language,omitempty"`
 }
 
+type Trivy struct {
+	Enabled     bool   `json:"enabled,omitempty"`
+	SkipInstall bool   `json:"skipInstall,omitempty"`
+	Namespace   string `json:"namespace,omitempty"`
+}
+type Integrations struct {
+	Trivy *Trivy `json:"trivy,omitempty"`
+}
+
 // K8sGPTSpec defines the desired state of K8sGPT
 type K8sGPTSpec struct {
 	Version      string           `json:"version,omitempty"`
@@ -77,6 +86,7 @@ type K8sGPTSpec struct {
 	Sink         *WebhookRef      `json:"sink,omitempty"`
 	AI           *AISpec          `json:"ai,omitempty"`
 	RemoteCache  *RemoteCacheRef  `json:"remoteCache,omitempty"`
+	Integrations *Integrations    `json:"integrations,omitempty"`
 }
 
 const (
