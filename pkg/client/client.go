@@ -26,6 +26,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const (
+	timeout = 30 * time.Second
+)
+
 // This is the client for communicating with the K8sGPT in cluster deployment
 type Client struct {
 	conn *grpc.ClientConn
@@ -37,7 +41,11 @@ func (c *Client) Close() error {
 
 func NewClient(address string) (*Client, error) {
 	// Connect to the K8sGPT server and create a new client
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	ctx, e := context.WithTimeout(context.Background(), timeout)
+	if e != nil {
+		return nil, fmt.Errorf("failed to create context: %v", e)
+	}
+	conn, err := grpc.DialContext(ctx, address, grpc.WithInsecure())
 	if err != nil {
 		return nil, fmt.Errorf("failed to dial K8sGPT server: %v", err)
 	}

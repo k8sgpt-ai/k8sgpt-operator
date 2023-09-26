@@ -13,8 +13,8 @@ import (
 func (c *Client) AddIntegration(config *v1alpha1.K8sGPT) error {
 
 	// Check if the integration is active already
-	client := rpc.NewServerServiceClient(c.conn)
 
+	client := rpc.NewServerServiceClient(c.conn)
 	req := &schemav1.ListIntegrationsRequest{}
 
 	resp, err := client.ListIntegrations(context.Background(),
@@ -40,7 +40,7 @@ func (c *Client) AddIntegration(config *v1alpha1.K8sGPT) error {
 	configUpdatereq := &schemav1.AddConfigRequest{
 		Integrations: &schemav1.Integrations{
 			Trivy: &schemav1.Trivy{
-				Enabled:     true,
+				Enabled:     config.Spec.Integrations.Trivy.Enabled,
 				SkipInstall: config.Spec.Integrations.Trivy.SkipInstall,
 				Namespace:   config.Spec.Integrations.Trivy.Namespace,
 			},
@@ -50,6 +50,10 @@ func (c *Client) AddIntegration(config *v1alpha1.K8sGPT) error {
 	if err != nil {
 		return fmt.Errorf("failed to call AddConfig RPC: %v", err)
 	}
-	fmt.Println("Activated integration")
+	if config.Spec.Integrations.Trivy.Enabled {
+		fmt.Println("Activated integration")
+	} else {
+		fmt.Println("Deactivated integration")
+	}
 	return nil
 }
