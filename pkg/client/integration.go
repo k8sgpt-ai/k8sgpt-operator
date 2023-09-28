@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	rpc "buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go/schema/v1/schemav1grpc"
@@ -13,7 +12,6 @@ import (
 func (c *Client) AddIntegration(config *v1alpha1.K8sGPT) error {
 
 	// Check if the integration is active already
-
 	client := rpc.NewServerServiceClient(c.conn)
 	req := &schemav1.ListIntegrationsRequest{}
 
@@ -23,19 +21,12 @@ func (c *Client) AddIntegration(config *v1alpha1.K8sGPT) error {
 		return err
 	}
 
-	if config.Spec.Integrations.Trivy == nil {
-		return errors.New("integrations: only Trivy is currently supported")
-	}
-
-	// Check for active integrations
-	for _, active := range resp.Integrations {
-		switch active {
-		case "trivy":
-			// Integration is active, nothing to do
-			return nil
-		}
+	if resp.Trivy.Enabled == config.Spec.Integrations.Trivy.Enabled {
+		fmt.Println("Skipping trivy installation, already enabled")
+		return nil
 	}
 	// If the integration is inactive, make it active
+	// Equally, if the flag has been deactivated we should also account for this
 	// TODO: Currently this only support trivy
 	configUpdatereq := &schemav1.AddConfigRequest{
 		Integrations: &schemav1.Integrations{
@@ -50,10 +41,6 @@ func (c *Client) AddIntegration(config *v1alpha1.K8sGPT) error {
 	if err != nil {
 		return fmt.Errorf("failed to call AddConfig RPC: %v", err)
 	}
-	if config.Spec.Integrations.Trivy.Enabled {
-		fmt.Println("Activated integration")
-	} else {
-		fmt.Println("Deactivated integration")
-	}
+
 	return nil
 }

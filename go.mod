@@ -3,8 +3,8 @@ module github.com/k8sgpt-ai/k8sgpt-operator
 go 1.19
 
 require (
-	buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.3.0-20230919114723-34e017906403.1
-	buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.31.0-20230919114723-34e017906403.1
+	buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.3.0-20230927080702-a2be8a73637d.1
+	buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.31.0-20230927080702-a2be8a73637d.1
 	github.com/onsi/ginkgo/v2 v2.12.0
 	github.com/onsi/gomega v1.27.10
 	github.com/prometheus/client_golang v1.16.0
@@ -26,7 +26,7 @@ require (
 )
 
 require (
-	buf.build/gen/go/k8sgpt-ai/k8sgpt/connectrpc/go v1.11.1-20230919114723-34e017906403.1 // indirect
+	buf.build/gen/go/k8sgpt-ai/k8sgpt/connectrpc/go v1.11.1-20230927080702-a2be8a73637d.1 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/MakeNowJust/heredoc v1.0.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect

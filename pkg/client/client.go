@@ -41,7 +41,7 @@ func (c *Client) Close() error {
 
 func NewClient(address string) (*Client, error) {
 	// Connect to the K8sGPT server and create a new client
-	ctx, e := context.WithTimeout(context.Background(), timeout)
+	ctx, e := context.WithTimeout(context.TODO(), timeout)
 	if e != nil {
 		return nil, fmt.Errorf("failed to create context: %v", e)
 	}
