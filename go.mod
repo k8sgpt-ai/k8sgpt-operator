@@ -26,7 +26,6 @@ require (
 )
 
 require (
-	buf.build/gen/go/k8sgpt-ai/k8sgpt/connectrpc/go v1.11.1-20230927080702-a2be8a73637d.1 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/MakeNowJust/heredoc v1.0.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
