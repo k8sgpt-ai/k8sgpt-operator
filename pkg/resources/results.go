@@ -31,10 +31,7 @@ func MapResults(i integrations.Integrations, resultsSpec []v1alpha1.ResultSpec, 
 		name = strings.ReplaceAll(name, "/", "")
 		result := GetResult(resultSpec, name, namespace, backend)
 		if backstageEnabled {
-			backstageLabel, err := i.BackstageLabel(resultSpec)
-			if err != nil {
-				return nil, err
-			}
+			backstageLabel := i.BackstageLabel(resultSpec)
 			// add Backstage label
 			result.ObjectMeta.Labels = backstageLabel
 		}
