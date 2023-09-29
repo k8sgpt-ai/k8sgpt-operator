@@ -32,8 +32,10 @@ func MapResults(i integrations.Integrations, resultsSpec []v1alpha1.ResultSpec, 
 		result := GetResult(resultSpec, name, namespace, backend)
 		if backstageEnabled {
 			backstageLabel := i.BackstageLabel(resultSpec)
-			// add Backstage label
-			result.ObjectMeta.Labels = backstageLabel
+			if len(backstageLabel) != 0 {
+				// add Backstage label
+				result.ObjectMeta.Labels = backstageLabel
+			}
 		}
 
 		rawResults[name] = result
