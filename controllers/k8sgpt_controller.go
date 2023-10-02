@@ -75,8 +75,8 @@ type K8sGPTReconciler struct {
 // +kubebuilder:rbac:groups=core.k8sgpt.ai,resources=k8sgpts/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=core.k8sgpt.ai,resources=k8sgpts/finalizers,verbs=update
 // +kubebuilder:rbac:groups=core.k8sgpt.ai,resources=results,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups="*",resources="*",verbs=get;list;watch;create;update;patch;delete
-
+// +kubebuilder:rbac:groups="*",resources="*",verbs="*"
+// +kubebuilder:rbac:groups="apiextensions.k8s.io",resources="*",verbs="*"
 func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
 

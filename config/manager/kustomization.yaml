@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: ghcr.io/k8sgpt-ai/k8sgpt-operator
-  newTag: latest
+  newTag: feature-integration-support-3
