@@ -36,13 +36,15 @@ func NewIntegrations(client client.Client, ctx context.Context) (*Integrations, 
 	}, nil
 }
 
-func (i *Integrations) BackstageLabel(result v1alpha1.ResultSpec) (map[string]string, error) {
+func (i *Integrations) BackstageLabel(result v1alpha1.ResultSpec) map[string]string {
 	namespace, resourceName, _ := strings.Cut(result.Name, "/")
+	// Log and don't propagate errors so we won't trigger a new reconciliation
 	gvr, err := i.restMapper.ResourceFor(schema.GroupVersionResource{
 		Resource: result.Kind,
 	})
 	if err != nil {
-		return nil, err
+		fmt.Printf("Unable to find Kind '%s'\n", result.Kind)
+		return map[string]string{}
 	}
 
 	obj := &unstructured.Unstructured{}
@@ -54,8 +56,10 @@ func (i *Integrations) BackstageLabel(result v1alpha1.ResultSpec) (map[string]st
 	obj.SetGroupVersionKind(gvk)
 	// Retrieve the resource using the client
 	err = i.client.Get(i.ctx, client.ObjectKey{Name: resourceName, Namespace: namespace}, obj)
+	// if we don't find the K8s object we won't trigger a new reconciliation and just log a message
 	if err != nil {
-		return nil, err
+		fmt.Printf("Fail to retrieve resource %s for namespace %s\n", resourceName, namespace)
+		return map[string]string{}
 	}
 	labels := obj.GetLabels()
 	value, exists := labels[backstageLabelKey]
@@ -63,5 +67,5 @@ func (i *Integrations) BackstageLabel(result v1alpha1.ResultSpec) (map[string]st
 		fmt.Printf("Label key '%s' does not exist in %s resource: %s\n", backstageLabelKey, result.Kind, resourceName)
 	}
 	// Assign the same label key/value to result CR
-	return map[string]string{backstageLabelKey: value}, nil
+	return map[string]string{backstageLabelKey: value}
 }
