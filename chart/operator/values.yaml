@@ -5,6 +5,8 @@ serviceMonitor:
   # namespace: ""
 grafanaDashboard:
   enabled: false
+  # The namespace where Grafana expects to find the dashboard
+  # namespace: ""
   folder:
     annotation: grafana_folder
     name: ai
@@ -29,6 +31,7 @@ controllerManager:
         cpu: 5m
         memory: 64Mi
   manager:
+    sinkWebhookTimeout: 30s
     containerSecurityContext:
       allowPrivilegeEscalation: false
       capabilities:
@@ -36,7 +39,7 @@ controllerManager:
         - ALL
     image:
       repository: ghcr.io/k8sgpt-ai/k8sgpt-operator
-      tag: v0.0.17  # x-release-please-version
+      tag: v0.0.21  # x-release-please-version
     resources:
       limits:
         cpu: 500m

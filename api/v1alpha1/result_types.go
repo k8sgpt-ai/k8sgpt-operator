@@ -32,7 +32,7 @@ type Sensitive struct {
 
 // ResultSpec defines the desired state of Result
 type ResultSpec struct {
-	Backend      `json:"backend"`
+	Backend      string    `json:"backend"`
 	Kind         string    `json:"kind"`
 	Name         string    `json:"name"`
 	Error        []Failure `json:"error"`
@@ -42,8 +42,8 @@ type ResultSpec struct {
 
 // ResultStatus defines the observed state of Result
 type ResultStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	LifeCycle string `json:"lifecycle,omitempty"`
+	Webhook   string `json:"webhook,omitempty"`
 }
 
 //+kubebuilder:object:root=true

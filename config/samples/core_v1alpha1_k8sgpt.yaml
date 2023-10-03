@@ -4,12 +4,17 @@ metadata:
   name: k8sgpt-sample
   namespace: k8sgpt-operator-system
 spec:
-  model: gpt-3.5-turbo
-  backend: openai
+  ai:
+    model: gpt-3.5-turbo
+    backend: openai
+    enabled: true
+    secret:
+      name: k8sgpt-sample-secret
+      key: openai-api-key
   noCache: false
-  version: v0.3.0
-  enableAI: true
-  secret:
-    name: k8sgpt-sample-secret
-    key: openai-api-key
-  # TODO(user): Add fields here
+  version: v0.3.5
+  remoteCache:
+    credentials:
+      name: k8sgpt-sample-cache-secret
+    bucketName: k8sgpt-debug-test
+    region: eu-west-2

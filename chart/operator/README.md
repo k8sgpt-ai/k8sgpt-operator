@@ -1,7 +1,8 @@
 
-K8sGPT Operator
+K8sgpt-operator
 ===========
-This Operator is designed to enable K8sGPT within a Kubernetes cluster. It will allow you to create a custom resource that defines the behaviour and scope of a managed K8sGPT workload. Analysis and outputs will also be configurable to enable integration into existing workflows.
+
+Automatic SRE Superpowers within your Kubernetes cluster
 
 
 ## Configuration
@@ -9,34 +10,38 @@ This Operator is designed to enable K8sGPT within a Kubernetes cluster. It will 
 The following table lists the configurable parameters of the K8sgpt-operator chart and their default values.
 
 <!---x-release-please-start-version-->
-
-| Parameter                                                                           | Description | Default                                                                       |
-|-------------------------------------------------------------------------------------|-------------|-------------------------------------------------------------------------------|
-| `serviceMonitor.enabled`                                                            |             | `false`                                                                       |
-| `serviceMonitor.additionalLabels`                                                   |             | `{}`
-| `controllerManager.kubeRbacProxy.containerSecurityContext.allowPrivilegeEscalation` |             | `false`                                                                       |
-| `controllerManager.kubeRbacProxy.containerSecurityContext.capabilities.drop`        |             | `["ALL"]`                                                                     |
-| `controllerManager.kubeRbacProxy.image.repository`                                  |             | `"gcr.io/kubebuilder/kube-rbac-proxy"`                                        |
-| `controllerManager.kubeRbacProxy.image.tag`                                         |             | `"v0.0.17"`                                                                   |
-| `controllerManager.kubeRbacProxy.resources.limits.cpu`                              |             | `"500m"`                                                                      |
-| `controllerManager.kubeRbacProxy.resources.limits.memory`                           |             | `"128Mi"`                                                                     |
-| `controllerManager.kubeRbacProxy.resources.requests.cpu`                            |             | `"5m"`                                                                        |
-| `controllerManager.kubeRbacProxy.resources.requests.memory`                         |             | `"64Mi"`                                                                      |
-| `controllerManager.manager.containerSecurityContext.allowPrivilegeEscalation`       |             | `false`                                                                       |
-| `controllerManager.manager.containerSecurityContext.capabilities.drop`              |             | `["ALL"]`                                                                     |
-| `controllerManager.manager.image.repository`                                        |             | `"ghcr.io/k8sgpt-ai/k8sgpt-operator"`                                         |
-| `controllerManager.manager.image.tag`                                               |             | `"v0.0.17"`                                                                    |
-| `controllerManager.manager.resources.limits.cpu`                                    |             | `"500m"`                                                                      |
-| `controllerManager.manager.resources.limits.memory`                                 |             | `"128Mi"`                                                                     |
-| `controllerManager.manager.resources.requests.cpu`                                  |             | `"10m"`                                                                       |
-| `controllerManager.manager.resources.requests.memory`                               |             | `"64Mi"`                                                                      |
-| `controllerManager.replicas`                                                        |             | `1`                                                                           |
-| `kubernetesClusterDomain`                                                           |             | `"cluster.local"`                                                             |
-| `metricsService.ports`                                                              |             | `[{"name": "https", "port": 8443, "protocol": "TCP", "targetPort": "https"}]` |
-| `metricsService.type`                                                               |             | `"ClusterIP"`                                                                 |
+| Parameter                | Description             | Default        |
+| ------------------------ | ----------------------- | -------------- |
+| `serviceMonitor.enabled` |  | `false` |
+| `serviceMonitor.additionalLabels` |  | `{}` |
+| `grafanaDashboard.enabled` |  | `false` |
+| `grafanaDashboard.folder.annotation` |  | `"grafana_folder"` |
+| `grafanaDashboard.folder.name` |  | `"ai"` |
+| `grafanaDashboard.label.key` |  | `"grafana_dashboard"` |
+| `grafanaDashboard.label.value` |  | `"1"` |
+| `controllerManager.kubeRbacProxy.containerSecurityContext.allowPrivilegeEscalation` |  | `false` |
+| `controllerManager.kubeRbacProxy.containerSecurityContext.capabilities.drop` |  | `["ALL"]` |
+| `controllerManager.kubeRbacProxy.image.repository` |  | `"gcr.io/kubebuilder/kube-rbac-proxy"` |
+| `controllerManager.kubeRbacProxy.image.tag` |  | `"v0.0.21"` |
+| `controllerManager.kubeRbacProxy.resources.limits.cpu` |  | `"500m"` |
+| `controllerManager.kubeRbacProxy.resources.limits.memory` |  | `"128Mi"` |
+| `controllerManager.kubeRbacProxy.resources.requests.cpu` |  | `"5m"` |
+| `controllerManager.kubeRbacProxy.resources.requests.memory` |  | `"64Mi"` |
+| `controllerManager.manager.sinkWebhookTimeout` |  | `"30s"` |
+| `controllerManager.manager.containerSecurityContext.allowPrivilegeEscalation` |  | `false` |
+| `controllerManager.manager.containerSecurityContext.capabilities.drop` |  | `["ALL"]` |
+| `controllerManager.manager.image.repository` |  | `"ghcr.io/k8sgpt-ai/k8sgpt-operator"` |
+| `controllerManager.manager.image.tag` | x-release-please-version | `"v0.0.21"` |
+| `controllerManager.manager.resources.limits.cpu` |  | `"500m"` |
+| `controllerManager.manager.resources.limits.memory` |  | `"128Mi"` |
+| `controllerManager.manager.resources.requests.cpu` |  | `"10m"` |
+| `controllerManager.manager.resources.requests.memory` |  | `"64Mi"` |
+| `controllerManager.replicas` |  | `1` |
+| `kubernetesClusterDomain` |  | `"cluster.local"` |
+| `metricsService.ports` |  | `[{"name": "https", "port": 8443, "protocol": "TCP", "targetPort": "https"}]` |
+| `metricsService.type` |  | `"ClusterIP"` |
 
 <!---x-release-please-end-->
-
 
 ---
 _Documentation generated by [Frigate](https://frigate.readthedocs.io)._

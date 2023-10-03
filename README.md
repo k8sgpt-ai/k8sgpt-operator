@@ -24,8 +24,7 @@ helm install release k8sgpt/k8sgpt-operator -n k8sgpt-operator-system --create-n
 
 2. Create secret:
 ```sh 
-kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key=$OPENAI_TOKEN -n k8sgpt-
-operator-system
+kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key=$OPENAI_TOKEN -n k8sgpt-operator-system
 ```
 
 3. Apply the K8sGPT configuration object:
@@ -37,19 +36,25 @@ metadata:
   name: k8sgpt-sample
   namespace: k8sgpt-operator-system
 spec:
-  model: gpt-3.5-turbo
-  backend: openai
+  ai:
+    enabled: true
+    model: gpt-3.5-turbo
+    backend: openai
+    secret:
+      name: k8sgpt-sample-secret
+      key: openai-api-key
+    # anonymized: false
+    # language: english
   noCache: false
-  version: v0.3.0
-  enableAI: true
+  version: v0.3.8
   # filters:
   #   - Ingress
+  # sink:
+  #   type: slack
+  #   webhook: <webhook-url>
   # extraOptions:
   #   backstage:
   #     enabled: true
-  secret:
-    name: k8sgpt-sample-secret
-    key: openai-api-key
 EOF
 ```
 
@@ -68,17 +73,17 @@ you will be able to see the Results objects of the analysis after some minutes (
         "details": "The error message means that the service in Kubernetes doesn't have any associated endpoints, which should have been labeled with \"control-plane=controller-manager\". \n\nTo solve this issue, you need to add the \"control-plane=controller-manager\" label to the endpoint that matches the service. Once the endpoint is labeled correctly, Kubernetes can associate it with the service, and the error should be resolved.",
 ```
 
-## Other AI Backend Examples
+## Remote Cache
 
 <details>
 
-<summary>AzureOpenAI</summary>
+<summary>S3</summary>
 
 1. Install the operator from the [Installation](#installation) section.
 
 2. Create secret:
-```sh 
-kubectl create secret generic k8sgpt-sample-secret --from-literal=azure-api-key=$AZURE_TOKEN -n k8sgpt-
+```sh
+kubectl create secret generic k8sgpt-sample-cache-secret --from-literal=aws_access_key_id=<AWS_ACCESS_KEY_ID>  --from-literal=aws_secret_access_key=<AWS_SECRET_ACCESS_KEY> -n k8sgpt-
 operator-system
 ```
 
@@ -91,16 +96,57 @@ metadata:
   name: k8sgpt-sample
   namespace: k8sgpt-operator-system
 spec:
-  model: gpt-35-turbo
-  backend: azureopenai
-  baseUrl: https://k8sgpt.openai.azure.com/
-  engine: llm
+  model: gpt-3.5-turbo
+  backend: openai
   noCache: false
-  version: v0.3.2
+  version: v0.3.0
   enableAI: true
   secret:
     name: k8sgpt-sample-secret
-    key: azure-api-key
+    key: openai-api-key
+  remoteCache:
+    credentials:
+      name: k8sgpt-sample-cache-secret 
+    bucketName: foo
+    region: us-west-1
+EOF
+```
+
+</details>
+
+## Other AI Backend Examples
+
+<details>
+
+<summary>AzureOpenAI</summary>
+
+1. Install the operator from the [Installation](#installation) section.
+
+2. Create secret:
+```sh 
+kubectl create secret generic k8sgpt-sample-secret --from-literal=azure-api-key=$AZURE_TOKEN -n k8sgpt-operator-system
+```
+
+3. Apply the K8sGPT configuration object:
+```
+kubectl apply -f - << EOF
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: K8sGPT
+metadata:
+  name: k8sgpt-sample
+  namespace: k8sgpt-operator-system
+spec:
+  ai:
+    enabled: true
+    secret:
+      name: k8sgpt-sample-secret
+      key: azure-api-key
+    model: gpt-35-turbo
+    backend: azureopenai
+    baseUrl: https://k8sgpt.openai.azure.com/
+    engine: llm
+  noCache: false
+  version: v0.3.8
 EOF
 ```
 
@@ -124,12 +170,13 @@ metadata:
   name: k8sgpt-local-ai
   namespace: default
 spec:
-  model: ggml-gpt4all-j
-  backend: localai
-  baseUrl: http://local-ai.local-ai.svc.cluster.local:8080/v1
+  ai:
+    enabled: true
+    model: ggml-gpt4all-j
+    backend: localai
+    baseUrl: http://local-ai.local-ai.svc.cluster.local:8080/v1
   noCache: false
-  version: v0.3.4
-  enableAI: true
+  version: v0.3.8
 EOF
 ```
    Note: ensure that the value of `baseUrl` is a properly constructed [DNS name](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#services) for the LocalAI Service. It should take the form: `http://local-ai.<namespace_local_ai_was_installed_in>.svc.cluster.local:8080/v1`.

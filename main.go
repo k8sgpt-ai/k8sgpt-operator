@@ -16,7 +16,10 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
+	"math/rand"
 	"os"
+	"time"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -25,6 +28,7 @@ import (
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/controllers"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/sinks"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -62,7 +66,15 @@ func main() {
 	flag.Parse()
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
-
+	if os.Getenv("LOCAL_MODE") != "" {
+		setupLog.Info("Running in local mode")
+		min := 7000
+		max := 8000
+		metricsAddr = fmt.Sprintf(":%d", rand.Intn(max-min+1)+min)
+		probeAddr = fmt.Sprintf(":%d", rand.Intn(max-min+1)+min)
+		setupLog.Info(fmt.Sprintf("Metrics address: %s", metricsAddr))
+		setupLog.Info(fmt.Sprintf("Probe address: %s", probeAddr))
+	}
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
 		MetricsBindAddress:     metricsAddr,
@@ -93,10 +105,23 @@ func main() {
 		os.Exit(1)
 	}
 
+	timeout, exists := os.LookupEnv("OPERATOR_SINK_WEBHOOK_TIMEOUT_SECONDS")
+	if !exists {
+		timeout = "35s"
+	}
+
+	sinkTimeout, err := time.ParseDuration(timeout)
+	if err != nil {
+		setupLog.Error(err, "unable to read webhook timeout value")
+		os.Exit(1)
+	}
+	sinkClient := sinks.NewClient(sinkTimeout)
+
 	if err = (&controllers.K8sGPTReconciler{
 		Client:       mgr.GetClient(),
 		Scheme:       mgr.GetScheme(),
 		Integrations: integration,
+		SinkClient:   sinkClient,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "K8sGPT")
 		os.Exit(1)

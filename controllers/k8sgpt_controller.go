@@ -17,8 +17,6 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"net"
-	"os"
 	"strings"
 	"time"
 
@@ -27,12 +25,10 @@ import (
 	kclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/sinks"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
 	"github.com/prometheus/client_golang/prometheus"
 	v1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -71,9 +67,8 @@ type K8sGPTReconciler struct {
 	client.Client
 	Scheme       *runtime.Scheme
 	Integrations *integrations.Integrations
+	SinkClient   *sinks.Client
 	K8sGPTClient *kclient.Client
-	// This is a map of clients for each deployment
-	k8sGPTClients map[string]*kclient.Client
 }
 
 // +kubebuilder:rbac:groups=core.k8sgpt.ai,resources=k8sgpts,verbs=get;list;watch;create;update;patch;delete
@@ -111,7 +106,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		if utils.ContainsString(k8sgptConfig.GetFinalizers(), FinalizerName) {
 
 			// Delete any external resources associated with the instance
-			err := resources.Sync(ctx, r.Client, *k8sgptConfig, resources.Destroy)
+			err := resources.Sync(ctx, r.Client, *k8sgptConfig, resources.DestroyOp)
 			if err != nil {
 				k8sgptReconcileErrorCount.Inc()
 				return r.finishReconcile(err, false)
@@ -130,13 +125,14 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	deployment := v1.Deployment{}
 	err = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
 		Name: "k8sgpt-deployment"}, &deployment)
+	if client.IgnoreNotFound(err) != nil {
+		k8sgptReconcileErrorCount.Inc()
+		return r.finishReconcile(err, false)
+	}
+	err = resources.Sync(ctx, r.Client, *k8sgptConfig, resources.SyncOp)
 	if err != nil {
-
-		err = resources.Sync(ctx, r.Client, *k8sgptConfig, resources.Create)
-		if err != nil {
-			k8sgptReconcileErrorCount.Inc()
-			return r.finishReconcile(err, false)
-		}
+		k8sgptReconcileErrorCount.Inc()
+		return r.finishReconcile(err, false)
 	}
 
 	if deployment.Status.ReadyReplicas > 0 {
@@ -158,73 +154,43 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		}
 
 		// If the deployment is active, we will query it directly for analysis data
-		if _, ok := r.k8sGPTClients[k8sgptConfig.Name]; !ok {
-			// Create a new client
-			var address string
-			if os.Getenv("LOCAL_MODE") != "" {
-				address = "localhost:8080"
-			} else {
-				// Get service IP and port for k8sgpt-deployment
-				svc := &corev1.Service{}
-				err = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
-					Name: "k8sgpt"}, svc)
-				if err != nil {
-					k8sgptReconcileErrorCount.Inc()
-					return r.finishReconcile(err, false)
-				}
-				address = fmt.Sprintf("%s:%d", svc.Spec.ClusterIP, svc.Spec.Ports[0].Port)
-			}
+		address, err := kclient.GenerateAddress(ctx, r.Client, k8sgptConfig)
+		if err != nil {
+			k8sgptReconcileErrorCount.Inc()
+			return r.finishReconcile(err, false)
+		}
+		// Log address
+		fmt.Printf("K8sGPT address: %s\n", address)
 
-			fmt.Printf("Creating new client for %s\n", address)
-			// Test if the port is open
-			conn, err := net.DialTimeout("tcp", address, 1*time.Second)
-			if err != nil {
-				k8sgptReconcileErrorCount.Inc()
-				return r.finishReconcile(err, false)
-			}
-
-			fmt.Printf("Connection established between %s and localhost with time out of %d seconds.\n", address, int64(1))
-			fmt.Printf("Remote Address : %s \n", conn.RemoteAddr().String())
-			fmt.Printf("Local Address : %s \n", conn.LocalAddr().String())
-
-			k8sgptClient, err := kclient.NewClient(address)
-			if err != nil {
-				k8sgptReconcileErrorCount.Inc()
-				return r.finishReconcile(err, false)
-			}
-			r.k8sGPTClients[k8sgptConfig.Name] = k8sgptClient
+		k8sgptClient, err := kclient.NewClient(address)
+		if err != nil {
+			k8sgptReconcileErrorCount.Inc()
+			return r.finishReconcile(err, false)
 		}
 
-		response, err := r.k8sGPTClients[k8sgptConfig.Name].ProcessAnalysis(deployment, k8sgptConfig)
+		defer k8sgptClient.Close()
+
+		// Configure the k8sgpt deployment if required
+		if k8sgptConfig.Spec.RemoteCache != nil {
+			err = k8sgptClient.AddConfig(k8sgptConfig)
+			if err != nil {
+				k8sgptReconcileErrorCount.Inc()
+				return r.finishReconcile(err, false)
+			}
+		}
+
+		response, err := k8sgptClient.ProcessAnalysis(deployment, k8sgptConfig)
 		if err != nil {
 			k8sgptReconcileErrorCount.Inc()
 			return r.finishReconcile(err, false)
 		}
 		// Parse the k8sgpt-deployment response into a list of results
 		k8sgptNumberOfResults.Set(float64(len(response.Results)))
-		rawResults := make(map[string]corev1alpha1.Result)
-		for _, resultSpec := range response.Results {
-			resultSpec.Backend = k8sgptConfig.Spec.Backend
-			name := strings.ReplaceAll(resultSpec.Name, "-", "")
-			name = strings.ReplaceAll(name, "/", "")
-			result := corev1alpha1.Result{
-				Spec: resultSpec,
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: k8sgptConfig.Namespace,
-				},
-			}
-			if k8sgptConfig.Spec.ExtraOptions != nil && k8sgptConfig.Spec.ExtraOptions.Backstage.Enabled {
-				backstageLabel, err := r.Integrations.BackstageLabel(resultSpec)
-				if err != nil {
-					k8sgptReconcileErrorCount.Inc()
-					return r.finishReconcile(err, false)
-				}
-				result.ObjectMeta.Labels = backstageLabel
-			}
-			rawResults[name] = result
+		rawResults, err := resources.MapResults(*r.Integrations, response.Results, *k8sgptConfig)
+		if err != nil {
+			k8sgptReconcileErrorCount.Inc()
+			return r.finishReconcile(err, false)
 		}
-
 		// Prior to creating or updating any results we will delete any stale results that
 		// no longer are relevent, we can do this by using the resultSpec composed name against
 		// the custom resource name
@@ -255,39 +221,64 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		// At this point we are able to loop through our rawResults and create them or update
 		// them as needed
 		for _, result := range rawResults {
-			// Check if the result already exists
-			var existingResult corev1alpha1.Result
-			err = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
-				Name: result.Name}, &existingResult)
+			operation, err := resources.CreateOrUpdateResult(ctx, r.Client, result)
 			if err != nil {
-				// if the result doesn't exist, we will create it
-				if errors.IsNotFound(err) {
-					err = r.Create(ctx, &result)
-					if err != nil {
-						k8sgptReconcileErrorCount.Inc()
-						return r.finishReconcile(err, false)
-					} else {
-						k8sgptNumberOfResultsByType.With(prometheus.Labels{
-							"kind": result.Spec.Kind,
-							"name": result.Name,
-						}).Inc()
-					}
-				} else {
-					k8sgptReconcileErrorCount.Inc()
-					return r.finishReconcile(err, false)
-				}
-			} else {
-				// If the result already exists we will update it
-				existingResult.Spec = result.Spec
-				existingResult.Labels = result.Labels
-				err = r.Update(ctx, &existingResult)
-				if err != nil {
-					k8sgptReconcileErrorCount.Inc()
-					return r.finishReconcile(err, false)
-				}
+				k8sgptReconcileErrorCount.Inc()
+				return r.finishReconcile(err, false)
+
 			}
+			// Update metrics
+			if operation == resources.CreatedResult {
+				k8sgptNumberOfResultsByType.With(prometheus.Labels{
+					"kind": result.Spec.Kind,
+					"name": result.Name,
+				}).Inc()
+			} else if operation == resources.UpdatedResult {
+				fmt.Printf("Updated successfully %s \n", result.Name)
+			}
+
 		}
 
+		// We emit when result Status is not historical
+		// and when user configures a sink for the first time
+		latestResultList := &corev1alpha1.ResultList{}
+		if err := r.List(ctx, latestResultList); err != nil {
+			return r.finishReconcile(err, false)
+		}
+		if len(latestResultList.Items) == 0 {
+			return r.finishReconcile(nil, false)
+		}
+		sinkEnabled := k8sgptConfig.Spec.Sink != nil && k8sgptConfig.Spec.Sink.Type != "" && k8sgptConfig.Spec.Sink.Endpoint != ""
+
+		var sinkType sinks.ISink
+		if sinkEnabled {
+			sinkType = sinks.NewSink(k8sgptConfig.Spec.Sink.Type)
+			sinkType.Configure(*k8sgptConfig, *r.SinkClient)
+		}
+
+		for _, result := range latestResultList.Items {
+			var res corev1alpha1.Result
+			if err := r.Get(ctx, client.ObjectKey{Namespace: result.Namespace, Name: result.Name}, &res); err != nil {
+				return r.finishReconcile(err, false)
+			}
+
+			if sinkEnabled {
+				if res.Status.LifeCycle != string(resources.NoOpResult) || res.Status.Webhook == "" {
+					if err := sinkType.Emit(res.Spec); err != nil {
+						k8sgptReconcileErrorCount.Inc()
+						return r.finishReconcile(err, false)
+					}
+					res.Status.Webhook = k8sgptConfig.Spec.Sink.Endpoint
+				}
+			} else {
+				// Remove the Webhook status from results
+				res.Status.Webhook = ""
+			}
+			if err := r.Status().Update(ctx, &res); err != nil {
+				k8sgptReconcileErrorCount.Inc()
+				return r.finishReconcile(err, false)
+			}
+		}
 	}
 
 	return r.finishReconcile(nil, false)
@@ -299,7 +290,6 @@ func (r *K8sGPTReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&corev1alpha1.K8sGPT{}).
 		Complete(r)
 
-	r.k8sGPTClients = make(map[string]*kclient.Client)
 	metrics.Registry.MustRegister(k8sgptReconcileErrorCount, k8sgptNumberOfResults, k8sgptNumberOfResultsByType)
 
 	return c
@@ -311,13 +301,13 @@ func (r *K8sGPTReconciler) finishReconcile(err error, requeueImmediate bool) (ct
 		if requeueImmediate {
 			interval = 0
 		}
-		fmt.Printf("Finished Reconciling K8sGPT with error: %s\n", err.Error())
+		fmt.Printf("Finished Reconciling k8sGPT with error: %s\n", err.Error())
 		return ctrl.Result{Requeue: true, RequeueAfter: interval}, err
 	}
 	interval := ReconcileSuccessInterval
 	if requeueImmediate {
 		interval = 0
 	}
-	fmt.Println("Finished Reconciling K8sGPT")
+	fmt.Println("Finished Reconciling k8sGPT")
 	return ctrl.Result{Requeue: true, RequeueAfter: interval}, nil
 }

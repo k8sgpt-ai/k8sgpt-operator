@@ -15,20 +15,24 @@ package client
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"net"
+	"os"
+	"time"
 
-	rpc "buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go/schema/v1/schemav1grpc"
-	schemav1 "buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go/schema/v1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
-	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/common"
 	"google.golang.org/grpc"
-	v1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // This is the client for communicating with the K8sGPT in cluster deployment
 type Client struct {
 	conn *grpc.ClientConn
+}
+
+func (c *Client) Close() error {
+	return c.conn.Close()
 }
 
 func NewClient(address string) (*Client, error) {
@@ -43,38 +47,30 @@ func NewClient(address string) (*Client, error) {
 	return client, nil
 }
 
-func (c *Client) ProcessAnalysis(deployment v1.Deployment, config *v1alpha1.K8sGPT) (*common.K8sGPTReponse, error) {
-
-	client := rpc.NewServerClient(c.conn)
-
-	req := &schemav1.AnalyzeRequest{
-		Explain: config.Spec.EnableAI,
-		Nocache: config.Spec.NoCache,
-		Backend: string(config.Spec.Backend),
-		Filters: config.Spec.Filters,
+func GenerateAddress(ctx context.Context, cli client.Client, k8sgptConfig *v1alpha1.K8sGPT) (string, error) {
+	var address string
+	if os.Getenv("LOCAL_MODE") != "" {
+		address = "localhost:8080"
+	} else {
+		// Get service IP and port for k8sgpt-deployment
+		svc := &corev1.Service{}
+		err := cli.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
+			Name: "k8sgpt"}, svc)
+		if err != nil {
+			return "", nil
+		}
+		address = fmt.Sprintf("%s:%d", svc.Spec.ClusterIP, svc.Spec.Ports[0].Port)
 	}
 
-	res, err := client.Analyze(context.Background(), req)
+	fmt.Printf("Creating new client for %s\n", address)
+	// Test if the port is open
+	conn, err := net.DialTimeout("tcp", address, 1*time.Second)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call Analyze RPC: %v", err)
+		return "", err
 	}
 
-	var target []v1alpha1.ResultSpec
+	fmt.Printf("Connection established between %s and localhost with time out of %d seconds.\n", address, int64(1))
+	fmt.Printf("Remote Address : %s \n", conn.RemoteAddr().String())
 
-	jsonBytes, err := json.Marshal(res.Results)
-	if err != nil {
-		return nil, err
-	}
-
-	err = json.Unmarshal(jsonBytes, &target)
-	if err != nil {
-		return nil, err
-	}
-
-	response := &common.K8sGPTReponse{
-		Status:   res.Status,
-		Results:  target,
-		Problems: int(res.Problems),
-	}
-	return response, nil
+	return address, nil
 }

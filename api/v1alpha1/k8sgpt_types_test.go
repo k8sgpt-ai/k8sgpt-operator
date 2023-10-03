@@ -34,10 +34,11 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			Key:  "k8s-gpt",
 		}
 
-		kind    = "K8sGPT"
-		baseUrl = "https://api.k8s-gpt.localhost"
-		model   = "345M"
-		version = "v1alpha1"
+		kind     = "K8sGPT"
+		baseUrl  = "https://api.k8s-gpt.localhost"
+		model    = "345M"
+		version  = "v1alpha1"
+		language = "english"
 
 		Namespace = "k8sGPT"
 
@@ -50,13 +51,18 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 				Namespace: Namespace,
 			},
 			Spec: K8sGPTSpec{
-				Backend:  OpenAI,
-				BaseUrl:  baseUrl,
-				Model:    model,
-				Secret:   &secretRef,
-				Version:  version,
-				EnableAI: true,
-				NoCache:  true,
+				AI: &AISpec{
+					Backend:   OpenAI,
+					BaseUrl:   baseUrl,
+					Model:     model,
+					Enabled:   true,
+					Secret:    &secretRef,
+					Anonymize: true,
+					Language:  language,
+				},
+				Version: version,
+
+				NoCache: true,
 			},
 		}
 
@@ -69,13 +75,18 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 				Namespace: Namespace,
 			},
 			Spec: K8sGPTSpec{
-				Backend:  AzureOpenAI,
-				BaseUrl:  baseUrl,
-				Model:    model,
-				Secret:   &secretRef,
-				Version:  version,
-				EnableAI: false,
-				NoCache:  false,
+				AI: &AISpec{
+					Backend:   OpenAI,
+					BaseUrl:   baseUrl,
+					Model:     model,
+					Secret:    &secretRef,
+					Enabled:   false,
+					Anonymize: false,
+					Language:  language,
+				},
+				Version: version,
+
+				NoCache: false,
 			},
 		}
 
@@ -107,7 +118,7 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			// Check the K8sGPT CRDs object's name and the APIVersion.
 			Expect(k8sGPTObject.Name).Should(Equal("k8s-gpt"))
 			Expect(k8sGPTObject.APIVersion).Should(Equal(GroupVersion.String()))
-			Expect(k8sGPTObject.Spec.EnableAI).Should(Equal(true))
+			Expect(k8sGPTObject.Spec.AI.Enabled).Should(Equal(true))
 
 			//get K8sGPT CRD by resource name
 			Expect(fakeClient.Get(ctx, types.NamespacedName{Name: "k8s-gpt-2", Namespace: Namespace}, &k8sGPTObject)).Should(Succeed())
@@ -132,10 +143,10 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			// Get the K8sGPT CRDs by the name and namespace.
 			Expect(fakeClient.Get(ctx, typeNamespace, &k8sGPTObject)).Should(Succeed())
 			// Update the K8sGPT CRDs.
-			k8sGPTObject.Spec.EnableAI = false
+			k8sGPTObject.Spec.AI.Enabled = false
 			Expect(fakeClient.Update(ctx, &k8sGPTObject)).Should(Succeed())
 			// check the K8sGPT CRDs should be equal to false
-			Expect(k8sGPTObject.Spec.EnableAI).Should(Equal(false))
+			Expect(k8sGPTObject.Spec.AI.Enabled).Should(Equal(false))
 		})
 
 		// Delete the K8sGPT CRDs.

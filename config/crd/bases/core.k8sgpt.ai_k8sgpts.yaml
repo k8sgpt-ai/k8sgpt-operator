@@ -35,19 +35,40 @@ spec:
           spec:
             description: K8sGPTSpec defines the desired state of K8sGPT
             properties:
-              backend:
-                default: openai
-                enum:
-                - openai
-                - localai
-                - azureopenai
-                type: string
-              baseUrl:
-                type: string
-              enableAI:
-                type: boolean
-              engine:
-                type: string
+              ai:
+                properties:
+                  anonymized:
+                    default: true
+                    type: boolean
+                  backend:
+                    default: openai
+                    enum:
+                    - openai
+                    - localai
+                    - azureopenai
+                    type: string
+                  baseUrl:
+                    type: string
+                  enabled:
+                    type: boolean
+                  engine:
+                    type: string
+                  language:
+                    default: english
+                    type: string
+                  model:
+                    default: gpt-3.5-turbo
+                    type: string
+                  secret:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                    type: object
+                required:
+                - backend
+                type: object
               extraOptions:
                 properties:
                   backstage:
@@ -60,22 +81,31 @@ spec:
                 items:
                   type: string
                 type: array
-              model:
-                default: gpt-3.5-turbo
-                type: string
               noCache:
                 type: boolean
-              secret:
+              remoteCache:
                 properties:
-                  key:
+                  bucketName:
                     type: string
-                  name:
+                  credentials:
+                    properties:
+                      name:
+                        type: string
+                    type: object
+                  region:
+                    type: string
+                type: object
+              sink:
+                properties:
+                  type:
+                    enum:
+                    - slack
+                    type: string
+                  webhook:
                     type: string
                 type: object
               version:
                 type: string
-            required:
-            - backend
             type: object
           status:
             description: K8sGPTStatus defines the observed state of K8sGPT
