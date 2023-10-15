@@ -81,6 +81,18 @@ spec:
                 items:
                   type: string
                 type: array
+              integrations:
+                properties:
+                  trivy:
+                    properties:
+                      enabled:
+                        type: boolean
+                      namespace:
+                        type: string
+                      skipInstall:
+                        type: boolean
+                    type: object
+                type: object
               noCache:
                 type: boolean
               remoteCache:

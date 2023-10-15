@@ -39,9 +39,8 @@ func NewClient(address string) (*Client, error) {
 	// Connect to the K8sGPT server and create a new client
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
-		return nil, fmt.Errorf("failed to dial K8sGPT server: %v", err)
+		return nil, fmt.Errorf("failed to create context: %v", err)
 	}
-
 	client := &Client{conn: conn}
 
 	return client, nil

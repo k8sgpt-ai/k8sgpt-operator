@@ -47,7 +47,11 @@ spec:
     # anonymized: false
     # language: english
   noCache: false
-  version: v0.3.8
+  version: v0.3.17
+  #integrations:
+  # trivy:
+  #  enabled: true
+  #  namespace: trivy-system
   # filters:
   #   - Ingress
   # sink:

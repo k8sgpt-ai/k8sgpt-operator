@@ -155,7 +155,14 @@ func GetClusterRole(config v1alpha1.K8sGPT) (*r1.ClusterRole, error) {
 			{
 				APIGroups: []string{"*"},
 				Resources: []string{"*"},
-				Verbs:     []string{"list", "get", "watch"},
+				// This is necessary for the creation of integrations
+				Verbs: []string{"create", "list", "get", "watch", "delete"},
+			},
+			// Allow creation of custom resources
+			{
+				APIGroups: []string{"apiextensions.k8s.io"},
+				Resources: []string{"*"},
+				Verbs:     []string{"*"},
 			},
 		},
 	}
