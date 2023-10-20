@@ -299,10 +299,16 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 				deployment.Spec.Template.Spec.Containers[0].Env, envVar,
 			)
 		}
-		addRemoteCacheEnvVar("AWS_ACCESS_KEY_ID", "aws_access_key_id")
-		addRemoteCacheEnvVar("AWS_SECRET_ACCESS_KEY", "aws_secret_access_key")
-
+		if config.Spec.RemoteCache.Azure != nil {
+			addRemoteCacheEnvVar("AZURE_CLIENT_ID", "azure_client_id")
+			addRemoteCacheEnvVar("AZURE_TENANT_ID", "azure_tenant_id")
+			addRemoteCacheEnvVar("AZURE_CLIENT_SECRET", "azure_client_secret")
+		} else if config.Spec.RemoteCache.S3 != nil {
+			addRemoteCacheEnvVar("AWS_ACCESS_KEY_ID", "aws_access_key_id")
+			addRemoteCacheEnvVar("AWS_SECRET_ACCESS_KEY", "aws_secret_access_key")
+		}
 	}
+
 	if config.Spec.AI.BaseUrl != "" {
 		baseUrl := corev1.EnvVar{
 			Name:  "K8SGPT_BASEURL",
