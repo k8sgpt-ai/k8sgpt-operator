@@ -82,6 +82,48 @@ you will be able to see the Results objects of the analysis after some minutes (
 
 <details>
 
+<summary>Azure Blob storage</summary>
+
+1. Install the operator from the [Installation](#installation) section.
+
+2. Create secret:
+```sh
+kubectl create secret generic k8sgpt-sample-cache-secret --from-literal=azure_client_id=<AZURE_CLIENT_ID>  --from-literal=azure_tenant_id=<AZURE_TENANT_ID> --from-literal=azure_client_secret=<AZURE_CLIENT_SECRET> -n k8sgpt-
+operator-system
+```
+
+3. Apply the K8sGPT configuration object:
+```
+kubectl apply -f - << EOF
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: K8sGPT
+metadata:
+  name: k8sgpt-sample
+  namespace: k8sgpt-operator-system
+spec:
+  model: gpt-3.5-turbo
+  backend: openai
+  noCache: false
+  version: v0.3.0
+  enableAI: true
+  secret:
+    name: k8sgpt-sample-secret
+    key: openai-api-key
+  remoteCache:
+    credentials:
+      name: k8sgpt-sample-cache-secret 
+    azure:
+      # Storage account must already exist
+      storageAccount: "account_name"
+      containerName: "container_name"
+EOF
+```
+
+</details>
+
+
+<details>
+
 <summary>S3</summary>
 
 1. Install the operator from the [Installation](#installation) section.
@@ -111,9 +153,10 @@ spec:
     key: openai-api-key
   remoteCache:
     credentials:
-      name: k8sgpt-sample-cache-secret 
-    bucketName: foo
-    region: us-west-1
+      name: k8sgpt-sample-cache-secret
+    s3:
+      bucketName: foo
+      region: us-west-1
 EOF
 ```
 

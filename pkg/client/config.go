@@ -11,12 +11,19 @@ import (
 
 func (c *Client) AddConfig(config *v1alpha1.K8sGPT) error {
 	client := rpc.NewServerServiceClient(c.conn)
-
-	req := &schemav1.AddConfigRequest{
-		Cache: &schemav1.Cache{
-			BucketName: config.Spec.RemoteCache.BucketName,
-			Region:     config.Spec.RemoteCache.Region,
-		},
+	req := &schemav1.AddConfigRequest{}
+	// If multiple caches are configured we pick S3
+	// which emulates the behaviour of K8sGPT cli
+	if config.Spec.RemoteCache.S3 != nil {
+		req.Cache = &schemav1.Cache{
+			BucketName: config.Spec.RemoteCache.S3.BucketName,
+			Region:     config.Spec.RemoteCache.S3.Region,
+		}
+	} else if config.Spec.RemoteCache.Azure != nil {
+		req.Cache = &schemav1.Cache{
+			StorageAccount: config.Spec.RemoteCache.Azure.StorageAccount,
+			ContainerName:  config.Spec.RemoteCache.Azure.ContainerName,
+		}
 	}
 
 	_, err := client.AddConfig(context.Background(), req)
@@ -31,10 +38,7 @@ func (c *Client) RemoveConfig(config *v1alpha1.K8sGPT) error {
 	client := rpc.NewServerServiceClient(c.conn)
 
 	req := &schemav1.RemoveConfigRequest{
-		Cache: &schemav1.Cache{
-			BucketName: config.Spec.RemoteCache.BucketName,
-			Region:     config.Spec.RemoteCache.Region,
-		},
+		Cache: &schemav1.Cache{},
 	}
 
 	_, err := client.RemoveConfig(context.Background(), req)

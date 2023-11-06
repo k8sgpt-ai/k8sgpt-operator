@@ -83,6 +83,28 @@ spec:
                 type: array
               noCache:
                 type: boolean
+              remoteCache:
+                properties:
+                  azure:
+                    properties:
+                      containerName:
+                        type: string
+                      storageAccount:
+                        type: string
+                    type: object
+                  credentials:
+                    properties:
+                      name:
+                        type: string
+                    type: object
+                  s3:
+                    properties:
+                      bucketName:
+                        type: string
+                      region:
+                        type: string
+                    type: object
+                type: object
               sink:
                 properties:
                   type:

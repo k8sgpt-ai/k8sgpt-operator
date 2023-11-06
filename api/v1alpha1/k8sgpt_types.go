@@ -42,8 +42,18 @@ type CredentialsRef struct {
 
 type RemoteCacheRef struct {
 	Credentials *CredentialsRef `json:"credentials,omitempty"`
-	BucketName  string          `json:"bucketName,omitempty"`
-	Region      string          `json:"region,omitempty"`
+	S3          *S3Backend      `json:"s3,omitempty"`
+	Azure       *AzureBackend   `json:"azure,omitempty"`
+}
+
+type S3Backend struct {
+	BucketName string `json:"bucketName,omitempty"`
+	Region     string `json:"region,omitempty"`
+}
+
+type AzureBackend struct {
+	StorageAccount string `json:"storageAccount,omitempty"`
+	ContainerName  string `json:"containerName,omitempty"`
 }
 
 type WebhookRef struct {

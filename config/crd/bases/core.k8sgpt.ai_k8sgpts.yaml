@@ -97,15 +97,25 @@ spec:
                 type: boolean
               remoteCache:
                 properties:
-                  bucketName:
-                    type: string
+                  azure:
+                    properties:
+                      containerName:
+                        type: string
+                      storageAccount:
+                        type: string
+                    type: object
                   credentials:
                     properties:
                       name:
                         type: string
                     type: object
-                  region:
-                    type: string
+                  s3:
+                    properties:
+                      bucketName:
+                        type: string
+                      region:
+                        type: string
+                    type: object
                 type: object
               sink:
                 properties:
