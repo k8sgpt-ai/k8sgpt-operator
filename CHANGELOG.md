@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.0.23](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.22...v0.0.23) (2023-11-12)
+
+
+### Features
+
+* add azure remote cache ([#246](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/246)) ([610e5de](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/610e5de3f9cd564f3ccfce6b7bf0b2b3efda630a))
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/onsi/gomega to v1.29.0 ([#247](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/247)) ([067dd45](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/067dd45f39bbd8dade7438b5b7084a0f3b6d9035))
+* **deps:** update module github.com/onsi/gomega to v1.30.0 ([#256](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/256)) ([91ef326](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/91ef326e426e63ccb6e4af2cbec1390b68cc5fc9))
+* operator's cluster role permissions to match k8sgpt ([#258](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/258)) ([513bf82](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/513bf8248d479c2b3edeef1d2366e45d4aaf626b))
+
+
+### Other
+
+* **deps:** bump google.golang.org/grpc from 1.58.2 to 1.58.3 ([#250](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/250)) ([0787c8c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0787c8cd45f3b6ebac5b048eba819cbc3284ddd9))
+* **deps:** update actions/checkout digest to b4ffde6 ([#242](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/242)) ([8e9bf51](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8e9bf51e0d84cb00b8edd37122b6f3756cdb6aed))
+* **deps:** update actions/setup-python digest to 65d7f2d ([#243](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/243)) ([9500137](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/95001375d8ea2a215a73f174eff8e5fcff1f7a5e))
+* **deps:** update google-github-actions/release-please-action digest to 4c5670f ([#244](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/244)) ([ec7a54c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/ec7a54c354d4d6bd34836bf50c49ffab827bc963))
+* **deps:** update helm/chart-testing-action action to v2.6.0 ([#253](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/253)) ([980705a](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/980705a23d4942ba127b7b5d3a12888379ffd40c))
+
 ## [0.0.22](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.21...v0.0.22) (2023-10-15)
 
 
