@@ -115,6 +115,16 @@ spec:
                         type: boolean
                     type: object
                 type: object
+              kubeconfig:
+                description: Define the kubeconfig the Deployment must use. If empty,
+                  the Deployment will use the ServiceAccount provided by Kubernetes
+                  itself.
+                properties:
+                  key:
+                    type: string
+                  name:
+                    type: string
+                type: object
               noCache:
                 type: boolean
               nodeSelector:
