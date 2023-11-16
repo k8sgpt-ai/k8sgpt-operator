@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.0.24](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.23...v0.0.24) (2023-11-16)
+
+
+### Features
+
+* results are labeled ([#264](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/264)) ([d3f7b9d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d3f7b9da359ae729d901be8c47b87e7eb9f315e7))
+
+
+### Bug Fixes
+
+* **deps:** update kubernetes packages to v0.28.4 ([#241](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/241)) ([9898aa3](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9898aa3c4e6e3f22e3af23b61e0e3b45145c070a))
+* **deps:** update module github.com/onsi/ginkgo/v2 to v2.13.1 ([#260](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/260)) ([5f27b87](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5f27b87da2e564aa283c6bf3bacbe10ac885e723))
+* **deps:** update module google.golang.org/grpc to v1.59.0 ([#257](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/257)) ([01fb7a3](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/01fb7a302bcb29b724cc1ad1091e68629f1ff0cb))
+
+
+### Other
+
+* **deps:** update gcr.io/kubebuilder/kube-rbac-proxy docker tag to v0.15.0 ([#239](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/239)) ([37f2da6](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/37f2da633598b8e8e26838e62c59f1ca69dd34ef))
+* **deps:** update google-github-actions/release-please-action digest to db8f2c6 ([#255](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/255)) ([2224748](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/2224748dcd7fe1389f4193e8a15c2c80f46896ce))
+* **deps:** update helm/chart-testing-action action to v2.6.1 ([#254](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/254)) ([c082313](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c08231397cda0bc05c6b8baec68fdbc22e05b8b6))
+
 ## [0.0.23](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.22...v0.0.23) (2023-11-12)
 
 
