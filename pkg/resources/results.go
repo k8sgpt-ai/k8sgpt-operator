@@ -30,13 +30,21 @@ func MapResults(i integrations.Integrations, resultsSpec []v1alpha1.ResultSpec, 
 		name := strings.ReplaceAll(resultSpec.Name, "-", "")
 		name = strings.ReplaceAll(name, "/", "")
 		result := GetResult(resultSpec, name, namespace, backend)
+		labels := map[string]string{
+			"k8sgpts.k8sgpt.ai/name":      config.Name,
+			"k8sgpts.k8sgpt.ai/namespace": config.Namespace,
+		}
+		if config.Spec.AI != nil {
+			labels["k8sgpts.k8sgpt.ai/backend"] = config.Spec.AI.Backend
+		}
 		if backstageEnabled {
+			// add Backstage label
 			backstageLabel := i.BackstageLabel(resultSpec)
-			if len(backstageLabel) != 0 {
-				// add Backstage label
-				result.ObjectMeta.Labels = backstageLabel
+			for k, v := range backstageLabel {
+				labels[k] = v
 			}
 		}
+		result.SetLabels(labels)
 
 		rawResults[name] = result
 	}
