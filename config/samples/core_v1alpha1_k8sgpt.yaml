@@ -13,11 +13,12 @@ spec:
       key: openai-api-key
   noCache: false
   version: v0.3.17
-#  remoteCache:
-#    credentials:
-#      name: k8sgpt-sample-cache-secret
-#    bucketName: k8sgpt-debug-test
-#    region: eu-west-2
+  # remoteCache:
+  #   credentials:
+  #     name: k8sgpt-sample-cache-secret
+  #   s3:
+  #     bucketName: foo
+  #     region: us-west-1
   integrations:
     trivy:
       enabled: false

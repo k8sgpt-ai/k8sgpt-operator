@@ -16,13 +16,31 @@ func (c *Client) AddConfig(config *v1alpha1.K8sGPT) error {
 	// which emulates the behaviour of K8sGPT cli
 	if config.Spec.RemoteCache.S3 != nil {
 		req.Cache = &schemav1.Cache{
-			BucketName: config.Spec.RemoteCache.S3.BucketName,
-			Region:     config.Spec.RemoteCache.S3.Region,
+			CacheType: &schemav1.Cache_S3Cache{
+				S3Cache: &schemav1.S3Cache{
+					BucketName: config.Spec.RemoteCache.S3.BucketName,
+					Region:     config.Spec.RemoteCache.S3.Region,
+				},
+			},
 		}
 	} else if config.Spec.RemoteCache.Azure != nil {
 		req.Cache = &schemav1.Cache{
-			StorageAccount: config.Spec.RemoteCache.Azure.StorageAccount,
-			ContainerName:  config.Spec.RemoteCache.Azure.ContainerName,
+			CacheType: &schemav1.Cache_AzureCache{
+				AzureCache: &schemav1.AzureCache{
+					StorageAccount: config.Spec.RemoteCache.Azure.StorageAccount,
+					ContainerName:  config.Spec.RemoteCache.Azure.ContainerName,
+				},
+			},
+		}
+	} else if config.Spec.RemoteCache.GCS != nil {
+		req.Cache = &schemav1.Cache{
+			CacheType: &schemav1.Cache_GcsCache{
+				GcsCache: &schemav1.GCSCache{
+					BucketName: config.Spec.RemoteCache.GCS.BucketName,
+					Region:     config.Spec.RemoteCache.GCS.Region,
+					ProjectId:  config.Spec.RemoteCache.GCS.ProjectId,
+				},
+			},
 		}
 	}
 

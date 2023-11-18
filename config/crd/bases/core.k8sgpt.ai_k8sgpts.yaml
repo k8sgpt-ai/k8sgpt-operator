@@ -109,6 +109,15 @@ spec:
                       name:
                         type: string
                     type: object
+                  gcs:
+                    properties:
+                      bucketName:
+                        type: string
+                      projectId:
+                        type: string
+                      region:
+                        type: string
+                    type: object
                   s3:
                     properties:
                       bucketName:
