@@ -34,11 +34,12 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			Key:  "k8s-gpt",
 		}
 
-		kind     = "K8sGPT"
-		baseUrl  = "https://api.k8s-gpt.localhost"
-		model    = "345M"
-		version  = "v1alpha1"
-		language = "english"
+		kind       = "K8sGPT"
+		baseUrl    = "https://api.k8s-gpt.localhost"
+		model      = "345M"
+		repository = "ghcr.io/k8sgpt-ai/k8sgpt"
+		version    = "v1alpha1"
+		language   = "english"
 
 		Namespace = "k8sGPT"
 
@@ -60,9 +61,9 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 					Anonymize: true,
 					Language:  language,
 				},
-				Version: version,
-
-				NoCache: true,
+				Version:    version,
+				Repository: repository,
+				NoCache:    true,
 			},
 		}
 
@@ -84,9 +85,9 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 					Anonymize: false,
 					Language:  language,
 				},
-				Version: version,
-
-				NoCache: false,
+				Repository: repository,
+				Version:    version,
+				NoCache:    false,
 			},
 		}
 

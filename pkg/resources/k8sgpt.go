@@ -174,6 +174,7 @@ func GetClusterRole(config v1alpha1.K8sGPT) (*r1.ClusterRole, error) {
 func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 
 	// Create deployment
+	image := config.Spec.Repository + ":" + config.Spec.Version
 	replicas := int32(1)
 	deployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -209,7 +210,7 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 						{
 							Name:            "k8sgpt",
 							ImagePullPolicy: corev1.PullAlways,
-							Image:           "ghcr.io/k8sgpt-ai/k8sgpt:" + config.Spec.Version,
+							Image:           image,
 							Args: []string{
 								"serve",
 							},

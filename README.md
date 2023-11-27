@@ -47,7 +47,8 @@ spec:
     # anonymized: false
     # language: english
   noCache: false
-  version: v0.3.17
+  repository: ghcr.io/k8sgpt-ai/k8gpt
+  version: v0.3.8
   #integrations:
   # trivy:
   #  enabled: true
@@ -101,14 +102,16 @@ metadata:
   name: k8sgpt-sample
   namespace: k8sgpt-operator-system
 spec:
-  model: gpt-3.5-turbo
-  backend: openai
+  ai:
+    model: gpt-3.5-turbo
+    backend: openai
+    enabled: true
+    secret:
+      name: k8sgpt-sample-secret
+      key: openai-api-key
   noCache: false
-  version: v0.3.0
-  enableAI: true
-  secret:
-    name: k8sgpt-sample-secret
-    key: openai-api-key
+  repository: ghcr.io/k8sgpt-ai/k8gpt
+  version: v0.3.8
   remoteCache:
     credentials:
       name: k8sgpt-sample-cache-secret 
@@ -143,14 +146,16 @@ metadata:
   name: k8sgpt-sample
   namespace: k8sgpt-operator-system
 spec:
-  model: gpt-3.5-turbo
-  backend: openai
+  ai:
+    model: gpt-3.5-turbo
+    backend: openai
+    enabled: true
+    secret:
+      name: k8sgpt-sample-secret
+      key: openai-api-key
   noCache: false
-  version: v0.3.0
-  enableAI: true
-  secret:
-    name: k8sgpt-sample-secret
-    key: openai-api-key
+  repository: ghcr.io/k8sgpt-ai/k8gpt
+  version: v0.3.8
   remoteCache:
     credentials:
       name: k8sgpt-sample-cache-secret
@@ -194,6 +199,7 @@ spec:
     baseUrl: https://k8sgpt.openai.azure.com/
     engine: llm
   noCache: false
+  repository: ghcr.io/k8sgpt-ai/k8gpt
   version: v0.3.8
 EOF
 ```
@@ -224,6 +230,7 @@ spec:
     backend: localai
     baseUrl: http://local-ai.local-ai.svc.cluster.local:8080/v1
   noCache: false
+  repository: ghcr.io/k8sgpt-ai/k8gpt
   version: v0.3.8
 EOF
 ```
