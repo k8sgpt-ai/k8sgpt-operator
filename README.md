@@ -50,6 +50,8 @@ spec:
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
   version: v0.3.8
+  imagePullSecrets:
+    - name: aws-cred
   #integrations:
   # trivy:
   #  enabled: true
@@ -113,6 +115,8 @@ spec:
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
   version: v0.3.8
+  imagePullSecrets:
+    - name: aws-cred
   remoteCache:
     credentials:
       name: k8sgpt-sample-cache-secret 
@@ -157,6 +161,8 @@ spec:
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8gpt
   version: v0.3.8
+  imagePullSecrets:
+    - name: aws-cred
   remoteCache:
     credentials:
       name: k8sgpt-sample-cache-secret
@@ -202,6 +208,8 @@ spec:
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8gpt
   version: v0.3.8
+  imagePullSecrets:
+    - name: aws-cred
 EOF
 ```
 
@@ -233,6 +241,8 @@ spec:
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8gpt
   version: v0.3.8
+  imagePullSecrets:
+    - name: aws-cred
 EOF
 ```
    Note: ensure that the value of `baseUrl` is a properly constructed [DNS name](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#services) for the LocalAI Service. It should take the form: `http://local-ai.<namespace_local_ai_was_installed_in>.svc.cluster.local:8080/v1`.
