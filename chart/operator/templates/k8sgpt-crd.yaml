@@ -84,6 +84,13 @@ spec:
                 items:
                   type: string
                 type: array
+              imagePullSecrets:
+                items:
+                  properties:
+                    name:
+                      type: string
+                  type: object
+                type: array
               integrations:
                 properties:
                   trivy:
