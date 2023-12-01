@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.0.25](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.24...v0.0.25) (2023-12-01)
+
+
+### Features
+
+* rework cache & add gcs cache option ([#262](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/262)) ([c9f1290](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c9f1290bde9a25ea2ed7a16e6cc1d1c35b64d928))
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/onsi/ginkgo/v2 to v2.13.2 ([#275](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/275)) ([ed3a031](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/ed3a0315b1da79fc7ec7ea466bc1309f54c44592))
+
+
+### Other
+
+* **deps:** update docker/build-push-action digest to 4a13e50 ([#267](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/267)) ([7fedf7c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/7fedf7c967532a415d7631ed7b7399c5dc6dde5a))
+* fix missing integration ([#278](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/278)) ([e8cc010](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e8cc01042ed669c67ed9f2768fa10a7d4ba99dd6))
+
 ## [0.0.24](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.23...v0.0.24) (2023-11-16)
 
 
