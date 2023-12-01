@@ -97,7 +97,7 @@ type Integrations struct {
 // K8sGPTSpec defines the desired state of K8sGPT
 type K8sGPTSpec struct {
 	Version string `json:"version,omitempty"`
-	// +kubebuilder:default:=ghcr.io/k8sgpt-ai/k8gpt
+	// +kubebuilder:default:=ghcr.io/k8sgpt-ai/k8sgpt
 	Repository   string           `json:"repository,omitempty"`
 	NoCache      bool             `json:"noCache,omitempty"`
 	Filters      []string         `json:"filters,omitempty"`

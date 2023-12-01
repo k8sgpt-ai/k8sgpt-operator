@@ -127,7 +127,7 @@ spec:
                     type: object
                 type: object
               repository:
-                default: ghcr.io/k8sgpt-ai/k8gpt
+                default: ghcr.io/k8sgpt-ai/k8sgpt
                 type: string
               sink:
                 properties:
