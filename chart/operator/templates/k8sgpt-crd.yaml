@@ -46,6 +46,9 @@ spec:
                     - openai
                     - localai
                     - azureopenai
+                    - amazonbedrock
+                    - cohere
+                    - amazonsagemaker
                     type: string
                   baseUrl:
                     type: string
