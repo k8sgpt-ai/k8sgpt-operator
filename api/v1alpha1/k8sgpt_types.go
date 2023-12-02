@@ -71,7 +71,7 @@ type WebhookRef struct {
 
 type AISpec struct {
 	// +kubebuilder:default:=openai
-	// +kubebuilder:validation:Enum=openai;localai;azureopenai
+	// +kubebuilder:validation:Enum=openai;localai;azureopenai;amazonbedrock;cohere;amazonsagemaker
 	Backend string `json:"backend"`
 	BaseUrl string `json:"baseUrl,omitempty"`
 	// +kubebuilder:default:=gpt-3.5-turbo
@@ -97,7 +97,7 @@ type Integrations struct {
 // K8sGPTSpec defines the desired state of K8sGPT
 type K8sGPTSpec struct {
 	Version string `json:"version,omitempty"`
-	// +kubebuilder:default:=ghcr.io/k8sgpt-ai/k8gpt
+	// +kubebuilder:default:=ghcr.io/k8sgpt-ai/k8sgpt
 	Repository   string           `json:"repository,omitempty"`
 	NoCache      bool             `json:"noCache,omitempty"`
 	Filters      []string         `json:"filters,omitempty"`
@@ -109,9 +109,12 @@ type K8sGPTSpec struct {
 }
 
 const (
-	OpenAI      = "openai"
-	AzureOpenAI = "azureopenai"
-	LocalAI     = "localai"
+	OpenAI          = "openai"
+	AzureOpenAI     = "azureopenai"
+	LocalAI         = "localai"
+	AmazonBedrock   = "amazonbedrock"
+	AmazonSageMaker = "AmazonSageMaker"
+	Cohere          = "cohere"
 )
 
 // K8sGPTStatus defines the observed state of K8sGPT

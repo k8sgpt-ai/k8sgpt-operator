@@ -47,7 +47,7 @@ spec:
     # anonymized: false
     # language: english
   noCache: false
-  repository: ghcr.io/k8sgpt-ai/k8gpt
+  repository: ghcr.io/k8sgpt-ai/k8sgpt
   version: v0.3.8
   #integrations:
   # trivy:
@@ -58,7 +58,7 @@ spec:
   # sink:
   #   type: slack
   #   webhook: <webhook-url>
-  # extraOptions:
+  #extraOptions:
   #   backstage:
   #     enabled: true
 EOF
