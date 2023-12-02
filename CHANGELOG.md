@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.26](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.25...v0.0.26) (2023-12-02)
+
+
+### Bug Fixes
+
+* **deps:** update k8s.io/utils digest to b307cd5 ([#273](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/273)) ([9f89969](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9f8996931c6bea13b9a7c1b6e4ddc0d87791ebd4))
+
+
+### Other
+
+* update kube marker ([#281](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/281)) ([4617b30](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/4617b30fadc4939ce8c02929c0a9c64b30d98ee2))
+
 ## [0.0.25](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.24...v0.0.25) (2023-12-01)
 
 
