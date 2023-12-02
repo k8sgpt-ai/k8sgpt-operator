@@ -110,7 +110,7 @@ spec:
       name: k8sgpt-sample-secret
       key: openai-api-key
   noCache: false
-  repository: ghcr.io/k8sgpt-ai/k8gpt
+  repository: ghcr.io/k8sgpt-ai/k8sgpt
   version: v0.3.8
   remoteCache:
     credentials:
