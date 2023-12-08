@@ -66,7 +66,7 @@ var (
 		Help: "The total number of backend AI calls",
 	}, []string{"backend", "deployment", "namespace"})
 	// k8sNumberOfFailedBackendAICalls is a metric for the number of failed backend AI calls
-	k8sNumberOfFailedBackendAICalls = prometheus.NewCounterVec(prometheus.CounterOpts{
+	k8sgptNumberOfFailedBackendAICalls = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Name: "k8sgpt_number_of_failed_backend_ai_calls",
 		Help: "The total number of failed backend AI calls",
 	}, []string{"backend", "deployment", "namespace"})
@@ -204,7 +204,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		response, err := k8sgptClient.ProcessAnalysis(deployment, k8sgptConfig)
 		if err != nil {
 			if k8sgptConfig.Spec.AI.Enabled {
-				k8sgptNumberOfBackendAICalls.With(prometheus.Labels{
+				k8sgptNumberOfFailedBackendAICalls.With(prometheus.Labels{
 					"backend":    k8sgptConfig.Spec.AI.Backend,
 					"deployment": deployment.Name,
 					"namespace":  deployment.Namespace}).Inc()
@@ -326,7 +326,10 @@ func (r *K8sGPTReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&corev1alpha1.K8sGPT{}).
 		Complete(r)
 
-	metrics.Registry.MustRegister(k8sgptReconcileErrorCount, k8sgptNumberOfResults, k8sgptNumberOfResultsByType)
+	metrics.Registry.MustRegister(k8sgptReconcileErrorCount,
+		k8sgptNumberOfResults,
+		k8sgptNumberOfResultsByType,
+		k8sgptNumberOfBackendAICalls, k8sgptNumberOfFailedBackendAICalls)
 
 	return c
 }
