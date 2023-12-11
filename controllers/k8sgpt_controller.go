@@ -60,6 +60,16 @@ var (
 		Name: "k8sgpt_number_of_results_by_type",
 		Help: "The total number of results by type",
 	}, []string{"kind", "name"})
+	// k8sgptNumberOfBackendAICalls is a metric for the number of backend AI calls
+	k8sgptNumberOfBackendAICalls = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "k8sgpt_number_of_backend_ai_calls",
+		Help: "The total number of backend AI calls",
+	}, []string{"backend", "deployment", "namespace"})
+	// k8sNumberOfFailedBackendAICalls is a metric for the number of failed backend AI calls
+	k8sgptNumberOfFailedBackendAICalls = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "k8sgpt_number_of_failed_backend_ai_calls",
+		Help: "The total number of failed backend AI calls",
+	}, []string{"backend", "deployment", "namespace"})
 )
 
 // K8sGPTReconciler reconciles a K8sGPT object
@@ -158,7 +168,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			return r.finishReconcile(nil, false)
 		}
 
-		// If the deployment is active, we will query it directly for analysis data
+		// If the deployment is active, we will query it directly for sis data
 		address, err := kclient.GenerateAddress(ctx, r.Client, k8sgptConfig)
 		if err != nil {
 			k8sgptReconcileErrorCount.Inc()
@@ -193,9 +203,23 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 		response, err := k8sgptClient.ProcessAnalysis(deployment, k8sgptConfig)
 		if err != nil {
+			if k8sgptConfig.Spec.AI.Enabled {
+				k8sgptNumberOfFailedBackendAICalls.With(prometheus.Labels{
+					"backend":    k8sgptConfig.Spec.AI.Backend,
+					"deployment": deployment.Name,
+					"namespace":  deployment.Namespace}).Inc()
+			}
 			k8sgptReconcileErrorCount.Inc()
 			return r.finishReconcile(err, false)
 		}
+		// Update metrics count
+		if k8sgptConfig.Spec.AI.Enabled {
+			k8sgptNumberOfBackendAICalls.With(prometheus.Labels{
+				"backend":    k8sgptConfig.Spec.AI.Backend,
+				"deployment": deployment.Name,
+				"namespace":  deployment.Namespace}).Inc()
+		}
+
 		// Parse the k8sgpt-deployment response into a list of results
 		k8sgptNumberOfResults.Set(float64(len(response.Results)))
 		rawResults, err := resources.MapResults(*r.Integrations, response.Results, *k8sgptConfig)
@@ -302,7 +326,10 @@ func (r *K8sGPTReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&corev1alpha1.K8sGPT{}).
 		Complete(r)
 
-	metrics.Registry.MustRegister(k8sgptReconcileErrorCount, k8sgptNumberOfResults, k8sgptNumberOfResultsByType)
+	metrics.Registry.MustRegister(k8sgptReconcileErrorCount,
+		k8sgptNumberOfResults,
+		k8sgptNumberOfResultsByType,
+		k8sgptNumberOfBackendAICalls, k8sgptNumberOfFailedBackendAICalls)
 
 	return c
 }
