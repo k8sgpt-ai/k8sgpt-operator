@@ -98,6 +98,10 @@ spec:
                 type: object
               noCache:
                 type: boolean
+              nodeSelector:
+                additionalProperties:
+                  type: string
+                type: object
               remoteCache:
                 properties:
                   azure:
