@@ -213,7 +213,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			return r.finishReconcile(err, false)
 		}
 		// Update metrics count
-		if k8sgptConfig.Spec.AI.Enabled {
+		if k8sgptConfig.Spec.AI.Enabled && len(response.Results) > 0 {
 			k8sgptNumberOfBackendAICalls.With(prometheus.Labels{
 				"backend":    k8sgptConfig.Spec.AI.Backend,
 				"deployment": deployment.Name,
