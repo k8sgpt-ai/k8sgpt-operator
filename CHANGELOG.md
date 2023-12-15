@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.0.27](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.26...v0.0.27) (2023-12-14)
+
+
+### Features
+
+* added llm metric analysis count ([#290](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/290)) ([abb97ab](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/abb97abc4c5785f8d5dbc020fdd390f5e0312ebd))
+
+
+### Other
+
+* **deps:** update actions/setup-go action to v5 ([#288](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/288)) ([2b15843](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/2b158432859b734ffa09d524fb7e2dfb4e2780f0))
+* **deps:** update anchore/sbom-action action to v0.15.1 ([#271](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/271)) ([0a41887](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0a4188744302e54cb4f2335b3e179bc582f72210))
+* **deps:** update google-github-actions/release-please-action action to v4 ([#283](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/283)) ([fa91448](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/fa91448a2dcdd0f6002d3b850fbc227752eb7edd))
+* **deps:** update google-github-actions/release-please-action digest to a2d8d68 ([#289](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/289)) ([87b8767](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/87b8767a6967f843adb4cdc9d33cc2c47242c495))
+* this fix will only increment metrics if there are actually results which implies the backend was called ([#295](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/295)) ([f496f3e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/f496f3e03c2981334ea19880627e0191d158f2db))
+
 ## [0.0.26](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.25...v0.0.26) (2023-12-02)
 
 
