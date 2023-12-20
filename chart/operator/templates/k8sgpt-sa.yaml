@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "k8sgpt"
+  labels:
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: k8sgpt-operator
+    app.kubernetes.io/part-of: k8sgpt-operator
+    {{- include "chart.labels" . | nindent 4 }}
+
