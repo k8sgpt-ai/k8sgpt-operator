@@ -98,14 +98,15 @@ type Integrations struct {
 type K8sGPTSpec struct {
 	Version string `json:"version,omitempty"`
 	// +kubebuilder:default:=ghcr.io/k8sgpt-ai/k8sgpt
-	Repository   string           `json:"repository,omitempty"`
-	NoCache      bool             `json:"noCache,omitempty"`
-	Filters      []string         `json:"filters,omitempty"`
-	ExtraOptions *ExtraOptionsRef `json:"extraOptions,omitempty"`
-	Sink         *WebhookRef      `json:"sink,omitempty"`
-	AI           *AISpec          `json:"ai,omitempty"`
-	RemoteCache  *RemoteCacheRef  `json:"remoteCache,omitempty"`
-	Integrations *Integrations    `json:"integrations,omitempty"`
+	Repository   string            `json:"repository,omitempty"`
+	NoCache      bool              `json:"noCache,omitempty"`
+	Filters      []string          `json:"filters,omitempty"`
+	ExtraOptions *ExtraOptionsRef  `json:"extraOptions,omitempty"`
+	Sink         *WebhookRef       `json:"sink,omitempty"`
+	AI           *AISpec           `json:"ai,omitempty"`
+	RemoteCache  *RemoteCacheRef   `json:"remoteCache,omitempty"`
+	Integrations *Integrations     `json:"integrations,omitempty"`
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 const (

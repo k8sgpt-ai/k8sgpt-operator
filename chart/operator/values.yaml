@@ -48,6 +48,10 @@ controllerManager:
         cpu: 10m
         memory: 64Mi
   replicas: 1
+  ## Node labels for pod assignment
+  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+  #
+  nodeSelector: {}
 kubernetesClusterDomain: cluster.local
 metricsService:
   ports:
