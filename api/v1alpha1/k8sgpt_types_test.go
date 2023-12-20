@@ -64,6 +64,9 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 				Version:    version,
 				Repository: repository,
 				NoCache:    true,
+				NodeSelector: map[string]string{
+					"nodepool": "management",
+				},
 			},
 		}
 
@@ -88,6 +91,9 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 				Repository: repository,
 				Version:    version,
 				NoCache:    false,
+				NodeSelector: map[string]string{
+					"nodepool": "management",
+				},
 			},
 		}
 

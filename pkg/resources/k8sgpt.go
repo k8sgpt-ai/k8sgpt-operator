@@ -261,6 +261,7 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 							Name:         "k8sgpt-vol",
 						},
 					},
+					NodeSelector: config.Spec.NodeSelector,
 				},
 			},
 		},
