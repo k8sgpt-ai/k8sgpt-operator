@@ -1,6 +1,6 @@
 module github.com/k8sgpt-ai/k8sgpt-operator
 
-go 1.19
+go 1.21
 
 require (
 	buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.3.0-20231116211251-9f5041346631.2
