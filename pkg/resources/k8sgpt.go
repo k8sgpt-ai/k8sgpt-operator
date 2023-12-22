@@ -93,6 +93,13 @@ func GetServiceAccount(config v1alpha1.K8sGPT) (*corev1.ServiceAccount, error) {
 				},
 			},
 		},
+		ImagePullSecrets: []corev1.LocalObjectReference{},
+	}
+	//Add image pull secrets to service account
+	for _, secret := range config.Spec.ImagePullSecrets {
+		serviceAccount.ImagePullSecrets = append(serviceAccount.ImagePullSecrets, corev1.LocalObjectReference{
+			Name: secret.Name,
+		})
 	}
 
 	return &serviceAccount, nil

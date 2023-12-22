@@ -155,7 +155,7 @@ spec:
       name: k8sgpt-sample-secret
       key: openai-api-key
   noCache: false
-  repository: ghcr.io/k8sgpt-ai/k8gpt
+  repository: ghcr.io/k8sgpt-ai/k8sgpt
   version: v0.3.8
   remoteCache:
     credentials:
@@ -200,7 +200,7 @@ spec:
     baseUrl: https://k8sgpt.openai.azure.com/
     engine: llm
   noCache: false
-  repository: ghcr.io/k8sgpt-ai/k8gpt
+  repository: ghcr.io/k8sgpt-ai/k8sgpt
   version: v0.3.8
 EOF
 ```
@@ -231,13 +231,46 @@ spec:
     backend: localai
     baseUrl: http://local-ai.local-ai.svc.cluster.local:8080/v1
   noCache: false
-  repository: ghcr.io/k8sgpt-ai/k8gpt
+  repository: ghcr.io/k8sgpt-ai/k8sgpt
   version: v0.3.8
 EOF
 ```
    Note: ensure that the value of `baseUrl` is a properly constructed [DNS name](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#services) for the LocalAI Service. It should take the form: `http://local-ai.<namespace_local_ai_was_installed_in>.svc.cluster.local:8080/v1`.
 
 4. Same as step 4. in the example above.
+
+</details>
+
+## K8sGPT Configuration Options
+
+<details>
+
+<summary>ImagePullSecrets</summary>
+You can use custom k8sgpt image by modifying `repository`, `version`, `imagePullSecrets`.
+`version` actually works as image tag.
+
+```sh
+kubectl apply -f - << EOF
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: K8sGPT
+metadata:
+  name: k8sgpt-sample
+  namespace: k8sgpt-operator-system
+spec:
+  ai:
+    enabled: true
+    model: gpt-3.5-turbo
+    backend: openai
+    secret:
+      name: k8sgpt-sample-secret
+      key: openai-api-key
+  noCache: false
+  repository: sample.repository/k8sgpt
+  version: sample-tag
+  imagePullSecrets:
+    - name: sample-secret
+EOF
+```
 
 </details>
 
