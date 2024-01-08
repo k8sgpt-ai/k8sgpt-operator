@@ -145,6 +145,13 @@ spec:
                 type: string
               sink:
                 properties:
+                  secret:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                    type: object
                   type:
                     enum:
                     - slack
