@@ -29,7 +29,9 @@ import (
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
 	"github.com/prometheus/client_golang/prometheus"
 	v1 "k8s.io/api/apps/v1"
+	kcorev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -288,8 +290,24 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 		var sinkType sinks.ISink
 		if sinkEnabled {
+			var sinkSecret string
+
+			if k8sgptConfig.Spec.Sink.Secret != nil {
+				secret := &kcorev1.Secret{}
+				secretNamespacedName := types.NamespacedName{
+					Namespace: req.Namespace,
+					Name:      k8sgptConfig.Spec.Sink.Secret.Name,
+				}
+				if err := r.Get(ctx, secretNamespacedName, secret); err != nil {
+					k8sgptReconcileErrorCount.Inc()
+					return r.finishReconcile(fmt.Errorf("could not find sink secret: %w", err), false)
+				}
+
+				sinkSecret = string(secret.Data[k8sgptConfig.Spec.Sink.Secret.Key])
+			}
+
 			sinkType = sinks.NewSink(k8sgptConfig.Spec.Sink.Type)
-			sinkType.Configure(*k8sgptConfig, *r.SinkClient)
+			sinkType.Configure(*k8sgptConfig, *r.SinkClient, sinkSecret)
 		}
 
 		for _, result := range latestResultList.Items {
