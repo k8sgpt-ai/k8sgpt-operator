@@ -274,6 +274,19 @@ EOF
 
 </details>
 
+<details>
+<summary>sink (integrations) </summary>
+
+Optional parameters available for sink.  
+('type', 'webhook' are required parameters.)
+
+| tool       | channel | icon_url | username |
+|------------|---------|----------|----------|
+| Slack      |         |          |          |
+| Mattermost | ✔️       | ✔️        | ✔️        |
+
+</details>
+
 ## Helm values
 
 For details please see [here](chart/operator/values.yaml)
