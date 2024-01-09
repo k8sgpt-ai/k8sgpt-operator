@@ -72,6 +72,8 @@ var (
 		Name: "k8sgpt_number_of_failed_backend_ai_calls",
 		Help: "The total number of failed backend AI calls",
 	}, []string{"backend", "deployment", "namespace"})
+	// analysisFailureCount is for the number of analysis failures
+	analysisFailureCount int
 )
 
 // K8sGPTReconciler reconciles a K8sGPT object
@@ -212,8 +214,21 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					"namespace":  deployment.Namespace}).Inc()
 			}
 			k8sgptReconcileErrorCount.Inc()
+			analysisFailureCount++
+			if analysisFailureCount > 5 {
+				k8sgptConfig.Spec.AI.Enabled = false
+				err = r.Update(ctx, k8sgptConfig)
+				if err != nil {
+					k8sgptReconcileErrorCount.Inc()
+					return r.finishReconcile(err, false)
+				}
+				analysisFailureCount = 0
+			}
 			return r.finishReconcile(err, false)
 		}
+		// Reset analysisFailureCount
+		analysisFailureCount = 0
+
 		// Update metrics count
 		if k8sgptConfig.Spec.AI.Enabled && len(response.Results) > 0 {
 			k8sgptNumberOfBackendAICalls.With(prometheus.Labels{
