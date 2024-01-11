@@ -145,6 +145,10 @@ spec:
                 type: string
               sink:
                 properties:
+                  channel:
+                    type: string
+                  icon_url:
+                    type: string
                   secret:
                     properties:
                       key:
@@ -155,6 +159,9 @@ spec:
                   type:
                     enum:
                     - slack
+                    - mattermost
+                    type: string
+                  username:
                     type: string
                   webhook:
                     type: string

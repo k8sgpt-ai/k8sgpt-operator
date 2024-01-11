@@ -16,7 +16,9 @@ func NewSink(sinkType string) ISink {
 	switch sinkType {
 	case "slack":
 		return &SlackSink{}
-		//Introduce more Sink Providers
+	//Introduce more Sink Providers
+	case "mattermost":
+		return &MattermostSink{}
 	default:
 		return &SlackSink{}
 	}
