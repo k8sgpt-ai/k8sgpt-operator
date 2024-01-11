@@ -43,7 +43,8 @@ func buildSlackMessage(kind, name, details, k8sgptCR string) SlackMessage {
 	}
 }
 
-func (s *SlackSink) Configure(config v1alpha1.K8sGPT, c Client) {
+func (s *SlackSink) Configure(config v1alpha1.K8sGPT, c Client, secret string) {
+	_ = secret
 	s.Endpoint = config.Spec.Sink.Endpoint
 	s.Client = c
 	// take the name of the K8sGPT Custom Resource
