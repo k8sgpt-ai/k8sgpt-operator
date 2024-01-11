@@ -286,7 +286,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		if len(latestResultList.Items) == 0 {
 			return r.finishReconcile(nil, false)
 		}
-		sinkEnabled := k8sgptConfig.Spec.Sink != nil && k8sgptConfig.Spec.Sink.Type != "" && k8sgptConfig.Spec.Sink.Endpoint != ""
+		sinkEnabled := k8sgptConfig.Spec.Sink != nil && k8sgptConfig.Spec.Sink.Type != "" && (k8sgptConfig.Spec.Sink.Endpoint != "" || k8sgptConfig.Spec.Sink.Secret != nil)
 
 		var sinkType sinks.ISink
 		if sinkEnabled {
