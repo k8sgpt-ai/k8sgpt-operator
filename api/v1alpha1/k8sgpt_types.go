@@ -64,9 +64,12 @@ type GCSBackend struct {
 }
 
 type WebhookRef struct {
-	// +kubebuilder:validation:Enum=slack
+	// +kubebuilder:validation:Enum=slack;mattermost
 	Type     string `json:"type,omitempty"`
 	Endpoint string `json:"webhook,omitempty"`
+	Channel  string `json:"channel,omitempty"`
+	UserName string `json:"username,omitempty"`
+	IconURL  string `json:"icon_url,omitempty"`
 }
 
 type AISpec struct {
