@@ -291,7 +291,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 		var sinkType sinks.ISink
 		if sinkEnabled {
-			var sinkSecret string
+			var sinkSecretValue string
 
 			if k8sgptConfig.Spec.Sink.Secret != nil {
 				secret := &kcorev1.Secret{}
@@ -304,10 +304,10 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					return r.finishReconcile(fmt.Errorf("could not find sink secret: %w", err), false)
 				}
 
-				sinkSecret = string(secret.Data[k8sgptConfig.Spec.Sink.Secret.Key])
+				sinkSecretValue = string(secret.Data[k8sgptConfig.Spec.Sink.Secret.Key])
 			}
 			sinkType = sinks.NewSink(k8sgptConfig.Spec.Sink.Type)
-			sinkType.Configure(*k8sgptConfig, *r.SinkClient, sinkSecret)
+			sinkType.Configure(*k8sgptConfig, *r.SinkClient, sinkSecretValue)
 		}
 
 		for _, result := range latestResultList.Items {

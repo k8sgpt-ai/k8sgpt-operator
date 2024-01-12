@@ -50,8 +50,8 @@ func buildMattermostMessage(kind, name, details, k8sgptCR, channel, username, ic
 	}
 }
 
-func (s *MattermostSink) Configure(config v1alpha1.K8sGPT, c Client, secret string) {
-	s.Endpoint = secret
+func (s *MattermostSink) Configure(config v1alpha1.K8sGPT, c Client, sinkSecretValue string) {
+	s.Endpoint = sinkSecretValue
 	if s.Endpoint == "" {
 		s.Endpoint = config.Spec.Sink.Endpoint
 	}
