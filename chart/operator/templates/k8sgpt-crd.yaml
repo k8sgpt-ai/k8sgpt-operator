@@ -149,6 +149,13 @@ spec:
                     type: string
                   icon_url:
                     type: string
+                  secret:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                    type: object
                   type:
                     enum:
                     - slack
@@ -158,12 +165,6 @@ spec:
                     type: string
                   webhook:
                     type: string
-                  secret:
-                    properties:
-                      key:
-                        type: string
-                      name:
-                        type: string
                 type: object
               version:
                 type: string
