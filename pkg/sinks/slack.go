@@ -43,8 +43,12 @@ func buildSlackMessage(kind, name, details, k8sgptCR string) SlackMessage {
 	}
 }
 
-func (s *SlackSink) Configure(config v1alpha1.K8sGPT, c Client) {
-	s.Endpoint = config.Spec.Sink.Endpoint
+func (s *SlackSink) Configure(config v1alpha1.K8sGPT, c Client, sinkSecretValue string) {
+	s.Endpoint = sinkSecretValue
+	// check if the webhook url is passed as a sinkSecretValue, if not use spec.sink.webhook
+	if s.Endpoint == "" {
+		s.Endpoint = config.Spec.Sink.Endpoint
+	}
 	s.Client = c
 	// take the name of the K8sGPT Custom Resource
 	s.K8sGPT = config.Name

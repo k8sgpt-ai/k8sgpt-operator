@@ -58,7 +58,10 @@ spec:
   #   - Ingress
   # sink:
   #   type: slack
-  #   webhook: <webhook-url>
+  #   webhook: <webhook-url> # use the sink secret if you want to keep your webhook url private
+  #   secret:
+  #     name: slack-webhook
+  #     key: url
   #extraOptions:
   #   backstage:
   #     enabled: true
