@@ -13,6 +13,12 @@ grafanaDashboard:
   label:
     key: grafana_dashboard
     value: "1"
+  # create GrafanaDashboard custom resource referencing to the configMap.
+  # according to https://grafana-operator.github.io/grafana-operator/docs/examples/dashboard_from_configmap/readme/
+  grafanaOperator:
+    enabled: false
+    matchLabels:
+      dashboards: "grafana"
 controllerManager:
   kubeRbacProxy:
     containerSecurityContext:
