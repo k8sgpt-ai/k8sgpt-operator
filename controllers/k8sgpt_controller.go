@@ -72,8 +72,8 @@ var (
 		Name: "k8sgpt_number_of_failed_backend_ai_calls",
 		Help: "The total number of failed backend AI calls",
 	}, []string{"backend", "deployment", "namespace"})
-	// analysisFailureCount is for the number of analysis failures
-	analysisFailureCount int
+	// analysisRetryCount is for the number of analysis failures
+	analysisRetryCount int
 )
 
 // K8sGPTReconciler reconciles a K8sGPT object
@@ -133,6 +133,17 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		}
 		// Stop reconciliation as the item is being deleted
 		return r.finishReconcile(nil, false)
+	}
+
+	if k8sgptConfig.Spec.AI.BackOff == nil {
+		k8sgptConfig.Spec.AI.BackOff = &corev1alpha1.BackOff{
+			Enabled:    true,
+			MaxRetries: 5,
+		}
+		if err := r.Update(ctx, k8sgptConfig); err != nil {
+			k8sgptReconcileErrorCount.Inc()
+			return r.finishReconcile(err, false)
+		}
 	}
 
 	// Check and see if the instance is new or has a K8sGPT deployment in flight
@@ -212,22 +223,26 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					"backend":    k8sgptConfig.Spec.AI.Backend,
 					"deployment": deployment.Name,
 					"namespace":  deployment.Namespace}).Inc()
+
+				if k8sgptConfig.Spec.AI.BackOff.Enabled {
+					if analysisRetryCount > k8sgptConfig.Spec.AI.BackOff.MaxRetries {
+						k8sgptConfig.Spec.AI.Enabled = false
+						err = r.Update(ctx, k8sgptConfig)
+						if err != nil {
+							k8sgptReconcileErrorCount.Inc()
+							return r.finishReconcile(err, false)
+						}
+						fmt.Printf("Disabled AI backend %s due to failures exceeding max retries\n", k8sgptConfig.Spec.AI.Backend)
+						analysisRetryCount = 0
+					}
+					analysisRetryCount++
+				}
 			}
 			k8sgptReconcileErrorCount.Inc()
-			analysisFailureCount++
-			if analysisFailureCount > 5 {
-				k8sgptConfig.Spec.AI.Enabled = false
-				err = r.Update(ctx, k8sgptConfig)
-				if err != nil {
-					k8sgptReconcileErrorCount.Inc()
-					return r.finishReconcile(err, false)
-				}
-				analysisFailureCount = 0
-			}
 			return r.finishReconcile(err, false)
 		}
-		// Reset analysisFailureCount
-		analysisFailureCount = 0
+		// Reset analysisRetryCount
+		analysisRetryCount = 0
 
 		// Update metrics count
 		if k8sgptConfig.Spec.AI.Enabled && len(response.Results) > 0 {
