@@ -74,6 +74,8 @@ var (
 	}, []string{"backend", "deployment", "namespace"})
 	// analysisRetryCount is for the number of analysis failures
 	analysisRetryCount int
+	// allowBackendAIRequest a circuit breaker that switching on/off backend AI calls
+	allowBackendAIRequest = true
 )
 
 // K8sGPTReconciler reconciles a K8sGPT object
@@ -216,7 +218,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			}
 		}
 
-		response, err := k8sgptClient.ProcessAnalysis(deployment, k8sgptConfig)
+		response, err := k8sgptClient.ProcessAnalysis(deployment, k8sgptConfig, allowBackendAIRequest)
 		if err != nil {
 			if k8sgptConfig.Spec.AI.Enabled {
 				k8sgptNumberOfFailedBackendAICalls.With(prometheus.Labels{
@@ -226,12 +228,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 				if k8sgptConfig.Spec.AI.BackOff.Enabled {
 					if analysisRetryCount > k8sgptConfig.Spec.AI.BackOff.MaxRetries {
-						k8sgptConfig.Spec.AI.Enabled = false
-						err = r.Update(ctx, k8sgptConfig)
-						if err != nil {
-							k8sgptReconcileErrorCount.Inc()
-							return r.finishReconcile(err, false)
-						}
+						allowBackendAIRequest = false
 						fmt.Printf("Disabled AI backend %s due to failures exceeding max retries\n", k8sgptConfig.Spec.AI.Backend)
 						analysisRetryCount = 0
 					}
