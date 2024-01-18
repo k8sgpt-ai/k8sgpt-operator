@@ -40,6 +40,18 @@ spec:
                   anonymized:
                     default: true
                     type: boolean
+                  backOff:
+                    properties:
+                      enabled:
+                        default: true
+                        type: boolean
+                      maxRetries:
+                        default: 5
+                        type: integer
+                    required:
+                      - enabled
+                      - maxRetries
+                    type: object
                   backend:
                     default: openai
                     enum:

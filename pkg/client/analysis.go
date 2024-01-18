@@ -12,11 +12,11 @@ import (
 	v1 "k8s.io/api/apps/v1"
 )
 
-func (c *Client) ProcessAnalysis(deployment v1.Deployment, config *v1alpha1.K8sGPT) (*common.K8sGPTReponse, error) {
+func (c *Client) ProcessAnalysis(deployment v1.Deployment, config *v1alpha1.K8sGPT, allowAIRequest bool) (*common.K8sGPTReponse, error) {
 
 	client := rpc.NewServerServiceClient(c.conn)
 	req := &schemav1.AnalyzeRequest{
-		Explain:   config.Spec.AI.Enabled,
+		Explain:   config.Spec.AI.Enabled && allowAIRequest,
 		Nocache:   config.Spec.NoCache,
 		Backend:   config.Spec.AI.Backend,
 		Filters:   config.Spec.Filters,

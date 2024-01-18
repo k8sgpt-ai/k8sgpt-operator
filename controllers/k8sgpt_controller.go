@@ -72,6 +72,10 @@ var (
 		Name: "k8sgpt_number_of_failed_backend_ai_calls",
 		Help: "The total number of failed backend AI calls",
 	}, []string{"backend", "deployment", "namespace"})
+	// analysisRetryCount is for the number of analysis failures
+	analysisRetryCount int
+	// allowBackendAIRequest a circuit breaker that switching on/off backend AI calls
+	allowBackendAIRequest = true
 )
 
 // K8sGPTReconciler reconciles a K8sGPT object
@@ -131,6 +135,17 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		}
 		// Stop reconciliation as the item is being deleted
 		return r.finishReconcile(nil, false)
+	}
+
+	if k8sgptConfig.Spec.AI.BackOff == nil {
+		k8sgptConfig.Spec.AI.BackOff = &corev1alpha1.BackOff{
+			Enabled:    true,
+			MaxRetries: 5,
+		}
+		if err := r.Update(ctx, k8sgptConfig); err != nil {
+			k8sgptReconcileErrorCount.Inc()
+			return r.finishReconcile(err, false)
+		}
 	}
 
 	// Check and see if the instance is new or has a K8sGPT deployment in flight
@@ -203,17 +218,29 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			}
 		}
 
-		response, err := k8sgptClient.ProcessAnalysis(deployment, k8sgptConfig)
+		response, err := k8sgptClient.ProcessAnalysis(deployment, k8sgptConfig, allowBackendAIRequest)
 		if err != nil {
 			if k8sgptConfig.Spec.AI.Enabled {
 				k8sgptNumberOfFailedBackendAICalls.With(prometheus.Labels{
 					"backend":    k8sgptConfig.Spec.AI.Backend,
 					"deployment": deployment.Name,
 					"namespace":  deployment.Namespace}).Inc()
+
+				if k8sgptConfig.Spec.AI.BackOff.Enabled {
+					if analysisRetryCount > k8sgptConfig.Spec.AI.BackOff.MaxRetries {
+						allowBackendAIRequest = false
+						fmt.Printf("Disabled AI backend %s due to failures exceeding max retries\n", k8sgptConfig.Spec.AI.Backend)
+						analysisRetryCount = 0
+					}
+					analysisRetryCount++
+				}
 			}
 			k8sgptReconcileErrorCount.Inc()
 			return r.finishReconcile(err, false)
 		}
+		// Reset analysisRetryCount
+		analysisRetryCount = 0
+
 		// Update metrics count
 		if k8sgptConfig.Spec.AI.Enabled && len(response.Results) > 0 {
 			k8sgptNumberOfBackendAICalls.With(prometheus.Labels{

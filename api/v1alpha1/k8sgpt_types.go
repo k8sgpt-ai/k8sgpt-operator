@@ -73,11 +73,19 @@ type WebhookRef struct {
 	Secret   *SecretRef `json:"secret,omitempty"`
 }
 
+type BackOff struct {
+	// +kubebuilder:default:=true
+	Enabled bool `json:"enabled"`
+	// +kubebuilder:default:=5
+	MaxRetries int `json:"maxRetries"`
+}
+
 type AISpec struct {
 	// +kubebuilder:default:=openai
 	// +kubebuilder:validation:Enum=openai;localai;azureopenai;amazonbedrock;cohere;amazonsagemaker
-	Backend string `json:"backend"`
-	BaseUrl string `json:"baseUrl,omitempty"`
+	Backend string   `json:"backend"`
+	BackOff *BackOff `json:"backOff,omitempty"`
+	BaseUrl string   `json:"baseUrl,omitempty"`
 	// +kubebuilder:default:=gpt-3.5-turbo
 	Model   string     `json:"model,omitempty"`
 	Engine  string     `json:"engine,omitempty"`
