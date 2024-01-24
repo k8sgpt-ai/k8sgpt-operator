@@ -124,6 +124,9 @@ type K8sGPTSpec struct {
 	RemoteCache      *RemoteCacheRef    `json:"remoteCache,omitempty"`
 	Integrations     *Integrations      `json:"integrations,omitempty"`
 	NodeSelector     map[string]string  `json:"nodeSelector,omitempty"`
+	// Define the kubeconfig the Deployment must use.
+	// If empty, the Deployment will use the ServiceAccount provided by Kubernetes itself.
+	Kubeconfig *SecretRef `json:"kubeconfig,omitempty"`
 }
 
 const (

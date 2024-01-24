@@ -22,11 +22,6 @@ import (
 
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 
-	kclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
-	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations"
-	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
-	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/sinks"
-	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
 	"github.com/prometheus/client_golang/prometheus"
 	v1 "k8s.io/api/apps/v1"
 	kcorev1 "k8s.io/api/core/v1"
@@ -37,6 +32,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
+
+	kclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/sinks"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
 )
 
 const (
@@ -151,7 +152,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	// Check and see if the instance is new or has a K8sGPT deployment in flight
 	deployment := v1.Deployment{}
 	err = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
-		Name: "k8sgpt-deployment"}, &deployment)
+		Name: k8sgptConfig.Name}, &deployment)
 	if client.IgnoreNotFound(err) != nil {
 		k8sgptReconcileErrorCount.Inc()
 		return r.finishReconcile(err, false)
@@ -260,7 +261,10 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		// no longer are relevent, we can do this by using the resultSpec composed name against
 		// the custom resource name
 		resultList := &corev1alpha1.ResultList{}
-		err = r.List(ctx, resultList)
+		err = r.List(ctx, resultList, client.MatchingLabels(map[string]string{
+			"k8sgpts.k8sgpt.ai/name":      k8sgptConfig.Name,
+			"k8sgpts.k8sgpt.ai/namespace": k8sgptConfig.Namespace,
+		}))
 		if err != nil {
 			k8sgptReconcileErrorCount.Inc()
 			return r.finishReconcile(err, false)

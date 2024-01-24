@@ -17,6 +17,7 @@ package resources
 import (
 	"context"
 	err "errors"
+	"fmt"
 
 	"github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
@@ -29,6 +30,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
@@ -39,7 +41,6 @@ type SyncOrDestroy int
 const (
 	SyncOp SyncOrDestroy = iota
 	DestroyOp
-	DeploymentName = "k8sgpt-deployment"
 )
 
 // GetService Create service for K8sGPT
@@ -47,7 +48,7 @@ func GetService(config v1alpha1.K8sGPT) (*corev1.Service, error) {
 	// Create service
 	service := corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "k8sgpt",
+			Name:      config.Name,
 			Namespace: config.Namespace,
 			OwnerReferences: []metav1.OwnerReference{
 				{
@@ -62,7 +63,7 @@ func GetService(config v1alpha1.K8sGPT) (*corev1.Service, error) {
 		},
 		Spec: corev1.ServiceSpec{
 			Selector: map[string]string{
-				"app": DeploymentName,
+				"app": config.Name,
 			},
 			Ports: []corev1.ServicePort{
 				{
@@ -178,14 +179,14 @@ func GetClusterRole(config v1alpha1.K8sGPT) (*r1.ClusterRole, error) {
 }
 
 // GetDeployment Create deployment with the latest K8sGPT image
-func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
+func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool) (*appsv1.Deployment, error) {
 
 	// Create deployment
 	image := config.Spec.Repository + ":" + config.Spec.Version
 	replicas := int32(1)
 	deployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      DeploymentName,
+			Name:      config.Name,
 			Namespace: config.Namespace,
 			OwnerReferences: []metav1.OwnerReference{
 				{
@@ -202,13 +203,13 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 			Replicas: &replicas,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"app": DeploymentName,
+					"app": config.Name,
 				},
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"app": DeploymentName,
+						"app": config.Name,
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -272,6 +273,35 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 				},
 			},
 		},
+	}
+	if outOfClusterMode {
+		// No need of ServiceAccount since the Deployment will use
+		// a kubeconfig pointing to an external cluster.
+		deployment.Spec.Template.Spec.ServiceAccountName = ""
+		deployment.Spec.Template.Spec.AutomountServiceAccountToken = ptr.To(false)
+
+		kubeconfigPath := fmt.Sprintf("/tmp/%s", config.Name)
+
+		deployment.Spec.Template.Spec.Containers[0].Args = append(deployment.Spec.Template.Spec.Containers[0].Args, fmt.Sprintf("--kubeconfig=%s/kubeconfig", kubeconfigPath))
+		deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(deployment.Spec.Template.Spec.Containers[0].VolumeMounts, corev1.VolumeMount{
+			Name:      "kubeconfig",
+			ReadOnly:  true,
+			MountPath: kubeconfigPath,
+		})
+		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
+			Name: "kubeconfig",
+			VolumeSource: v1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: config.Spec.Kubeconfig.Name,
+					Items: []corev1.KeyToPath{
+						{
+							Key:  config.Spec.Kubeconfig.Key,
+							Path: "kubeconfig",
+						},
+					},
+				},
+			},
+		})
 	}
 	if config.Spec.AI.Secret != nil {
 		password := corev1.EnvVar{
@@ -347,6 +377,31 @@ func Sync(ctx context.Context, c client.Client,
 
 	var objs []client.Object
 
+	outOfClusterMode := config.Spec.Kubeconfig != nil
+
+	if !outOfClusterMode {
+		svcAcc, er := GetServiceAccount(config)
+		if er != nil {
+			return er
+		}
+
+		objs = append(objs, svcAcc)
+
+		clusterRole, er := GetClusterRole(config)
+		if er != nil {
+			return er
+		}
+
+		objs = append(objs, clusterRole)
+
+		clusterRoleBinding, er := GetClusterRoleBinding(config)
+		if er != nil {
+			return er
+		}
+
+		objs = append(objs, clusterRoleBinding)
+	}
+
 	svc, er := GetService(config)
 	if er != nil {
 		return er
@@ -354,28 +409,7 @@ func Sync(ctx context.Context, c client.Client,
 
 	objs = append(objs, svc)
 
-	svcAcc, er := GetServiceAccount(config)
-	if er != nil {
-		return er
-	}
-
-	objs = append(objs, svcAcc)
-
-	clusterRole, er := GetClusterRole(config)
-	if er != nil {
-		return er
-	}
-
-	objs = append(objs, clusterRole)
-
-	clusterRoleBinding, er := GetClusterRoleBinding(config)
-	if er != nil {
-		return er
-	}
-
-	objs = append(objs, clusterRoleBinding)
-
-	deployment, er := GetDeployment(config)
+	deployment, er := GetDeployment(config, outOfClusterMode)
 	if er != nil {
 		return er
 	}
