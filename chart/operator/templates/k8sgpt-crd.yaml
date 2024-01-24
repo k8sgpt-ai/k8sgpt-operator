@@ -178,6 +178,8 @@ spec:
                   webhook:
                     type: string
                 type: object
+              targetNamespace:
+                type: string
               version:
                 type: string
             type: object

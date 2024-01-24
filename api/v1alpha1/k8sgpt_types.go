@@ -124,6 +124,7 @@ type K8sGPTSpec struct {
 	RemoteCache      *RemoteCacheRef    `json:"remoteCache,omitempty"`
 	Integrations     *Integrations      `json:"integrations,omitempty"`
 	NodeSelector     map[string]string  `json:"nodeSelector,omitempty"`
+	TargetNamespace  string             `json:"targetNamespace,omitempty"`
 }
 
 const (
