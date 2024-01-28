@@ -83,6 +83,71 @@ you will be able to see the Results objects of the analysis after some minutes (
         "details": "The error message means that the service in Kubernetes doesn't have any associated endpoints, which should have been labeled with \"control-plane=controller-manager\". \n\nTo solve this issue, you need to add the \"control-plane=controller-manager\" label to the endpoint that matches the service. Once the endpoint is labeled correctly, Kubernetes can associate it with the service, and the error should be resolved.",
 ```
 
+## Monitor multiple clusters
+
+The `k8sgpt.ai` Operator allows monitoring multiple clusters by providing a `kubeconfig` value.
+
+This feature could be fascinating if you want to embrace Platform Engineering such as running a fleet of Kubernetes clusters for multiple stakeholders.
+Especially designed for the Cluster API-based infrastructures, `k8sgpt.ai` Operator is going to be installed in the same Cluster API management cluster:
+this one is responsible for creating the required clusters according to the infrastructure provider for the seed clusters.
+
+Once a Cluster API-based cluster has been provisioned a `kubeconfig` according to the naming convention `${CLUSTERNAME}-kubeconfig` will be available in the same namespace:
+the conventional Secret data key is `value`, this can be used to instruct the `k8sgpt.ai` Operator to monitor a remote cluster without installing any resource deployed to the seed cluster.
+
+```
+$: kubectl get clusters
+NAME              PHASE         AGE   VERSION
+capi-quickstart   Provisioned   8s    v1.28.0
+
+$: kubectl get secrets
+NAME                         TYPE     DATA   AGE
+capi-quickstart-kubeconfig   Opaque   1      8s
+```
+
+> **A security concern**
+>
+> If your setup requires the least privilege approach,
+> a different `kubeconfig` must be provided since the Cluster API generated one is bounded to the `admin` user which has `clustr-admin` permissions.
+ 
+
+Once you have a valid `kubeconfig`, a `k8sgpt` instance can be created as it follows.
+
+```yaml
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: K8sGPT
+metadata:
+  name: capi-quickstart
+  namespace: default
+spec:
+  ai:
+    anonymized: true
+    backend: openai
+    language: english
+    model: gpt-3.5-turbo
+    secret:
+      key: api_key
+      name: my_openai_secret
+  kubeconfig:
+    key: value
+    name: capi-quickstart-kubeconfig
+```
+
+Once applied the `k8sgpt.ai` Operator will create the `k8sgpt.ai` Deployment by using the seed cluster `kubeconfig` defined in the field `/spec/kubeconfig`.
+
+The resulting `Result` objects will be available in the same Namespace where the `k8sgpt.ai` instance has been deployed,
+accordingly labelled with the following keys:
+
+- `k8sgpts.k8sgpt.ai/name`: the `k8sgpt.ai` instance Name
+- `k8sgpts.k8sgpt.ai/namespace`: the `k8sgpt.ai` instance Namespace
+- `k8sgpts.k8sgpt.ai/backend`: the AI backend (if specified)
+
+Thanks to these labels, the results can be filtered according to the specified monitored cluster,
+without polluting the underlying cluster with the `k8sgpt.ai` CRDs and consuming seed compute workloads,
+as well as keeping confidentiality about the AI backend driver credentials.
+
+> In case of missing `/spec/kubeconfig` field, `k8sgpt.ai` Operator will track the cluster on which has been deployed:
+> this is possible by mounting the provided `ServiceAccount`.
+
 ## Remote Cache
 
 <details>
