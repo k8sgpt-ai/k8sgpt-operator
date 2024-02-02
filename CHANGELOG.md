@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.1.0](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.28...v0.1.0) (2024-02-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* monitoring multiple clusters ([#266](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/266))
+
+### Features
+
+* monitoring multiple clusters ([#266](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/266)) ([95a67a0](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/95a67a0db1db9aee6a18a638b861932e05926de6))
+
+
+### Bug Fixes
+
+* **deps:** update kubernetes packages to v0.29.1 ([#325](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/325)) ([26f7c71](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/26f7c714d97fddbfead9495baa8d62ccc5c33884))
+* **deps:** update module buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go to v1.32.0-20231116211251-9f5041346631.1 ([#331](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/331)) ([5247a1b](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5247a1ba6ad89cb9cce9e7a05b0b6d3e0b0d4c6a))
+* **deps:** update module buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go to v1.32.0-20240128172516-6bf6a55ff115.1 ([#334](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/334)) ([162c9a6](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/162c9a6091c41dd6ee9488acaf853970388aa73b))
+* **deps:** update module github.com/onsi/gomega to v1.31.1 ([#324](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/324)) ([6e5854b](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/6e5854bcad6fe0a0aec2dbf237f4ff771e010422))
+* **deps:** update module google.golang.org/grpc to v1.61.0 ([#330](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/330)) ([0e1cb4c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0e1cb4c68aea12ad57f9f8dc3f3e924341608a2f))
+
+
+### Other
+
+* **deps:** update actions/upload-artifact digest to 26f96df ([#329](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/329)) ([5e937ba](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5e937baedabd1a2f046f3066580f9a18f12f1f30))
+* **deps:** update actions/upload-artifact digest to 694cdab ([#326](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/326)) ([0a32492](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0a32492cc1b3b7d7211169f40652b09feab5ff84))
+* **deps:** update anchore/sbom-action action to v0.15.5 ([#327](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/327)) ([0bb5d76](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0bb5d7615e833519f539d3cad39d643e3ff71c38))
+* **deps:** update anchore/sbom-action action to v0.15.8 ([#335](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/335)) ([c9efaa0](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c9efaa016f233471d8a630431d9e13b04f96803a))
+
 ## [0.0.28](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.27...v0.0.28) (2024-01-14)
 
 
