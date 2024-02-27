@@ -311,7 +311,10 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		// We emit when result Status is not historical
 		// and when user configures a sink for the first time
 		latestResultList := &corev1alpha1.ResultList{}
-		if err := r.List(ctx, latestResultList); err != nil {
+		if err := r.List(ctx, latestResultList, client.MatchingLabels(map[string]string{
+			"k8sgpts.k8sgpt.ai/name":      k8sgptConfig.Name,
+			"k8sgpts.k8sgpt.ai/namespace": k8sgptConfig.Namespace,
+		})); err != nil {
 			return r.finishReconcile(err, false)
 		}
 		if len(latestResultList.Items) == 0 {
