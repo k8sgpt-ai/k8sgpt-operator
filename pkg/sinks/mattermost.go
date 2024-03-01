@@ -41,7 +41,7 @@ func buildMattermostMessage(kind, name, details, k8sgptCR, channel, username, ic
 		UserName: username,
 		IconURL:  iconURL,
 		Attachments: []attachment{
-			attachment{
+			{
 				Text:  details,
 				Color: "danger",
 				Title: "Report",
