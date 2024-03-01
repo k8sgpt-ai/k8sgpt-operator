@@ -118,7 +118,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "sum by (kind) (k8sgpt_number_of_results_by_type)",
+            "expr": "sum by (kind, k8sgpt) (k8sgpt_number_of_results_by_type)",
             "legendFormat": "__auto",
             "range": true,
             "refId": "A"
@@ -192,7 +192,7 @@
               "uid": "prometheus"
             },
             "editorMode": "builder",
-            "expr": "sum(k8sgpt_number_of_results)",
+            "expr": "sum by (k8sgpt) (k8sgpt_number_of_results)",
             "range": true,
             "refId": "A"
           }
@@ -279,7 +279,7 @@
               "uid": "prometheus"
             },
             "editorMode": "builder",
-            "expr": "count by(kind) (k8sgpt_number_of_results_by_type)",
+            "expr": "count by(kind, k8sgpt) (k8sgpt_number_of_results_by_type)",
             "hide": false,
             "range": true,
             "refId": "A"
