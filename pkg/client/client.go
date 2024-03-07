@@ -48,6 +48,8 @@ func NewClient(address string) (*Client, error) {
 
 func GenerateAddress(ctx context.Context, cli client.Client, k8sgptConfig *v1alpha1.K8sGPT) (string, error) {
 	var address string
+	var ip net.IP
+
 	if os.Getenv("LOCAL_MODE") != "" {
 		address = "localhost:8080"
 	} else {
@@ -58,7 +60,12 @@ func GenerateAddress(ctx context.Context, cli client.Client, k8sgptConfig *v1alp
 		if err != nil {
 			return "", nil
 		}
-		address = fmt.Sprintf("%s:%d", svc.Spec.ClusterIP, svc.Spec.Ports[0].Port)
+		ip = net.ParseIP(svc.Spec.ClusterIP)
+		if ip.To4() != nil {
+			address = fmt.Sprintf("%s:%d", svc.Spec.ClusterIP, svc.Spec.Ports[0].Port)
+		} else {
+			address = fmt.Sprintf("[%s]:%d", svc.Spec.ClusterIP, svc.Spec.Ports[0].Port)
+		}
 	}
 
 	fmt.Printf("Creating new client for %s\n", address)
