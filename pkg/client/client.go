@@ -54,7 +54,7 @@ func GenerateAddress(ctx context.Context, cli client.Client, k8sgptConfig *v1alp
 		// Get service IP and port for k8sgpt-deployment
 		svc := &corev1.Service{}
 		err := cli.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
-			Name: "k8sgpt"}, svc)
+			Name: k8sgptConfig.Name}, svc)
 		if err != nil {
 			return "", nil
 		}

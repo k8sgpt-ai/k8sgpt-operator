@@ -33,7 +33,7 @@ func buildSlackMessage(kind, name, details, k8sgptCR string) SlackMessage {
 	return SlackMessage{
 		Text: fmt.Sprintf(">*[%s] K8sGPT analysis of the %s %s*", k8sgptCR, kind, name),
 		Attachments: []Attachment{
-			Attachment{
+			{
 				Type:  "mrkdwn",
 				Text:  details,
 				Color: "danger",
@@ -78,3 +78,4 @@ func (s *SlackSink) Emit(results v1alpha1.ResultSpec) error {
 
 	return nil
 }
+

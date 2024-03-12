@@ -33,7 +33,10 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			Name: "k8s-gpt-secret",
 			Key:  "k8s-gpt",
 		}
-
+		backOff = BackOff{
+			Enabled:    true,
+			MaxRetries: 5,
+		}
 		kind       = "K8sGPT"
 		baseUrl    = "https://api.k8s-gpt.localhost"
 		model      = "345M"
@@ -54,6 +57,7 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			Spec: K8sGPTSpec{
 				AI: &AISpec{
 					Backend:   OpenAI,
+					BackOff:   &backOff,
 					BaseUrl:   baseUrl,
 					Model:     model,
 					Enabled:   true,
@@ -81,6 +85,7 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			Spec: K8sGPTSpec{
 				AI: &AISpec{
 					Backend:   OpenAI,
+					BackOff:   &backOff,
 					BaseUrl:   baseUrl,
 					Model:     model,
 					Secret:    &secretRef,

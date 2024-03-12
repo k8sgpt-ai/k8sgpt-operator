@@ -40,6 +40,18 @@ spec:
                   anonymized:
                     default: true
                     type: boolean
+                  backOff:
+                    properties:
+                      enabled:
+                        default: true
+                        type: boolean
+                      maxRetries:
+                        default: 5
+                        type: integer
+                    required:
+                      - enabled
+                      - maxRetries
+                    type: object
                   backend:
                     default: openai
                     enum:
@@ -102,6 +114,16 @@ spec:
                       skipInstall:
                         type: boolean
                     type: object
+                type: object
+              kubeconfig:
+                description: Define the kubeconfig the Deployment must use. If empty,
+                  the Deployment will use the ServiceAccount provided by Kubernetes
+                  itself.
+                properties:
+                  key:
+                    type: string
+                  name:
+                    type: string
                 type: object
               noCache:
                 type: boolean
@@ -166,6 +188,8 @@ spec:
                   webhook:
                     type: string
                 type: object
+              targetNamespace:
+                type: string
               version:
                 type: string
             type: object
