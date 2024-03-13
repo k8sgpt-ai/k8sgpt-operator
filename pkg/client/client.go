@@ -58,7 +58,7 @@ func GenerateAddress(ctx context.Context, cli client.Client, k8sgptConfig *v1alp
 		err := cli.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
 			Name: k8sgptConfig.Name}, svc)
 		if err != nil {
-			return "", nil
+			return "", err
 		}
 		ip = net.ParseIP(svc.Spec.ClusterIP)
 		if ip.To4() != nil {
@@ -74,6 +74,7 @@ func GenerateAddress(ctx context.Context, cli client.Client, k8sgptConfig *v1alp
 	if err != nil {
 		return "", err
 	}
+	defer conn.Close()
 
 	fmt.Printf("Connection established between %s and localhost with time out of %d seconds.\n", address, int64(1))
 	fmt.Printf("Remote Address : %s \n", conn.RemoteAddr().String())
