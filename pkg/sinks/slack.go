@@ -78,4 +78,3 @@ func (s *SlackSink) Emit(results v1alpha1.ResultSpec) error {
 
 	return nil
 }
-
