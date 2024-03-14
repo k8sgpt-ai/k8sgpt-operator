@@ -49,30 +49,30 @@ const (
 var (
 	// Metrics
 	// k8sgptReconcileErrorCount is a metric for the number of errors during reconcile
-	k8sgptReconcileErrorCount = prometheus.NewCounter(prometheus.CounterOpts{
+	k8sgptReconcileErrorCount = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Name: "k8sgpt_reconcile_error_count",
 		Help: "The total number of errors during reconcile",
-	})
+	}, []string{"k8sgpt"})
 	// k8sgptNumberOfResults is a metric for the number of results
-	k8sgptNumberOfResults = prometheus.NewGauge(prometheus.GaugeOpts{
+	k8sgptNumberOfResults = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "k8sgpt_number_of_results",
 		Help: "The total number of results",
-	})
+	}, []string{"k8sgpt"})
 	// k8sgptNumberOfResultsByType is a metric for the number of results by type
 	k8sgptNumberOfResultsByType = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "k8sgpt_number_of_results_by_type",
 		Help: "The total number of results by type",
-	}, []string{"kind", "name"})
+	}, []string{"kind", "name", "k8sgpt"})
 	// k8sgptNumberOfBackendAICalls is a metric for the number of backend AI calls
 	k8sgptNumberOfBackendAICalls = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Name: "k8sgpt_number_of_backend_ai_calls",
 		Help: "The total number of backend AI calls",
-	}, []string{"backend", "deployment", "namespace"})
+	}, []string{"backend", "deployment", "namespace", "k8sgpt"})
 	// k8sNumberOfFailedBackendAICalls is a metric for the number of failed backend AI calls
 	k8sgptNumberOfFailedBackendAICalls = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Name: "k8sgpt_number_of_failed_backend_ai_calls",
 		Help: "The total number of failed backend AI calls",
-	}, []string{"backend", "deployment", "namespace"})
+	}, []string{"backend", "deployment", "namespace", "k8sgpt"})
 	// analysisRetryCount is for the number of analysis failures
 	analysisRetryCount int
 	// allowBackendAIRequest a circuit breaker that switching on/off backend AI calls
@@ -102,7 +102,9 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	err := r.Get(ctx, req.NamespacedName, k8sgptConfig)
 	if err != nil {
 		// Error reading the object - requeue the request.
-		k8sgptReconcileErrorCount.Inc()
+		k8sgptReconcileErrorCount.With(prometheus.Labels{
+			"k8sgpt": k8sgptConfig.Name,
+		}).Inc()
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
@@ -114,7 +116,9 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		if !utils.ContainsString(k8sgptConfig.GetFinalizers(), FinalizerName) {
 			controllerutil.AddFinalizer(k8sgptConfig, FinalizerName)
 			if err := r.Update(ctx, k8sgptConfig); err != nil {
-				k8sgptReconcileErrorCount.Inc()
+				k8sgptReconcileErrorCount.With(prometheus.Labels{
+					"k8sgpt": k8sgptConfig.Name,
+				}).Inc()
 				return r.finishReconcile(err, false)
 			}
 		}
@@ -125,12 +129,16 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			// Delete any external resources associated with the instance
 			err := resources.Sync(ctx, r.Client, *k8sgptConfig, resources.DestroyOp)
 			if err != nil {
-				k8sgptReconcileErrorCount.Inc()
+				k8sgptReconcileErrorCount.With(prometheus.Labels{
+					"k8sgpt": k8sgptConfig.Name,
+				}).Inc()
 				return r.finishReconcile(err, false)
 			}
 			controllerutil.RemoveFinalizer(k8sgptConfig, FinalizerName)
 			if err := r.Update(ctx, k8sgptConfig); err != nil {
-				k8sgptReconcileErrorCount.Inc()
+				k8sgptReconcileErrorCount.With(prometheus.Labels{
+					"k8sgpt": k8sgptConfig.Name,
+				}).Inc()
 				return r.finishReconcile(err, false)
 			}
 		}
@@ -144,7 +152,9 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			MaxRetries: 5,
 		}
 		if err := r.Update(ctx, k8sgptConfig); err != nil {
-			k8sgptReconcileErrorCount.Inc()
+			k8sgptReconcileErrorCount.With(prometheus.Labels{
+				"k8sgpt": k8sgptConfig.Name,
+			}).Inc()
 			return r.finishReconcile(err, false)
 		}
 	}
@@ -154,12 +164,16 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	err = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
 		Name: k8sgptConfig.Name}, &deployment)
 	if client.IgnoreNotFound(err) != nil {
-		k8sgptReconcileErrorCount.Inc()
+		k8sgptReconcileErrorCount.With(prometheus.Labels{
+			"k8sgpt": k8sgptConfig.Name,
+		}).Inc()
 		return r.finishReconcile(err, false)
 	}
 	err = resources.Sync(ctx, r.Client, *k8sgptConfig, resources.SyncOp)
 	if err != nil {
-		k8sgptReconcileErrorCount.Inc()
+		k8sgptReconcileErrorCount.With(prometheus.Labels{
+			"k8sgpt": k8sgptConfig.Name,
+		}).Inc()
 		return r.finishReconcile(err, false)
 	}
 
@@ -179,7 +193,9 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 				imageRepository, k8sgptConfig.Spec.Version)
 			err = r.Update(ctx, &deployment)
 			if err != nil {
-				k8sgptReconcileErrorCount.Inc()
+				k8sgptReconcileErrorCount.With(prometheus.Labels{
+					"k8sgpt": k8sgptConfig.Name,
+				}).Inc()
 				return r.finishReconcile(err, false)
 			}
 
@@ -189,7 +205,9 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		// If the deployment is active, we will query it directly for sis data
 		address, err := kclient.GenerateAddress(ctx, r.Client, k8sgptConfig)
 		if err != nil {
-			k8sgptReconcileErrorCount.Inc()
+			k8sgptReconcileErrorCount.With(prometheus.Labels{
+				"k8sgpt": k8sgptConfig.Name,
+			}).Inc()
 			return r.finishReconcile(err, false)
 		}
 		// Log address
@@ -197,7 +215,9 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 		k8sgptClient, err := kclient.NewClient(address)
 		if err != nil {
-			k8sgptReconcileErrorCount.Inc()
+			k8sgptReconcileErrorCount.With(prometheus.Labels{
+				"k8sgpt": k8sgptConfig.Name,
+			}).Inc()
 			return r.finishReconcile(err, false)
 		}
 
@@ -207,14 +227,18 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		if k8sgptConfig.Spec.RemoteCache != nil {
 			err = k8sgptClient.AddConfig(k8sgptConfig)
 			if err != nil {
-				k8sgptReconcileErrorCount.Inc()
+				k8sgptReconcileErrorCount.With(prometheus.Labels{
+					"k8sgpt": k8sgptConfig.Name,
+				}).Inc()
 				return r.finishReconcile(err, false)
 			}
 		}
 		if k8sgptConfig.Spec.Integrations != nil {
 			err = k8sgptClient.AddIntegration(k8sgptConfig)
 			if err != nil {
-				k8sgptReconcileErrorCount.Inc()
+				k8sgptReconcileErrorCount.With(prometheus.Labels{
+					"k8sgpt": k8sgptConfig.Name,
+				}).Inc()
 				return r.finishReconcile(err, false)
 			}
 		}
@@ -225,7 +249,9 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 				k8sgptNumberOfFailedBackendAICalls.With(prometheus.Labels{
 					"backend":    k8sgptConfig.Spec.AI.Backend,
 					"deployment": deployment.Name,
-					"namespace":  deployment.Namespace}).Inc()
+					"namespace":  deployment.Namespace,
+					"k8sgpt":     k8sgptConfig.Name,
+				}).Inc()
 
 				if k8sgptConfig.Spec.AI.BackOff.Enabled {
 					if analysisRetryCount > k8sgptConfig.Spec.AI.BackOff.MaxRetries {
@@ -236,7 +262,9 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					analysisRetryCount++
 				}
 			}
-			k8sgptReconcileErrorCount.Inc()
+			k8sgptReconcileErrorCount.With(prometheus.Labels{
+				"k8sgpt": k8sgptConfig.Name,
+			}).Inc()
 			return r.finishReconcile(err, false)
 		}
 		// Reset analysisRetryCount
@@ -247,14 +275,21 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			k8sgptNumberOfBackendAICalls.With(prometheus.Labels{
 				"backend":    k8sgptConfig.Spec.AI.Backend,
 				"deployment": deployment.Name,
-				"namespace":  deployment.Namespace}).Inc()
+				"namespace":  deployment.Namespace,
+				"k8sgpt":     k8sgptConfig.Name,
+			}).Inc()
 		}
 
 		// Parse the k8sgpt-deployment response into a list of results
-		k8sgptNumberOfResults.Set(float64(len(response.Results)))
+		k8sgptNumberOfResults.With(prometheus.Labels{
+			"k8sgpt": k8sgptConfig.Name,
+		}).Set(float64(len(response.Results)))
+
 		rawResults, err := resources.MapResults(*r.Integrations, response.Results, *k8sgptConfig)
 		if err != nil {
-			k8sgptReconcileErrorCount.Inc()
+			k8sgptReconcileErrorCount.With(prometheus.Labels{
+				"k8sgpt": k8sgptConfig.Name,
+			}).Inc()
 			return r.finishReconcile(err, false)
 		}
 		// Prior to creating or updating any results we will delete any stale results that
@@ -266,7 +301,9 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			"k8sgpts.k8sgpt.ai/namespace": k8sgptConfig.Namespace,
 		}))
 		if err != nil {
-			k8sgptReconcileErrorCount.Inc()
+			k8sgptReconcileErrorCount.With(prometheus.Labels{
+				"k8sgpt": k8sgptConfig.Name,
+			}).Inc()
 			return r.finishReconcile(err, false)
 		}
 		if len(resultList.Items) > 0 {
@@ -276,12 +313,15 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 				if _, ok := rawResults[result.Name]; !ok {
 					err = r.Delete(ctx, &result)
 					if err != nil {
-						k8sgptReconcileErrorCount.Inc()
+						k8sgptReconcileErrorCount.With(prometheus.Labels{
+							"k8sgpt": k8sgptConfig.Name,
+						}).Inc()
 						return r.finishReconcile(err, false)
 					} else {
 						k8sgptNumberOfResultsByType.With(prometheus.Labels{
-							"kind": result.Spec.Kind,
-							"name": result.Name,
+							"kind":   result.Spec.Kind,
+							"name":   result.Name,
+							"k8sgpt": k8sgptConfig.Name,
 						}).Dec()
 					}
 				}
@@ -292,15 +332,18 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		for _, result := range rawResults {
 			operation, err := resources.CreateOrUpdateResult(ctx, r.Client, result)
 			if err != nil {
-				k8sgptReconcileErrorCount.Inc()
+				k8sgptReconcileErrorCount.With(prometheus.Labels{
+					"k8sgpt": k8sgptConfig.Name,
+				}).Inc()
 				return r.finishReconcile(err, false)
 
 			}
 			// Update metrics
 			if operation == resources.CreatedResult {
 				k8sgptNumberOfResultsByType.With(prometheus.Labels{
-					"kind": result.Spec.Kind,
-					"name": result.Name,
+					"kind":   result.Spec.Kind,
+					"name":   result.Name,
+					"k8sgpt": k8sgptConfig.Name,
 				}).Inc()
 			} else if operation == resources.UpdatedResult {
 				fmt.Printf("Updated successfully %s \n", result.Name)
@@ -334,7 +377,9 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					Name:      k8sgptConfig.Spec.Sink.Secret.Name,
 				}
 				if err := r.Get(ctx, secretNamespacedName, secret); err != nil {
-					k8sgptReconcileErrorCount.Inc()
+					k8sgptReconcileErrorCount.With(prometheus.Labels{
+						"k8sgpt": k8sgptConfig.Name,
+					}).Inc()
 					return r.finishReconcile(fmt.Errorf("could not find sink secret: %w", err), false)
 				}
 
@@ -353,7 +398,9 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			if sinkEnabled {
 				if res.Status.LifeCycle != string(resources.NoOpResult) || res.Status.Webhook == "" {
 					if err := sinkType.Emit(res.Spec); err != nil {
-						k8sgptReconcileErrorCount.Inc()
+						k8sgptReconcileErrorCount.With(prometheus.Labels{
+							"k8sgpt": k8sgptConfig.Name,
+						}).Inc()
 						return r.finishReconcile(err, false)
 					}
 					res.Status.Webhook = k8sgptConfig.Spec.Sink.Endpoint
@@ -363,7 +410,9 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 				res.Status.Webhook = ""
 			}
 			if err := r.Status().Update(ctx, &res); err != nil {
-				k8sgptReconcileErrorCount.Inc()
+				k8sgptReconcileErrorCount.With(prometheus.Labels{
+					"k8sgpt": k8sgptConfig.Name,
+				}).Inc()
 				return r.finishReconcile(err, false)
 			}
 		}

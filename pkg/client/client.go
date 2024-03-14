@@ -48,6 +48,8 @@ func NewClient(address string) (*Client, error) {
 
 func GenerateAddress(ctx context.Context, cli client.Client, k8sgptConfig *v1alpha1.K8sGPT) (string, error) {
 	var address string
+	var ip net.IP
+
 	if os.Getenv("LOCAL_MODE") != "" {
 		address = "localhost:8080"
 	} else {
@@ -56,9 +58,14 @@ func GenerateAddress(ctx context.Context, cli client.Client, k8sgptConfig *v1alp
 		err := cli.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
 			Name: k8sgptConfig.Name}, svc)
 		if err != nil {
-			return "", nil
+			return "", err
 		}
-		address = fmt.Sprintf("%s:%d", svc.Spec.ClusterIP, svc.Spec.Ports[0].Port)
+		ip = net.ParseIP(svc.Spec.ClusterIP)
+		if ip.To4() != nil {
+			address = fmt.Sprintf("%s:%d", svc.Spec.ClusterIP, svc.Spec.Ports[0].Port)
+		} else {
+			address = fmt.Sprintf("[%s]:%d", svc.Spec.ClusterIP, svc.Spec.Ports[0].Port)
+		}
 	}
 
 	fmt.Printf("Creating new client for %s\n", address)
@@ -67,6 +74,7 @@ func GenerateAddress(ctx context.Context, cli client.Client, k8sgptConfig *v1alp
 	if err != nil {
 		return "", err
 	}
+	defer conn.Close()
 
 	fmt.Printf("Connection established between %s and localhost with time out of %d seconds.\n", address, int64(1))
 	fmt.Printf("Remote Address : %s \n", conn.RemoteAddr().String())
