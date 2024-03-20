@@ -21,7 +21,7 @@ func (c *Client) ProcessAnalysis(deployment v1.Deployment, config *v1alpha1.K8sG
 		Backend:   config.Spec.AI.Backend,
 		Namespace: config.Spec.TargetNamespace,
 		Filters:   config.Spec.Filters,
-		Anonymize: config.Spec.AI.Anonymize,
+		Anonymize: *config.Spec.AI.Anonymize,
 		Language:  config.Spec.AI.Language,
 	}
 

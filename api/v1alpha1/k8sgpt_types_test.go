@@ -43,6 +43,7 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 		repository = "ghcr.io/k8sgpt-ai/k8sgpt"
 		version    = "v1alpha1"
 		language   = "english"
+		anonymize  = true
 
 		Namespace = "k8sGPT"
 
@@ -62,7 +63,7 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 					Model:     model,
 					Enabled:   true,
 					Secret:    &secretRef,
-					Anonymize: true,
+					Anonymize: &anonymize,
 					Language:  language,
 				},
 				Version:    version,
@@ -74,7 +75,8 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			},
 		}
 
-		k8sGPT2 = K8sGPT{
+		dontAnonymize = false
+		k8sGPT2       = K8sGPT{
 			TypeMeta: metav1.TypeMeta{
 				Kind: kind,
 			},
@@ -90,7 +92,7 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 					Model:     model,
 					Secret:    &secretRef,
 					Enabled:   false,
-					Anonymize: false,
+					Anonymize: &dontAnonymize,
 					Language:  language,
 				},
 				Repository: repository,
