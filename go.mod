@@ -3,7 +3,7 @@ module github.com/k8sgpt-ai/k8sgpt-operator
 go 1.21
 
 require (
-	buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.3.0-20240128172516-6bf6a55ff115.2
+	buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.3.0-20240213144542-6e830f3fdf19.2
 	buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.32.0-20240128172516-6bf6a55ff115.1
 	github.com/onsi/ginkgo/v2 v2.16.0
 	github.com/onsi/gomega v1.32.0
