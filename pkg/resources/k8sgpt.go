@@ -43,6 +43,32 @@ const (
 	DestroyOp
 )
 
+func addSecretAsEnvToDeployment(secretName string, secretKey string,
+	config v1alpha1.K8sGPT, c client.Client,
+	deployment *appsv1.Deployment) error {
+	secret := &corev1.Secret{}
+	er := c.Get(context.Background(), types.NamespacedName{Name: secretName,
+		Namespace: config.Namespace}, secret)
+	if er != nil {
+		return err.New("secret does not exist, cannot add to env of deployment")
+	}
+	envVar := v1.EnvVar{
+		Name: secretKey,
+		ValueFrom: &v1.EnvVarSource{
+			SecretKeyRef: &v1.SecretKeySelector{
+				LocalObjectReference: v1.LocalObjectReference{
+					Name: secretName,
+				},
+				Key: secretKey,
+			},
+		},
+	}
+	deployment.Spec.Template.Spec.Containers[0].Env = append(
+		deployment.Spec.Template.Spec.Containers[0].Env, envVar,
+	)
+	return nil
+}
+
 // GetService Create service for K8sGPT
 func GetService(config v1alpha1.K8sGPT) (*corev1.Service, error) {
 	// Create service
@@ -179,7 +205,7 @@ func GetClusterRole(config v1alpha1.K8sGPT) (*r1.ClusterRole, error) {
 }
 
 // GetDeployment Create deployment with the latest K8sGPT image
-func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool) (*appsv1.Deployment, error) {
+func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Client) (*appsv1.Deployment, error) {
 
 	// Create deployment
 	image := config.Spec.Repository + ":" + config.Spec.Version
@@ -303,7 +329,8 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool) (*appsv1.Deplo
 			},
 		})
 	}
-	if config.Spec.AI.Secret != nil {
+	// This check is necessary for the simple OpenAI journey, let's keep it here and guard from breaking other types of backend
+	if config.Spec.AI.Secret != nil && config.Spec.AI.Backend != v1alpha1.AmazonBedrock {
 		password := corev1.EnvVar{
 			Name: "K8SGPT_PASSWORD",
 			ValueFrom: &corev1.EnvVarSource{
@@ -367,7 +394,28 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool) (*appsv1.Deplo
 			deployment.Spec.Template.Spec.Containers[0].Env, engine,
 		)
 	} else if config.Spec.AI.Engine != "" && config.Spec.AI.Backend != v1alpha1.AzureOpenAI {
-		return &appsv1.Deployment{}, err.New("Engine is supported only by azureopenai provider.")
+		return &appsv1.Deployment{}, err.New("engine is supported only by azureopenai provider")
+	}
+	// Add checks for amazonbedrock
+	if config.Spec.AI.Backend == v1alpha1.AmazonBedrock {
+		if config.Spec.AI.Secret == nil {
+			return &appsv1.Deployment{}, err.New("secret is required for amazonbedrock backend")
+		}
+		if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "AWS_ACCESS_KEY_ID", config, c, &deployment); err != nil {
+			return &appsv1.Deployment{}, err
+		}
+		if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "AWS_SECRET_ACCESS_KEY", config, c, &deployment); err != nil {
+			return &appsv1.Deployment{}, err
+		}
+		if config.Spec.AI.Region == "" {
+			return &appsv1.Deployment{}, err.New("default region is required for amazonbedrock backend")
+		}
+		deployment.Spec.Template.Spec.Containers[0].Env = append(
+			deployment.Spec.Template.Spec.Containers[0].Env, corev1.EnvVar{
+				Name:  "AWS_DEFAULT_REGION",
+				Value: config.Spec.AI.Region,
+			},
+		)
 	}
 	return &deployment, nil
 }
@@ -409,7 +457,7 @@ func Sync(ctx context.Context, c client.Client,
 
 	objs = append(objs, svc)
 
-	deployment, er := GetDeployment(config, outOfClusterMode)
+	deployment, er := GetDeployment(config, outOfClusterMode, c)
 	if er != nil {
 		return er
 	}
