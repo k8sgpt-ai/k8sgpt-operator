@@ -3,8 +3,8 @@ module github.com/k8sgpt-ai/k8sgpt-operator
 go 1.21
 
 require (
-	buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.3.0-20240128172516-6bf6a55ff115.2
-	buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.32.0-20240128172516-6bf6a55ff115.1
+	buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.3.0-20240213144542-6e830f3fdf19.2
+	buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.33.0-20240213144542-6e830f3fdf19.1
 	github.com/onsi/ginkgo/v2 v2.16.0
 	github.com/onsi/gomega v1.32.0
 	github.com/prometheus/client_golang v1.19.0
@@ -91,7 +91,9 @@ require (
 	golang.org/x/time v0.3.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.3.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240123012728-ef4313101c80 // indirect
+	google.golang.org/genproto v0.0.0-20240123012728-ef4313101c80 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240125205218-1f4bbc51befe // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240125205218-1f4bbc51befe // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

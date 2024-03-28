@@ -26,6 +26,18 @@ In the scenario where you are testing an uncomitted or unreleased K8sGPT with yo
 by running again `LOCAL_MODE=1 make run` and in your local K8sGPT clone you can run `k8sgpt serve` or simply ` go run main.go serve`
 Note: You should always deploy a K8sGPT Custom Resource so the operator's reconcilaition can be triggered and you can set arbitrary values for the k8sgpt's version since you will bypass them.
 
+### Testing with GRPCurl
+
+It is possible to test the operator's GRPC API with the grpcurl tool.
+This enables you to test the K8sGPT GRPC API without the need of the K8sGPT Operator.
+
+Example:
+```
+grpcurl -plaintext -d '{ "backend": "amazonbedrock", "explain": true}' localhost:8080 schema.v1.ServerService/Analyze
+```
+
+For API details visit the spec on [buf](https://buf.build/k8sgpt-ai/k8sgpt)
+
 ## Help
 Feel free to join our slack [channel](https://k8sgpt.slack.com) and open GH issues, so we can make the development experience better for all K8sGPT contributors
 

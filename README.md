@@ -238,6 +238,7 @@ EOF
 
 ## Other AI Backend Examples
 
+
 <details>
 
 <summary>AzureOpenAI</summary>
@@ -277,6 +278,39 @@ EOF
 
 <details>
 
+<summary>Amazon Bedrock</summary>
+
+</details>
+1. Install the operator from the [Installation](#installation) section.
+
+2. Create secret:
+```sh 
+kubectl create secret generic bedrock-sample-secret --from-literal=AWS_ACCESS_KEY_ID="$(echo $AWS_ACCESS_KEY_ID)" --from-literal=AWS_ACCESS_KEY="$(echo $AWS_ACCESS_KEY)" -n k8sgpt-operator-system
+```
+3. Apply the K8sGPT configuration object:
+```
+kubectl apply -f - << EOF
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: K8sGPT
+metadata:
+  name: k8sgpt-sample
+  namespace: k8sgpt-operator-system
+spec:
+  ai:
+    enabled: true
+    secret:
+      name: bedrock-sample-secret
+    model: anthropic.claude-v2
+    region: eu-central-1
+    backend: amazonbedrock
+  noCache: false
+  repository: ghcr.io/k8sgpt-ai/k8sgpt
+  version: v0.3.29
+EOF
+```
+
+<details>
+
 <summary>LocalAI</summary>
 
 
@@ -305,7 +339,7 @@ EOF
 ```
    Note: ensure that the value of `baseUrl` is a properly constructed [DNS name](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#services) for the LocalAI Service. It should take the form: `http://local-ai.<namespace_local_ai_was_installed_in>.svc.cluster.local:8080/v1`.
 
-4. Same as step 4. in the example above.
+1. Same as step 4. in the example above.
 
 </details>
 
