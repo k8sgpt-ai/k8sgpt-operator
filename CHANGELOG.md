@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.1.2...v0.1.3) (2024-03-28)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/onsi/ginkgo/v2 to v2.17.1 ([#384](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/384)) ([9168561](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/916856132989e159545df770024fceb1bc8e9881))
+
 ## [0.1.2](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.1.1...v0.1.2) (2024-03-28)
 
 

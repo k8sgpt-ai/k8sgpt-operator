@@ -14,5 +14,5 @@ annotations:
   artifacthub.io/license: Apache-2.0
   artifacthub.io/categories: monitoring-logging
 type: application
-version: 0.1.2
+version: 0.1.3
 appVersion: 0.0.26
