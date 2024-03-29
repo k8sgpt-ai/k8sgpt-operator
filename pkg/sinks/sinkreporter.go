@@ -8,7 +8,7 @@ import (
 )
 
 type ISink interface {
-	Configure(config v1alpha1.K8sGPT, c Client)
+	Configure(config v1alpha1.K8sGPT, c Client, sinkSecretValue string)
 	Emit(results v1alpha1.ResultSpec) error
 }
 
@@ -16,7 +16,9 @@ func NewSink(sinkType string) ISink {
 	switch sinkType {
 	case "slack":
 		return &SlackSink{}
-		//Introduce more Sink Providers
+	//Introduce more Sink Providers
+	case "mattermost":
+		return &MattermostSink{}
 	default:
 		return &SlackSink{}
 	}

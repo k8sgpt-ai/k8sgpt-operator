@@ -33,12 +33,17 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			Name: "k8s-gpt-secret",
 			Key:  "k8s-gpt",
 		}
-
-		kind     = "K8sGPT"
-		baseUrl  = "https://api.k8s-gpt.localhost"
-		model    = "345M"
-		version  = "v1alpha1"
-		language = "english"
+		backOff = BackOff{
+			Enabled:    true,
+			MaxRetries: 5,
+		}
+		kind       = "K8sGPT"
+		baseUrl    = "https://api.k8s-gpt.localhost"
+		model      = "345M"
+		repository = "ghcr.io/k8sgpt-ai/k8sgpt"
+		version    = "v1alpha1"
+		language   = "english"
+		anonymize  = true
 
 		Namespace = "k8sGPT"
 
@@ -53,20 +58,25 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			Spec: K8sGPTSpec{
 				AI: &AISpec{
 					Backend:   OpenAI,
+					BackOff:   &backOff,
 					BaseUrl:   baseUrl,
 					Model:     model,
 					Enabled:   true,
 					Secret:    &secretRef,
-					Anonymize: true,
+					Anonymize: &anonymize,
 					Language:  language,
 				},
-				Version: version,
-
-				NoCache: true,
+				Version:    version,
+				Repository: repository,
+				NoCache:    true,
+				NodeSelector: map[string]string{
+					"nodepool": "management",
+				},
 			},
 		}
 
-		k8sGPT2 = K8sGPT{
+		dontAnonymize = false
+		k8sGPT2       = K8sGPT{
 			TypeMeta: metav1.TypeMeta{
 				Kind: kind,
 			},
@@ -77,16 +87,20 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			Spec: K8sGPTSpec{
 				AI: &AISpec{
 					Backend:   OpenAI,
+					BackOff:   &backOff,
 					BaseUrl:   baseUrl,
 					Model:     model,
 					Secret:    &secretRef,
 					Enabled:   false,
-					Anonymize: false,
+					Anonymize: &dontAnonymize,
 					Language:  language,
 				},
-				Version: version,
-
-				NoCache: false,
+				Repository: repository,
+				Version:    version,
+				NoCache:    false,
+				NodeSelector: map[string]string{
+					"nodepool": "management",
+				},
 			},
 		}
 
