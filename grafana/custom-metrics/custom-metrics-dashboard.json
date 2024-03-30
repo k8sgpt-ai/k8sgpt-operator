@@ -117,7 +117,7 @@
         {
           "datasource": "${DS_PROMETHEUS}",
           "exemplar": true,
-          "expr": "sum(rate(k8sgpt_reconcile_error_count{job=\"$job\", namespace=\"$namespace\"}[5m])) by (instance, pod)",
+          "expr": "sum(rate(k8sgpt_reconcile_error_count{job=\"$job\", namespace=\"$namespace\"}[5m])) by (instance, pod, k8sgpt)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,

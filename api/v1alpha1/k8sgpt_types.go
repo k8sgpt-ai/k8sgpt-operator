@@ -86,13 +86,14 @@ type AISpec struct {
 	Backend string   `json:"backend"`
 	BackOff *BackOff `json:"backOff,omitempty"`
 	BaseUrl string   `json:"baseUrl,omitempty"`
+	Region  string   `json:"region,omitempty"`
 	// +kubebuilder:default:=gpt-3.5-turbo
 	Model   string     `json:"model,omitempty"`
 	Engine  string     `json:"engine,omitempty"`
 	Secret  *SecretRef `json:"secret,omitempty"`
 	Enabled bool       `json:"enabled,omitempty"`
 	// +kubebuilder:default:=true
-	Anonymize bool `json:"anonymized,omitempty"`
+	Anonymize *bool `json:"anonymized,omitempty"`
 	// +kubebuilder:default:=english
 	Language string `json:"language,omitempty"`
 }
@@ -140,6 +141,8 @@ const (
 )
 
 // K8sGPTStatus defines the observed state of K8sGPT
+// show the current backend used
+// +kubebuilder:printcolumn:name="Backend",type="string",JSONPath=".spec.ai.backend",description="The current backend used"
 type K8sGPTStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file

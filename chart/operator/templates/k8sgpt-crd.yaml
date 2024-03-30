@@ -1,3 +1,4 @@
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -73,6 +74,8 @@ spec:
                     type: string
                   model:
                     default: gpt-3.5-turbo
+                    type: string
+                  region:
                     type: string
                   secret:
                     properties:
@@ -194,7 +197,7 @@ spec:
                 type: string
             type: object
           status:
-            description: K8sGPTStatus defines the observed state of K8sGPT
+            description: K8sGPTStatus defines the observed state of K8sGPT show the current backend used
             type: object
         type: object
     served: true
