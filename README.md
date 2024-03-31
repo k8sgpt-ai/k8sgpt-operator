@@ -285,7 +285,7 @@ EOF
 
 2. Create secret:
 ```sh 
-kubectl create secret generic bedrock-sample-secret --from-literal=AWS_ACCESS_KEY_ID="$(echo $AWS_ACCESS_KEY_ID)" --from-literal=AWS_ACCESS_KEY="$(echo $AWS_ACCESS_KEY)" -n k8sgpt-operator-system
+kubectl create secret generic bedrock-sample-secret --from-literal=AWS_ACCESS_KEY_ID="$(echo $AWS_ACCESS_KEY_ID)" --from-literal=AWS_SECRET_ACCESS_KEY="$(echo $AWS_SECRET_ACCESS_KEY)" -n k8sgpt-operator-system
 ```
 3. Apply the K8sGPT configuration object:
 ```
