@@ -17,8 +17,8 @@ type ResultOperation string
 
 const (
 	CreatedResult ResultOperation = "created"
-	UpdatedResult                 = "updated"
-	NoOpResult                    = "historical"
+	UpdatedResult ResultOperation = "updated"
+	NoOpResult    ResultOperation = "historical"
 )
 
 func MapResults(i integrations.Integrations, resultsSpec []v1alpha1.ResultSpec, config v1alpha1.K8sGPT) (map[string]v1alpha1.Result, error) {
