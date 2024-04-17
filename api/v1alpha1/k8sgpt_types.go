@@ -105,7 +105,8 @@ type AISpec struct {
 	// +kubebuilder:default:=true
 	Anonymize *bool `json:"anonymized,omitempty"`
 	// +kubebuilder:default:=english
-	Language string `json:"language,omitempty"`
+	Language      string `json:"language,omitempty"`
+	ProxyEndpoint string `json:"proxyEndpoint,omitempty"`
 }
 
 type Trivy struct {
