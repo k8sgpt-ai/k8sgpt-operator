@@ -65,6 +65,8 @@ spec:
                     - amazonbedrock
                     - cohere
                     - amazonsagemaker
+                    - google
+                    - googlevertexai
                     type: string
                   baseUrl:
                     type: string

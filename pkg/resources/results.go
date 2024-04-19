@@ -17,19 +17,19 @@ type ResultOperation string
 
 const (
 	CreatedResult ResultOperation = "created"
-	UpdatedResult                 = "updated"
-	NoOpResult                    = "historical"
+	UpdatedResult ResultOperation = "updated"
+	NoOpResult    ResultOperation = "historical"
 )
 
 func MapResults(i integrations.Integrations, resultsSpec []v1alpha1.ResultSpec, config v1alpha1.K8sGPT) (map[string]v1alpha1.Result, error) {
-	namespace := config.Namespace
+	namespace := config.Spec.TargetNamespace
 	backend := config.Spec.AI.Backend
 	backstageEnabled := config.Spec.ExtraOptions != nil && config.Spec.ExtraOptions.Backstage.Enabled
 	rawResults := make(map[string]v1alpha1.Result)
 	for _, resultSpec := range resultsSpec {
 		name := strings.ReplaceAll(resultSpec.Name, "-", "")
 		name = strings.ReplaceAll(name, "/", "")
-		result := GetResult(resultSpec, name, namespace, backend)
+		result := GetResult(resultSpec, name, namespace, backend, resultSpec.Details)
 		labels := map[string]string{
 			"k8sgpts.k8sgpt.ai/name":      config.Name,
 			"k8sgpts.k8sgpt.ai/namespace": config.Namespace,
@@ -51,8 +51,9 @@ func MapResults(i integrations.Integrations, resultsSpec []v1alpha1.ResultSpec, 
 	return rawResults, nil
 }
 
-func GetResult(resultSpec v1alpha1.ResultSpec, name, namespace, backend string) v1alpha1.Result {
+func GetResult(resultSpec v1alpha1.ResultSpec, name, namespace, backend string, detail string) v1alpha1.Result {
 	resultSpec.Backend = backend
+	resultSpec.Details = detail
 	return v1alpha1.Result{
 		Spec: resultSpec,
 		ObjectMeta: metav1.ObjectMeta{
