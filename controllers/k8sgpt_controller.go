@@ -181,10 +181,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 		// Check the repo and version of the deployment image matches the repo and version set in the K8sGPT CR
 		imageURI := deployment.Spec.Template.Spec.Containers[0].Image
-
-		image := strings.Split(imageURI, ":")
-		imageRepository := strings.Join(image[0:len(image)-1], ":")
-		imageVersion := image[len(image)-1]
+		imageRepository, imageVersion := parseImageURI(imageURI)
 
 		// if one of repository or tag is changed, we need to update the deployment
 		if imageRepository != k8sgptConfig.Spec.Repository || imageVersion != k8sgptConfig.Spec.Version {
@@ -453,4 +450,42 @@ func (r *K8sGPTReconciler) finishReconcile(err error, requeueImmediate bool) (ct
 	}
 	fmt.Println("Finished Reconciling k8sGPT")
 	return ctrl.Result{Requeue: true, RequeueAfter: interval}, nil
+}
+
+// https://kubernetes.io/docs/concepts/containers/images/#image-names
+func parseImageURI(uri string) (string, string) {
+	// We have possible image variants:
+	// - pause
+	// - pause:v1.0.0
+	// With registry
+	// - fictional.registry.example/imagename
+	// - fictional.registry.example:10443/imagename
+	// - fictional.registry.example/imagename:v1.0.0
+	// - fictional.registry.example:10443/imagename:v1.0.0
+
+	var (
+		repository string
+		version    string
+	)
+
+	if strings.Contains(uri, "/") {
+		parts := strings.SplitN(uri, "/", 2)
+		registry := parts[0]
+		name := parts[1]
+		if strings.Contains(name, ":") {
+			nameParts := strings.SplitN(name, ":", 2)
+			repository = registry + "/" + nameParts[0]
+			version = nameParts[1]
+		} else {
+			repository = registry + "/" + name
+		}
+	} else if strings.Contains(uri, ":") {
+		imageParts := strings.SplitN(uri, ":", 2)
+		repository = imageParts[0]
+		version = imageParts[1]
+	} else {
+		repository = uri
+	}
+
+	return repository, version
 }
