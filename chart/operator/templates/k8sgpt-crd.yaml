@@ -4,7 +4,7 @@ kind: CustomResourceDefinition
 metadata:
   name: k8sgpts.core.k8sgpt.ai
   annotations:
-    controller-gen.kubebuilder.io/version: v0.11.1
+    controller-gen.kubebuilder.io/version: v0.14.0
   labels:
   {{- include "chart.labels" . | nindent 4 }}
 spec:
@@ -62,6 +62,8 @@ spec:
                     - amazonbedrock
                     - cohere
                     - amazonsagemaker
+                    - google
+                    - googlevertexai
                     type: string
                   baseUrl:
                     type: string
