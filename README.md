@@ -280,7 +280,6 @@ EOF
 
 <summary>Amazon Bedrock</summary>
 
-</details>
 1. Install the operator from the [Installation](#installation) section.
 
 2. Create secret:
@@ -308,6 +307,8 @@ spec:
   version: v0.3.29
 EOF
 ```
+
+</details>
 
 <details>
 
