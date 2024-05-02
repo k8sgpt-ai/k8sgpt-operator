@@ -22,7 +22,6 @@ import (
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
-	r1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -41,7 +40,6 @@ const (
 
 // Create service for K8sGPT
 func GetService(config v1alpha1.K8sGPT) (*v1.Service, error) {
-
 	// Create service
 	service := v1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -63,88 +61,8 @@ func GetService(config v1alpha1.K8sGPT) (*v1.Service, error) {
 	return &service, nil
 }
 
-// Create Service Account for K8sGPT and bind it to K8sGPT role
-func GetServiceAccount(config v1alpha1.K8sGPT) (*v1.ServiceAccount, error) {
-
-	// Create service account
-	serviceAccount := v1.ServiceAccount{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "k8sgpt",
-			Namespace: config.Namespace,
-		},
-	}
-
-	return &serviceAccount, nil
-}
-
-// Create cluster role binding for K8sGPT
-func GetClusterRoleBinding(config v1alpha1.K8sGPT) (*r1.ClusterRoleBinding, error) {
-
-	// Create cluster role binding
-	clusterRoleBinding := r1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "k8sgpt",
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					Kind:               config.Kind,
-					Name:               config.Name,
-					UID:                config.UID,
-					APIVersion:         config.APIVersion,
-					BlockOwnerDeletion: utils.PtrBool(true),
-					Controller:         utils.PtrBool(true),
-				},
-			},
-		},
-		Subjects: []r1.Subject{
-			{
-				Kind:      "ServiceAccount",
-				Name:      "k8sgpt",
-				Namespace: config.Namespace,
-			},
-		},
-		RoleRef: r1.RoleRef{
-			Kind:     "ClusterRole",
-			Name:     "k8sgpt",
-			APIGroup: "rbac.authorization.k8s.io",
-		},
-	}
-
-	return &clusterRoleBinding, nil
-}
-
-// Create ClusterRole for K8sGPT with cluster read all
-func GetClusterRole(config v1alpha1.K8sGPT) (*r1.ClusterRole, error) {
-
-	// Create cluster role
-	clusterRole := r1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "k8sgpt",
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					Kind:               config.Kind,
-					Name:               config.Name,
-					UID:                config.UID,
-					APIVersion:         config.APIVersion,
-					BlockOwnerDeletion: utils.PtrBool(true),
-					Controller:         utils.PtrBool(true),
-				},
-			},
-		},
-		Rules: []r1.PolicyRule{
-			{
-				APIGroups: []string{"*"},
-				Resources: []string{"*"},
-				Verbs:     []string{"list", "get", "watch"},
-			},
-		},
-	}
-
-	return &clusterRole, nil
-}
-
 // Create deployment with the latest K8sGPT image
 func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
-
 	// Create deployment
 	replicas := int32(1)
 	deployment := appsv1.Deployment{
@@ -277,8 +195,8 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 }
 
 func Sync(ctx context.Context, c client.Client,
-	config v1alpha1.K8sGPT, i CreateOrDestroy) error {
-
+	config v1alpha1.K8sGPT, i CreateOrDestroy,
+) error {
 	var objs []client.Object
 
 	svc, er := GetService(config)
@@ -287,27 +205,6 @@ func Sync(ctx context.Context, c client.Client,
 	}
 
 	objs = append(objs, svc)
-
-	svcAcc, er := GetServiceAccount(config)
-	if er != nil {
-		return er
-	}
-
-	objs = append(objs, svcAcc)
-
-	clusterRole, er := GetClusterRole(config)
-	if er != nil {
-		return er
-	}
-
-	objs = append(objs, clusterRole)
-
-	clusterRoleBinding, er := GetClusterRoleBinding(config)
-	if er != nil {
-		return er
-	}
-
-	objs = append(objs, clusterRoleBinding)
 
 	deployment, er := GetDeployment(config)
 	if er != nil {
@@ -325,8 +222,10 @@ func Sync(ctx context.Context, c client.Client,
 			if config.Spec.AI.Secret != nil {
 
 				secret := &v1.Secret{}
-				er := c.Get(ctx, types.NamespacedName{Name: config.Spec.AI.Secret.Name,
-					Namespace: config.Namespace}, secret)
+				er := c.Get(ctx, types.NamespacedName{
+					Name:      config.Spec.AI.Secret.Name,
+					Namespace: config.Namespace,
+				}, secret)
 				if er != nil {
 					return err.New("references secret does not exist, cannot create deployment")
 				}
