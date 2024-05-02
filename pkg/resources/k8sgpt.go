@@ -317,8 +317,7 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 	return &deployment, nil
 }
 
-func Sync(ctx context.Context, c client.Client,
-	config v1alpha1.K8sGPT, i SyncOrDestroy) error {
+func Sync(ctx context.Context, c client.Client, config v1alpha1.K8sGPT, i SyncOrDestroy) error {
 
 	var objs []client.Object
 
@@ -330,7 +329,7 @@ func Sync(ctx context.Context, c client.Client,
 			return er
 		}
 
-	deployment, er := GetDeployment(config)
+	deployment, er := GetDeployment(config, outOfClusterMode, c)
 	if er != nil {
 		return er
 	}
