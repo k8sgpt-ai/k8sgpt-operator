@@ -10,13 +10,7 @@ rules:
   resources:
   - '*'
   verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
+  - '*'
 - apiGroups:
   - core.k8sgpt.ai
   resources:

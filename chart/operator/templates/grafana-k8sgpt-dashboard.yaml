@@ -11,7 +11,29 @@ metadata:
     app.kubernetes.io/part-of: k8sgpt-operator
   {{- include "chart.labels" . | nindent 4 }}
   name: k8sgpt-overview
+  namespace: {{ .Values.grafanaDashboard.namespace | default (include "k8sgpt-operator.namespace" .) }}
 data:
   k8sgpt-overview.json: |
 {{ .Files.Get "dashboards/k8sgpt-overview.json" | indent 4}}
+---
+{{ if .Values.grafanaDashboard.grafanaOperator.enabled -}}
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  labels:
+    app.kubernetes.io/component: grafana-dashboard
+    app.kubernetes.io/created-by: k8sgpt-operator
+    app.kubernetes.io/part-of: k8sgpt-operator
+  {{- include "chart.labels" . | nindent 4 }}
+  name: k8sgpt-overview
+  namespace: {{ .Values.grafanaDashboard.namespace | default (include "k8sgpt-operator.namespace" .) }}
+spec:
+  folder: {{ .Values.grafanaDashboard.folder.name }}
+  instanceSelector:
+    matchLabels:
+      {{- toYaml $.Values.grafanaDashboard.grafanaOperator.matchLabels | nindent 6 }}
+  configMapRef:
+    name: k8sgpt-overview
+    key: k8sgpt-overview.json
+{{ end -}}
 {{ end -}}

@@ -5,12 +5,20 @@ serviceMonitor:
   # namespace: ""
 grafanaDashboard:
   enabled: false
+  # The namespace where Grafana expects to find the dashboard
+  # namespace: ""
   folder:
     annotation: grafana_folder
     name: ai
   label:
     key: grafana_dashboard
     value: "1"
+  # create GrafanaDashboard custom resource referencing to the configMap.
+  # according to https://grafana-operator.github.io/grafana-operator/docs/examples/dashboard_from_configmap/readme/
+  grafanaOperator:
+    enabled: false
+    matchLabels:
+      dashboards: "grafana"
 controllerManager:
   kubeRbacProxy:
     containerSecurityContext:
@@ -20,7 +28,7 @@ controllerManager:
         - ALL
     image:
       repository: gcr.io/kubebuilder/kube-rbac-proxy
-      tag: v0.14.1
+      tag: v0.16.0
     resources:
       limits:
         cpu: 500m
@@ -37,7 +45,7 @@ controllerManager:
         - ALL
     image:
       repository: ghcr.io/k8sgpt-ai/k8sgpt-operator
-      tag: v0.0.19  # x-release-please-version
+      tag: v0.1.3  # x-release-please-version
     resources:
       limits:
         cpu: 500m
@@ -46,6 +54,10 @@ controllerManager:
         cpu: 10m
         memory: 64Mi
   replicas: 1
+  ## Node labels for pod assignment
+  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+  #
+  nodeSelector: {}
 kubernetesClusterDomain: cluster.local
 metricsService:
   ports:

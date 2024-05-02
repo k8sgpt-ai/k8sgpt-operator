@@ -1,5 +1,314 @@
 # Changelog
 
+## [0.1.3](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.1.2...v0.1.3) (2024-04-04)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/onsi/ginkgo/v2 to v2.17.1 ([#384](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/384)) ([9168561](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/916856132989e159545df770024fceb1bc8e9881))
+* **deps:** update module google.golang.org/grpc to v1.63.0 ([#401](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/401)) ([d1b5cbf](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d1b5cbf517f9e8e5c2fd78088863a93813d9dab0))
+
+
+### Other
+
+* **deps:** update actions/setup-python digest to 82c7e63 ([#387](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/387)) ([ae46b74](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/ae46b74716805ae74fba22616c78d061cc853d5b))
+* **deps:** update anchore/sbom-action action to v0.15.10 ([#388](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/388)) ([a6e6070](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/a6e607006bae0f356e29fc921db3898a7991f9d6))
+* **deps:** update gcr.io/kubebuilder/kube-rbac-proxy docker tag to v0.16.0 ([#396](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/396)) ([8bf0f7a](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8bf0f7a9664eabe95075d59974df0312f9a7238a))
+* small update to fix linter ([#403](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/403)) ([7078643](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/7078643c0db10d6ad426955a8cfacb7c1c24762c))
+
+## [0.1.2](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.1.1...v0.1.2) (2024-03-28)
+
+
+### Features
+
+* bedrock support ([#389](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/389)) ([796f212](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/796f212a87cd03f147b82fb282fa5cbb6ac38d19))
+* create GrafanaDashboard CR for GrafanaOperator ([#322](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/322)) ([e4391ab](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e4391abc5fd696bce20222f8d3c7689a56ab2efd))
+
+
+### Bug Fixes
+
+* **deps:** update kubernetes packages to v0.29.3 ([#383](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/383)) ([18702e8](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/18702e8df077d1144f4d8e52ece83d89432a02fc))
+* **deps:** update module github.com/onsi/gomega to v1.32.0 ([#385](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/385)) ([8b0a4bb](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8b0a4bb14c57251920e6777fd372d5da23030952))
+
+
+### Other
+
+* **deps:** update docker/build-push-action digest to 2cdde99 ([#381](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/381)) ([90dd29d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/90dd29dcf840b0fec438e1d57ea231efd2fceba0))
+* **deps:** update docker/login-action digest to e92390c ([#377](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/377)) ([9e798f0](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9e798f0611dacec288d914c6519ca660e58040f0))
+* **deps:** update docker/setup-buildx-action digest to 2b51285 ([#380](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/380)) ([8a2608b](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8a2608b045a4427940cb17ae90c77833679a3fae))
+* **deps:** update softprops/action-gh-release digest to 9d7c94c ([#376](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/376)) ([14cffb0](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/14cffb06ebaa636b7fda792e5dc3510ed6888529))
+
+## [0.1.1](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.1.0...v0.1.1) (2024-03-14)
+
+
+### Bug Fixes
+
+* add kubeconfig field in helm chart crd template ([#345](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/345)) ([807a318](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/807a318c4ce0b389507739d7b5f95decb347ec28))
+* add prometheus metric label "k8sgpt" ([#364](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/364)) ([4deaf1f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/4deaf1f6d48ac924a2995d33307dde5d394b515e))
+* **deps:** update k8s.io/utils digest to 4693a02 ([#374](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/374)) ([9557fae](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9557fae63eeca021b3d0519d5159b812b3cd2f36))
+* **deps:** update kubernetes packages to v0.29.2 ([#343](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/343)) ([7a957e7](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/7a957e7221b032bdcd9fdce1d24dbc70ae496e41))
+* **deps:** update module buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go to v1.3.0-20240128172516-6bf6a55ff115.2 ([#333](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/333)) ([de1a15a](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/de1a15ae2e618b6ba960edb64c6ebf5b3aaa69e0))
+* **deps:** update module github.com/onsi/ginkgo/v2 to v2.16.0 ([#366](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/366)) ([9594462](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/95944620ffcbf570201657d400e414e2a33ff169))
+* **deps:** update module github.com/prometheus/client_golang to v1.19.0 ([#360](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/360)) ([f754f25](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/f754f25ba982b040531ff897d337e1d212cd0128))
+* **deps:** update module github.com/stretchr/testify to v1.9.0 ([#365](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/365)) ([fb4ed99](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/fb4ed990f52535aaafe01f05c37db6a567631616))
+* **deps:** update module google.golang.org/grpc to v1.61.1 ([#342](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/342)) ([29106a2](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/29106a233ea88f5b94cb950a1083cb3182abd692))
+* **deps:** update module google.golang.org/grpc to v1.62.0 ([#354](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/354)) ([403c6e3](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/403c6e3bf05bd2b1caf045dac8d04ddb31410612))
+* **deps:** update module google.golang.org/grpc to v1.62.1 ([#368](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/368)) ([4a90208](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/4a90208dcb147eb30052b0e686d85f8d0556cc64))
+* respect the anonymize value from CR during initialisaiton ([#332](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/332)) ([f604212](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/f604212ac3ba285b8eee9e6c14c7805fb08c4c48))
+
+
+### Other
+
+* **deps:** update actions/upload-artifact digest to 5d5d22a ([#337](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/337)) ([26a78cc](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/26a78cc07bcff19ef2d8b70bae7c2664697ea04a))
+* **deps:** update anchore/sbom-action action to v0.15.9 ([#367](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/367)) ([76d0618](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/76d0618225757dec11df25bedc00e8003a0c0032))
+* **deps:** update azure/setup-helm action to v4 ([#362](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/362)) ([539cba1](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/539cba186c904e7d87f545b7b3cda5ec86343ec6))
+* **deps:** update azure/setup-helm digest to b7246b1 ([#371](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/371)) ([7e3d63f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/7e3d63ff31eb44c5f6e57fccd945556a27467172))
+* **deps:** update docker/build-push-action digest to af5a7ed ([#372](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/372)) ([958dc55](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/958dc55ee53128c3729c6f3b1c3be218b20ee1fe))
+* **deps:** update docker/setup-buildx-action digest to 0d103c3 ([#358](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/358)) ([d25999a](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d25999a53c4157bd79ea54ecf133dac54f806afc))
+* **deps:** update golang docker tag to v1.22 ([#338](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/338)) ([2913abb](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/2913abbf7a21f7cc42c07bed271ae79ec46fa873))
+* **deps:** update google-github-actions/release-please-action digest to a37ac6e ([#375](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/375)) ([e88a92a](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e88a92aabf49d48fd5d4461546bf023595dc64a3))
+* **deps:** update helm/kind-action action to v1.9.0 ([#341](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/341)) ([17e4285](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/17e4285ee83ce7f66f72325bbd1838b2009a6005))
+* **deps:** update softprops/action-gh-release action to v2 ([#373](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/373)) ([b080cf1](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/b080cf1953c8a969bf5789794a6ed7febff1c33b))
+
+## [0.1.0](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.28...v0.1.0) (2024-02-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* monitoring multiple clusters ([#266](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/266))
+
+### Features
+
+* monitoring multiple clusters ([#266](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/266)) ([95a67a0](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/95a67a0db1db9aee6a18a638b861932e05926de6))
+
+
+### Bug Fixes
+
+* **deps:** update kubernetes packages to v0.29.1 ([#325](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/325)) ([26f7c71](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/26f7c714d97fddbfead9495baa8d62ccc5c33884))
+* **deps:** update module buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go to v1.32.0-20231116211251-9f5041346631.1 ([#331](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/331)) ([5247a1b](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5247a1ba6ad89cb9cce9e7a05b0b6d3e0b0d4c6a))
+* **deps:** update module buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go to v1.32.0-20240128172516-6bf6a55ff115.1 ([#334](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/334)) ([162c9a6](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/162c9a6091c41dd6ee9488acaf853970388aa73b))
+* **deps:** update module github.com/onsi/gomega to v1.31.1 ([#324](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/324)) ([6e5854b](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/6e5854bcad6fe0a0aec2dbf237f4ff771e010422))
+* **deps:** update module google.golang.org/grpc to v1.61.0 ([#330](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/330)) ([0e1cb4c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0e1cb4c68aea12ad57f9f8dc3f3e924341608a2f))
+
+
+### Other
+
+* **deps:** update actions/upload-artifact digest to 26f96df ([#329](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/329)) ([5e937ba](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5e937baedabd1a2f046f3066580f9a18f12f1f30))
+* **deps:** update actions/upload-artifact digest to 694cdab ([#326](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/326)) ([0a32492](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0a32492cc1b3b7d7211169f40652b09feab5ff84))
+* **deps:** update anchore/sbom-action action to v0.15.5 ([#327](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/327)) ([0bb5d76](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0bb5d7615e833519f539d3cad39d643e3ff71c38))
+* **deps:** update anchore/sbom-action action to v0.15.8 ([#335](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/335)) ([c9efaa0](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c9efaa016f233471d8a630431d9e13b04f96803a))
+
+## [0.0.28](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.27...v0.0.28) (2024-01-14)
+
+
+### Features
+
+* Add license scan report and status ([#298](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/298)) ([f58daae](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/f58daae0572eacba80241ec6cfa34998b7fe8ed6))
+* add mattermost sink ([#303](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/303)) ([c6ff954](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c6ff954e2d3cfd50af8b142e86e5711823903f0e))
+* add nodeSelector to Chart and k8sgpt-operator ([#292](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/292)) ([c008d22](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c008d221bc03c847c18acdbda0a3c585626bd4cf))
+
+
+### Bug Fixes
+
+* **deps:** update k8s.io/utils digest to e7106e6 ([#304](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/304)) ([a1edb2e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/a1edb2eca5af04a08072f4285336b637e6387cc3))
+* **deps:** update kubernetes packages to v0.29.0 ([#294](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/294)) ([3ca395e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/3ca395e6b126f2c37290ba024e30558559994a59))
+* **deps:** update module github.com/onsi/ginkgo/v2 to v2.14.0 ([#318](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/318)) ([65d5856](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/65d5856d9165d5921100f15b829d25131e8747ff))
+* **deps:** update module github.com/prometheus/client_golang to v1.18.0 ([#301](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/301)) ([e088e15](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e088e152597f9e927f101319030026d547bab5c5))
+* **deps:** update module google.golang.org/grpc to v1.60.1 ([#293](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/293)) ([8d5e5cd](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8d5e5cdbbfb0cb846f001059f4fedf3f59be7c62))
+
+
+### Other
+
+* **deps:** update actions/setup-python action to v5 ([#287](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/287)) ([a9bc7bf](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/a9bc7bf55a14d65499249985d1ff5933e57cb217))
+* **deps:** update actions/upload-artifact action to v4 ([#296](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/296)) ([5bedad6](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5bedad6a6c91960871d2c929ca91ef1eea636c95))
+* **deps:** update actions/upload-artifact digest to 1eb3cb2 ([#320](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/320)) ([88157df](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/88157df101ffec6715b74f3f39b1dbed42e36c54))
+* **deps:** update anchore/sbom-action action to v0.15.2 ([#305](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/305)) ([efc169f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/efc169f68d7c7b5c52fc6501367bd9276e02df1c))
+* **deps:** update anchore/sbom-action action to v0.15.3 ([#312](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/312)) ([4457381](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/44573815775186e805e1eb15cd8dec73adbee980))
+* **deps:** update google-github-actions/release-please-action digest to cc61a07 ([#297](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/297)) ([5921187](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/592118770ec1b5b04e04f9375311a0f109aaa922))
+* go version 121 ([#321](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/321)) ([85d3681](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/85d368114896eb6908f50efd9a190a31a08aa8b9))
+
+
+### Docs
+
+* local mode ([#319](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/319)) ([e0b56ef](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e0b56ef4ad66a2a011cb08acddb996db0dad5c6b))
+
+## [0.0.27](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.26...v0.0.27) (2023-12-14)
+
+
+### Features
+
+* added llm metric analysis count ([#290](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/290)) ([abb97ab](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/abb97abc4c5785f8d5dbc020fdd390f5e0312ebd))
+
+
+### Other
+
+* **deps:** update actions/setup-go action to v5 ([#288](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/288)) ([2b15843](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/2b158432859b734ffa09d524fb7e2dfb4e2780f0))
+* **deps:** update anchore/sbom-action action to v0.15.1 ([#271](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/271)) ([0a41887](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0a4188744302e54cb4f2335b3e179bc582f72210))
+* **deps:** update google-github-actions/release-please-action action to v4 ([#283](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/283)) ([fa91448](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/fa91448a2dcdd0f6002d3b850fbc227752eb7edd))
+* **deps:** update google-github-actions/release-please-action digest to a2d8d68 ([#289](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/289)) ([87b8767](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/87b8767a6967f843adb4cdc9d33cc2c47242c495))
+* this fix will only increment metrics if there are actually results which implies the backend was called ([#295](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/295)) ([f496f3e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/f496f3e03c2981334ea19880627e0191d158f2db))
+
+## [0.0.26](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.25...v0.0.26) (2023-12-02)
+
+
+### Bug Fixes
+
+* **deps:** update k8s.io/utils digest to b307cd5 ([#273](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/273)) ([9f89969](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9f8996931c6bea13b9a7c1b6e4ddc0d87791ebd4))
+
+
+### Other
+
+* update kube marker ([#281](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/281)) ([4617b30](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/4617b30fadc4939ce8c02929c0a9c64b30d98ee2))
+
+## [0.0.25](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.24...v0.0.25) (2023-12-01)
+
+
+### Features
+
+* rework cache & add gcs cache option ([#262](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/262)) ([c9f1290](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c9f1290bde9a25ea2ed7a16e6cc1d1c35b64d928))
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/onsi/ginkgo/v2 to v2.13.2 ([#275](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/275)) ([ed3a031](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/ed3a0315b1da79fc7ec7ea466bc1309f54c44592))
+
+
+### Other
+
+* **deps:** update docker/build-push-action digest to 4a13e50 ([#267](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/267)) ([7fedf7c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/7fedf7c967532a415d7631ed7b7399c5dc6dde5a))
+* fix missing integration ([#278](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/278)) ([e8cc010](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e8cc01042ed669c67ed9f2768fa10a7d4ba99dd6))
+
+## [0.0.24](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.23...v0.0.24) (2023-11-16)
+
+
+### Features
+
+* results are labeled ([#264](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/264)) ([d3f7b9d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d3f7b9da359ae729d901be8c47b87e7eb9f315e7))
+
+
+### Bug Fixes
+
+* **deps:** update kubernetes packages to v0.28.4 ([#241](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/241)) ([9898aa3](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9898aa3c4e6e3f22e3af23b61e0e3b45145c070a))
+* **deps:** update module github.com/onsi/ginkgo/v2 to v2.13.1 ([#260](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/260)) ([5f27b87](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5f27b87da2e564aa283c6bf3bacbe10ac885e723))
+* **deps:** update module google.golang.org/grpc to v1.59.0 ([#257](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/257)) ([01fb7a3](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/01fb7a302bcb29b724cc1ad1091e68629f1ff0cb))
+
+
+### Other
+
+* **deps:** update gcr.io/kubebuilder/kube-rbac-proxy docker tag to v0.15.0 ([#239](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/239)) ([37f2da6](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/37f2da633598b8e8e26838e62c59f1ca69dd34ef))
+* **deps:** update google-github-actions/release-please-action digest to db8f2c6 ([#255](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/255)) ([2224748](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/2224748dcd7fe1389f4193e8a15c2c80f46896ce))
+* **deps:** update helm/chart-testing-action action to v2.6.1 ([#254](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/254)) ([c082313](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c08231397cda0bc05c6b8baec68fdbc22e05b8b6))
+
+## [0.0.23](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.22...v0.0.23) (2023-11-12)
+
+
+### Features
+
+* add azure remote cache ([#246](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/246)) ([610e5de](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/610e5de3f9cd564f3ccfce6b7bf0b2b3efda630a))
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/onsi/gomega to v1.29.0 ([#247](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/247)) ([067dd45](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/067dd45f39bbd8dade7438b5b7084a0f3b6d9035))
+* **deps:** update module github.com/onsi/gomega to v1.30.0 ([#256](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/256)) ([91ef326](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/91ef326e426e63ccb6e4af2cbec1390b68cc5fc9))
+* operator's cluster role permissions to match k8sgpt ([#258](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/258)) ([513bf82](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/513bf8248d479c2b3edeef1d2366e45d4aaf626b))
+
+
+### Other
+
+* **deps:** bump google.golang.org/grpc from 1.58.2 to 1.58.3 ([#250](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/250)) ([0787c8c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0787c8cd45f3b6ebac5b048eba819cbc3284ddd9))
+* **deps:** update actions/checkout digest to b4ffde6 ([#242](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/242)) ([8e9bf51](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8e9bf51e0d84cb00b8edd37122b6f3756cdb6aed))
+* **deps:** update actions/setup-python digest to 65d7f2d ([#243](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/243)) ([9500137](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/95001375d8ea2a215a73f174eff8e5fcff1f7a5e))
+* **deps:** update google-github-actions/release-please-action digest to 4c5670f ([#244](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/244)) ([ec7a54c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/ec7a54c354d4d6bd34836bf50c49ffab827bc963))
+* **deps:** update helm/chart-testing-action action to v2.6.0 ([#253](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/253)) ([980705a](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/980705a23d4942ba127b7b5d3a12888379ffd40c))
+
+## [0.0.22](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.21...v0.0.22) (2023-10-15)
+
+
+### Features
+
+* add K8sGPT Custom Resource name as a prefix to slack messages ([#221](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/221)) ([5b5fd2f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5b5fd2f4be06f87d466517eec99d40b58bb64877))
+* initial integration support ([#225](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/225)) ([246077e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/246077ec23b0bfbec7719ae9e6cbeca2ab29d1b4))
+
+
+### Bug Fixes
+
+* **deps:** update kubernetes packages to v0.28.2 ([#218](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/218)) ([63085af](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/63085af0359c21b2efa9749d461cb6dd6140b5d8))
+* **deps:** update module buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go to v1.3.0-20231002095256-194bc640518b.1 ([#222](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/222)) ([ac6a723](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/ac6a723c74825e0b31c0b928000ba0c74743cde3))
+* **deps:** update module buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go to v1.31.0-20230919114723-34e017906403.1 ([#223](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/223)) ([c076067](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c07606706f97b1bf4543164334f74ee25304f868))
+* **deps:** update module github.com/onsi/ginkgo/v2 to v2.12.1 ([#224](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/224)) ([fb0476d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/fb0476d5f200007c5f0f42b384ab1156d45c944e))
+* **deps:** update module github.com/onsi/gomega to v1.28.0 ([#231](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/231)) ([bcacac3](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/bcacac3347dee0639d584e16b1d3328c76760665))
+* **deps:** update module github.com/prometheus/client_golang to v1.17.0 ([#229](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/229)) ([2790e19](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/2790e197709f9ba6c51e442e6adf1b12872197eb))
+* **deps:** update module google.golang.org/grpc to v1.58.0 ([#209](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/209)) ([c3014c2](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c3014c215f0f748fd822311fb0409939b5312533))
+* **deps:** update module google.golang.org/grpc to v1.58.1 ([#219](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/219)) ([f302b0c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/f302b0c918341fe7ed9cb5beac6c320d5be4ad2c))
+* **deps:** update module google.golang.org/grpc to v1.58.2 ([#227](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/227)) ([c8e1163](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c8e116358f5295f98ae49f4a94dd132874e8ec51))
+* update helm install command ([#235](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/235)) ([8373b8a](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8373b8a192c06b2eba5936c02132b0160a1ba2bc))
+
+
+### Other
+
+* **deps:** update actions/checkout action to v4 ([#204](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/204)) ([98fefad](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/98fefaddfde1ac9ba9aff112ca91111b8db8c825))
+* **deps:** update actions/checkout digest to 8ade135 ([#228](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/228)) ([9264875](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9264875d0d32036b0bf8dd0baac3b11f6affb0b9))
+* **deps:** update actions/upload-artifact digest to a8a3f3a ([#208](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/208)) ([55614a8](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/55614a8a5e995f0b592d3d2ed93b235db4a4dbe1))
+* **deps:** update docker/build-push-action action to v5 ([#215](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/215)) ([a1f9d68](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/a1f9d685230349545f4d87d9c8e4fc05b5dcd994))
+* **deps:** update docker/build-push-action digest to 0a97817 ([#210](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/210)) ([3df6569](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/3df6569f6ec8233e8842fd652b96ca2dbed2c573))
+* **deps:** update docker/login-action action to v3 ([#216](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/216)) ([53ed0a9](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/53ed0a95c5d9d4d277fdbb56a99caeba5a5c1547))
+* **deps:** update docker/setup-buildx-action action to v3 ([#217](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/217)) ([646c6f8](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/646c6f822e57c69b5dd05a9232c9537d69a62934))
+* only log and stop propagating backstage errors ([#232](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/232)) ([7fe8884](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/7fe88841ac8e74298cdcc58f3e98763b459d6c23))
+
+## [0.0.21](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.20...v0.0.21) (2023-08-28)
+
+
+### Features
+
+* remote config rework ([#201](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/201)) ([44e7c6b](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/44e7c6b3e55f086fcf4c5971e75cf81afbbe518f))
+
+
+### Bug Fixes
+
+* **deps:** update kubernetes packages ([#196](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/196)) ([8cdbb96](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8cdbb96b4985c9766dae5c12888e3bc2e2a4c8d7))
+* **deps:** update module github.com/onsi/ginkgo/v2 to v2.12.0 ([#197](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/197)) ([dd78856](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/dd7885605a025683becf528a37ce88434228a9a4))
+
+
+### Other
+
+* **deps:** update actions/checkout digest to f43a0e5 ([#198](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/198)) ([d06091c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d06091c0ec063731c099c5f9b03f363047f7c57a))
+* **deps:** update actions/setup-go digest to 93397be ([#194](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/194)) ([d01b5a9](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d01b5a965aad6b53b21fda6fb445e1a874deffd5))
+* **deps:** update docker/setup-buildx-action digest to 885d146 ([#200](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/200)) ([def4871](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/def48718b34eb140759cd7cf0face7cbd1154a45))
+* updated schema for integrations support ([#202](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/202)) ([53af89d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/53af89d125afc6b121241658ddc892abd5c0dcfd))
+
+## [0.0.20](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.19...v0.0.20) (2023-08-01)
+
+
+### Features
+
+* **operator:** add namespace to grafanaDashboard ([#168](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/168)) ([9c31c92](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9c31c9279549f1569b6c6b11326742799bf271ae))
+
+
+### Bug Fixes
+
+* compare the number of errors to update Results ([#167](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/167)) ([e805d2c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e805d2c5e29dd4db96e43bce5b5c3b2cc9c561aa))
+* **deps:** update k8s.io/utils digest to 3b25d92 ([#191](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/191)) ([df6407c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/df6407c922b4057887f2866196d4ad1f0c785931))
+* **deps:** update kubernetes packages to v0.27.4 ([#183](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/183)) ([afe44a6](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/afe44a67f662f588ea13092fe8255309504f0fdf))
+* **deps:** update module github.com/onsi/gomega to v1.27.10 ([#188](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/188)) ([1b4a6a2](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/1b4a6a2f96e6aca9247c3d2ecf11b373e54c2103))
+* **deps:** update module github.com/onsi/gomega to v1.27.9 ([#187](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/187)) ([a212521](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/a2125217d25a9f2a48efd06ecb22fd85267f1fb9))
+* **deps:** update module github.com/stretchr/testify to v1.8.4 ([#192](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/192)) ([2085708](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/20857089e6232eb4211bd23e282b5ed44a8670d5))
+* **deps:** update module google.golang.org/grpc to v1.56.1 ([#165](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/165)) ([79366ab](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/79366abb339a091ee062a6e278da45463251dfef))
+* **deps:** update module google.golang.org/grpc to v1.56.2 ([#177](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/177)) ([7290e54](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/7290e5492805d640b8a5ab1bca4aa124f2840385))
+* **deps:** update module google.golang.org/grpc to v1.57.0 ([#190](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/190)) ([d356f14](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d356f14c1d1da98adbe186903f2404bf1240cfe1))
+* resources should be synced after k8sgptConfig CR update ([#174](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/174)) ([080a2b1](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/080a2b132f1e36c1b7f457c42622e10faf229587))
+
+
+### Other
+
+* **deps:** update actions/setup-python digest to 61a6322 ([#182](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/182)) ([8888c73](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8888c7393f993c799fe65edfd748af05166d9fd9))
+* **deps:** update anchore/sbom-action action to v0.14.3 ([#164](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/164)) ([12b2c36](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/12b2c36fc47e5d31cb64f88723ba0a47963cb0b6))
+* **deps:** update docker/setup-buildx-action digest to 4c0219f ([#175](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/175)) ([6a0e96d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/6a0e96d41e71816e6ff2e9f350bf635a15cef722))
+* **deps:** update google-github-actions/release-please-action digest to 8016a66 ([#170](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/170)) ([6b383e6](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/6b383e65858b7d767a883f954ad7d0025b85f214))
+* **deps:** update google-github-actions/release-please-action digest to ca6063f ([#184](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/184)) ([3d0e50c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/3d0e50cb08da541207a0122cfb625aef0154bf41))
+* **deps:** update helm/kind-action action to v1.8.0 ([#178](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/178)) ([3ca7fe3](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/3ca7fe37fd6acb2e4c54e24a4a184edac17c9ce8))
+* operator debug ([5a931fb](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5a931fb293ecc5d0a9d92646bcab8d7a0299a324))
+
 ## [0.0.19](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.0.18...v0.0.19) (2023-06-20)
 
 

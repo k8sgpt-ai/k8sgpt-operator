@@ -2,8 +2,8 @@ apiVersion: v2
 name: k8sgpt-operator
 description: Automatic SRE Superpowers within your Kubernetes cluster
 maintainers:
-  - name: "The K8sGPT Authors"
-    email: "noreply@k8sgpt.ai"
+  - name: The K8sGPT Authors
+    email: noreply@k8sgpt.ai
     url: https://github.com/k8sgpt-ai/community
 annotations:
   artifacthub.io/links: |
@@ -11,24 +11,8 @@ annotations:
       url: https://github.com/k8sgpt-ai/k8sgpt-operator/issues/new
     - name: community
       url: https://github.com/k8sgpt-ai/community
-  artifacthub.io/license: "Apache-2.0"
-  artifacthub.io/categories: "monitoring-logging"
-
-# A chart can be either an 'application' or a 'library' chart.
-#
-# Application charts are a collection of templates that can be packaged into versioned archives
-# to be deployed.
-#
-# Library charts provide useful utilities or functions for the chart developer. They're included as
-# a dependency of application charts to inject those utilities and functions into the rendering
-# pipeline. Library charts do not define any templates and therefore cannot be deployed.
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/categories: monitoring-logging
 type: application
-# This is the chart version. This version number should be incremented each time you make changes
-# to the chart and its templates, including the app version.
-# Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.0.19   # x-release-please-version
-# This is the version number of the application being deployed. This version number should be
-# incremented each time you make changes to the application. Versions are not expected to
-# follow Semantic Versioning. They should reflect the version the application is using.
-# It is recommended to use it with quotes.
-appVersion: "0.0.19"    # x-release-please-version
+version: 0.1.3
+appVersion: 0.0.26

@@ -17,40 +17,80 @@ package resources
 import (
 	"context"
 	err "errors"
+	"fmt"
 
 	"github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/retry"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-// enum create or destroy
-type CreateOrDestroy int
+// SyncOrDestroy enum create or destroy
+type SyncOrDestroy int
 
 const (
-	Create CreateOrDestroy = iota
-	Destroy
-	DeploymentName = "k8sgpt-deployment"
+	SyncOp SyncOrDestroy = iota
+	DestroyOp
 )
 
-// Create service for K8sGPT
-func GetService(config v1alpha1.K8sGPT) (*v1.Service, error) {
-	// Create service
-	service := v1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "k8sgpt",
-			Namespace: config.Namespace,
-		},
-		Spec: v1.ServiceSpec{
-			Selector: map[string]string{
-				"app": DeploymentName,
+func addSecretAsEnvToDeployment(secretName string, secretKey string,
+	config v1alpha1.K8sGPT, c client.Client,
+	deployment *appsv1.Deployment) error {
+	secret := &corev1.Secret{}
+	er := c.Get(context.Background(), types.NamespacedName{Name: secretName,
+		Namespace: config.Namespace}, secret)
+	if er != nil {
+		return err.New("secret does not exist, cannot add to env of deployment")
+	}
+	envVar := v1.EnvVar{
+		Name: secretKey,
+		ValueFrom: &v1.EnvVarSource{
+			SecretKeyRef: &v1.SecretKeySelector{
+				LocalObjectReference: v1.LocalObjectReference{
+					Name: secretName,
+				},
+				Key: secretKey,
 			},
-			Ports: []v1.ServicePort{
+		},
+	}
+	deployment.Spec.Template.Spec.Containers[0].Env = append(
+		deployment.Spec.Template.Spec.Containers[0].Env, envVar,
+	)
+	return nil
+}
+
+// GetService Create service for K8sGPT
+func GetService(config v1alpha1.K8sGPT) (*corev1.Service, error) {
+	// Create service
+	service := corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      config.Name,
+			Namespace: config.Namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					Kind:               config.Kind,
+					Name:               config.Name,
+					UID:                config.UID,
+					APIVersion:         config.APIVersion,
+					BlockOwnerDeletion: utils.PtrBool(true),
+					Controller:         utils.PtrBool(true),
+				},
+			},
+		},
+		Spec: corev1.ServiceSpec{
+			Selector: map[string]string{
+				"app": config.Name,
+			},
+			Ports: []corev1.ServicePort{
 				{
 					Port: 8080,
 				},
@@ -61,13 +101,15 @@ func GetService(config v1alpha1.K8sGPT) (*v1.Service, error) {
 	return &service, nil
 }
 
-// Create deployment with the latest K8sGPT image
-func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
+// GetDeployment Create deployment with the latest K8sGPT image
+func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Client) (*appsv1.Deployment, error) {
+
 	// Create deployment
+	image := config.Spec.Repository + ":" + config.Spec.Version
 	replicas := int32(1)
 	deployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      DeploymentName,
+			Name:      config.Name,
 			Namespace: config.Namespace,
 			OwnerReferences: []metav1.OwnerReference{
 				{
@@ -84,26 +126,26 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 			Replicas: &replicas,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"app": DeploymentName,
+					"app": config.Name,
 				},
 			},
-			Template: v1.PodTemplateSpec{
+			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"app": DeploymentName,
+						"app": config.Name,
 					},
 				},
-				Spec: v1.PodSpec{
+				Spec: corev1.PodSpec{
 					ServiceAccountName: "k8sgpt",
-					Containers: []v1.Container{
+					Containers: []corev1.Container{
 						{
 							Name:            "k8sgpt",
-							ImagePullPolicy: v1.PullAlways,
-							Image:           "ghcr.io/k8sgpt-ai/k8sgpt:" + config.Spec.Version,
+							ImagePullPolicy: corev1.PullAlways,
+							Image:           image,
 							Args: []string{
 								"serve",
 							},
-							Env: []v1.EnvVar{
+							Env: []corev1.EnvVar{
 								{
 									Name:  "K8SGPT_MODEL",
 									Value: config.Spec.AI.Model,
@@ -121,22 +163,22 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 									Value: "/k8sgpt-data/.cache",
 								},
 							},
-							Ports: []v1.ContainerPort{
+							Ports: []corev1.ContainerPort{
 								{
 									ContainerPort: 8080,
 								},
 							},
-							Resources: v1.ResourceRequirements{
-								Limits: v1.ResourceList{
-									v1.ResourceCPU:    resource.MustParse("1"),
-									v1.ResourceMemory: resource.MustParse("512Mi"),
+							Resources: corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("1"),
+									corev1.ResourceMemory: resource.MustParse("512Mi"),
 								},
-								Requests: v1.ResourceList{
-									v1.ResourceCPU:    resource.MustParse("0.2"),
-									v1.ResourceMemory: resource.MustParse("156Mi"),
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("0.2"),
+									corev1.ResourceMemory: resource.MustParse("156Mi"),
 								},
 							},
-							VolumeMounts: []v1.VolumeMount{
+							VolumeMounts: []corev1.VolumeMount{
 								{
 									MountPath: "/k8sgpt-data",
 									Name:      "k8sgpt-vol",
@@ -144,22 +186,53 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 							},
 						},
 					},
-					Volumes: []v1.Volume{
+					Volumes: []corev1.Volume{
 						{
-							VolumeSource: v1.VolumeSource{EmptyDir: &v1.EmptyDirVolumeSource{}},
+							VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
 							Name:         "k8sgpt-vol",
 						},
 					},
+					NodeSelector: config.Spec.NodeSelector,
 				},
 			},
 		},
 	}
-	if config.Spec.AI.Secret != nil {
-		password := v1.EnvVar{
+	if outOfClusterMode {
+		// No need of ServiceAccount since the Deployment will use
+		// a kubeconfig pointing to an external cluster.
+		deployment.Spec.Template.Spec.ServiceAccountName = ""
+		deployment.Spec.Template.Spec.AutomountServiceAccountToken = ptr.To(false)
+
+		kubeconfigPath := fmt.Sprintf("/tmp/%s", config.Name)
+
+		deployment.Spec.Template.Spec.Containers[0].Args = append(deployment.Spec.Template.Spec.Containers[0].Args, fmt.Sprintf("--kubeconfig=%s/kubeconfig", kubeconfigPath))
+		deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(deployment.Spec.Template.Spec.Containers[0].VolumeMounts, corev1.VolumeMount{
+			Name:      "kubeconfig",
+			ReadOnly:  true,
+			MountPath: kubeconfigPath,
+		})
+		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
+			Name: "kubeconfig",
+			VolumeSource: v1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: config.Spec.Kubeconfig.Name,
+					Items: []corev1.KeyToPath{
+						{
+							Key:  config.Spec.Kubeconfig.Key,
+							Path: "kubeconfig",
+						},
+					},
+				},
+			},
+		})
+	}
+	// This check is necessary for the simple OpenAI journey, let's keep it here and guard from breaking other types of backend
+	if config.Spec.AI.Secret != nil && config.Spec.AI.Backend != v1alpha1.AmazonBedrock {
+		password := corev1.EnvVar{
 			Name: "K8SGPT_PASSWORD",
-			ValueFrom: &v1.EnvVarSource{
-				SecretKeyRef: &v1.SecretKeySelector{
-					LocalObjectReference: v1.LocalObjectReference{
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
 						Name: config.Spec.AI.Secret.Name,
 					},
 					Key: config.Spec.AI.Secret.Key,
@@ -170,8 +243,37 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 			deployment.Spec.Template.Spec.Containers[0].Env, password,
 		)
 	}
+	if config.Spec.RemoteCache != nil {
+
+		// check to see if key/value exists
+		addRemoteCacheEnvVar := func(name, key string) {
+			envVar := v1.EnvVar{
+				Name: name,
+				ValueFrom: &v1.EnvVarSource{
+					SecretKeyRef: &v1.SecretKeySelector{
+						LocalObjectReference: v1.LocalObjectReference{
+							Name: config.Spec.RemoteCache.Credentials.Name,
+						},
+						Key: key,
+					},
+				},
+			}
+			deployment.Spec.Template.Spec.Containers[0].Env = append(
+				deployment.Spec.Template.Spec.Containers[0].Env, envVar,
+			)
+		}
+		if config.Spec.RemoteCache.Azure != nil {
+			addRemoteCacheEnvVar("AZURE_CLIENT_ID", "azure_client_id")
+			addRemoteCacheEnvVar("AZURE_TENANT_ID", "azure_tenant_id")
+			addRemoteCacheEnvVar("AZURE_CLIENT_SECRET", "azure_client_secret")
+		} else if config.Spec.RemoteCache.S3 != nil {
+			addRemoteCacheEnvVar("AWS_ACCESS_KEY_ID", "aws_access_key_id")
+			addRemoteCacheEnvVar("AWS_SECRET_ACCESS_KEY", "aws_secret_access_key")
+		}
+	}
+
 	if config.Spec.AI.BaseUrl != "" {
-		baseUrl := v1.EnvVar{
+		baseUrl := corev1.EnvVar{
 			Name:  "K8SGPT_BASEURL",
 			Value: config.Spec.AI.BaseUrl,
 		}
@@ -181,7 +283,7 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 	}
 	// Engine is required only when azureopenai is the ai backend
 	if config.Spec.AI.Engine != "" && config.Spec.AI.Backend == v1alpha1.AzureOpenAI {
-		engine := v1.EnvVar{
+		engine := corev1.EnvVar{
 			Name:  "K8SGPT_ENGINE",
 			Value: config.Spec.AI.Engine,
 		}
@@ -189,15 +291,38 @@ func GetDeployment(config v1alpha1.K8sGPT) (*appsv1.Deployment, error) {
 			deployment.Spec.Template.Spec.Containers[0].Env, engine,
 		)
 	} else if config.Spec.AI.Engine != "" && config.Spec.AI.Backend != v1alpha1.AzureOpenAI {
-		return &appsv1.Deployment{}, err.New("Engine is supported only by azureopenai provider.")
+		return &appsv1.Deployment{}, err.New("engine is supported only by azureopenai provider")
+	}
+	// Add checks for amazonbedrock
+	if config.Spec.AI.Backend == v1alpha1.AmazonBedrock {
+		if config.Spec.AI.Secret == nil {
+			return &appsv1.Deployment{}, err.New("secret is required for amazonbedrock backend")
+		}
+		if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "AWS_ACCESS_KEY_ID", config, c, &deployment); err != nil {
+			return &appsv1.Deployment{}, err
+		}
+		if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "AWS_SECRET_ACCESS_KEY", config, c, &deployment); err != nil {
+			return &appsv1.Deployment{}, err
+		}
+		if config.Spec.AI.Region == "" {
+			return &appsv1.Deployment{}, err.New("default region is required for amazonbedrock backend")
+		}
+		deployment.Spec.Template.Spec.Containers[0].Env = append(
+			deployment.Spec.Template.Spec.Containers[0].Env, corev1.EnvVar{
+				Name:  "AWS_DEFAULT_REGION",
+				Value: config.Spec.AI.Region,
+			},
+		)
 	}
 	return &deployment, nil
 }
 
 func Sync(ctx context.Context, c client.Client,
-	config v1alpha1.K8sGPT, i CreateOrDestroy,
-) error {
+	config v1alpha1.K8sGPT, i SyncOrDestroy) error {
+
 	var objs []client.Object
+
+	outOfClusterMode := config.Spec.Kubeconfig != nil
 
 	svc, er := GetService(config)
 	if er != nil {
@@ -206,7 +331,7 @@ func Sync(ctx context.Context, c client.Client,
 
 	objs = append(objs, svc)
 
-	deployment, er := GetDeployment(config)
+	deployment, er := GetDeployment(config, outOfClusterMode, c)
 	if er != nil {
 		return er
 	}
@@ -216,29 +341,27 @@ func Sync(ctx context.Context, c client.Client,
 	// for each object, create or destroy
 	for _, obj := range objs {
 		switch i {
-		case Create:
+		case SyncOp:
 
-			// before creation we will check to see if the secret exists if used as a ref
+			// before creation, we will check to see if the secret exists if used as a ref
 			if config.Spec.AI.Secret != nil {
 
-				secret := &v1.Secret{}
-				er := c.Get(ctx, types.NamespacedName{
-					Name:      config.Spec.AI.Secret.Name,
-					Namespace: config.Namespace,
-				}, secret)
+				secret := &corev1.Secret{}
+				er := c.Get(ctx, types.NamespacedName{Name: config.Spec.AI.Secret.Name,
+					Namespace: config.Namespace}, secret)
 				if er != nil {
 					return err.New("references secret does not exist, cannot create deployment")
 				}
 			}
 
-			err := c.Create(ctx, obj)
+			err := doSync(ctx, c, obj)
 			if err != nil {
 				// If the object already exists, ignore the error
 				if !errors.IsAlreadyExists(err) {
 					return err
 				}
 			}
-		case Destroy:
+		case DestroyOp:
 			err := c.Delete(ctx, obj)
 			if err != nil {
 				// if the object is not found, ignore the error
@@ -250,4 +373,38 @@ func Sync(ctx context.Context, c client.Client,
 	}
 
 	return nil
+}
+
+func doSync(ctx context.Context, clt client.Client, obj client.Object) error {
+	var mutateFn controllerutil.MutateFn
+	switch expect := obj.(type) {
+	case *appsv1.Deployment:
+		exist := &appsv1.Deployment{}
+		err := clt.Get(context.Background(), client.ObjectKeyFromObject(obj), exist)
+		if err != nil && !errors.IsNotFound(err) {
+			return err
+		} else if err == nil {
+			mutateFn = func() error {
+				exist.Spec = expect.Spec
+				return nil
+			}
+			obj = exist
+		}
+	case *corev1.Service:
+		exist := &corev1.Service{}
+		err := clt.Get(context.Background(), client.ObjectKeyFromObject(obj), exist)
+		if err != nil && !errors.IsNotFound(err) {
+			return err
+		} else if err == nil {
+			mutateFn = func() error {
+				exist.Spec = expect.Spec
+				return nil
+			}
+			obj = exist
+		}
+	}
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		_, err := controllerutil.CreateOrPatch(ctx, clt, obj, mutateFn)
+		return err
+	})
 }

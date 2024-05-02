@@ -36,45 +36,115 @@ type ExtraOptionsRef struct {
 	Backstage *Backstage `json:"backstage,omitempty"`
 }
 
+type CredentialsRef struct {
+	Name string `json:"name,omitempty"`
+}
+
+type RemoteCacheRef struct {
+	Credentials *CredentialsRef `json:"credentials,omitempty"`
+	GCS         *GCSBackend     `json:"gcs,omitempty"`
+	S3          *S3Backend      `json:"s3,omitempty"`
+	Azure       *AzureBackend   `json:"azure,omitempty"`
+}
+
+type S3Backend struct {
+	BucketName string `json:"bucketName,omitempty"`
+	Region     string `json:"region,omitempty"`
+}
+
+type AzureBackend struct {
+	StorageAccount string `json:"storageAccount,omitempty"`
+	ContainerName  string `json:"containerName,omitempty"`
+}
+
+type GCSBackend struct {
+	BucketName string `json:"bucketName,omitempty"`
+	Region     string `json:"region,omitempty"`
+	ProjectId  string `json:"projectId,omitempty"`
+}
+
 type WebhookRef struct {
-	// +kubebuilder:validation:Enum=slack
-	Type     string `json:"type,omitempty"`
-	Endpoint string `json:"webhook,omitempty"`
+	// +kubebuilder:validation:Enum=slack;mattermost
+	Type     string     `json:"type,omitempty"`
+	Endpoint string     `json:"webhook,omitempty"`
+	Channel  string     `json:"channel,omitempty"`
+	UserName string     `json:"username,omitempty"`
+	IconURL  string     `json:"icon_url,omitempty"`
+	Secret   *SecretRef `json:"secret,omitempty"`
+}
+
+type BackOff struct {
+	// +kubebuilder:default:=true
+	Enabled bool `json:"enabled"`
+	// +kubebuilder:default:=5
+	MaxRetries int `json:"maxRetries"`
 }
 
 type AISpec struct {
 	// +kubebuilder:default:=openai
-	// +kubebuilder:validation:Enum=openai;localai;azureopenai
-	Backend string `json:"backend"`
-	BaseUrl string `json:"baseUrl,omitempty"`
+	// +kubebuilder:validation:Enum=openai;localai;azureopenai;amazonbedrock;cohere;amazonsagemaker;google;googlevertexai
+	Backend string   `json:"backend"`
+	BackOff *BackOff `json:"backOff,omitempty"`
+	BaseUrl string   `json:"baseUrl,omitempty"`
+	Region  string   `json:"region,omitempty"`
 	// +kubebuilder:default:=gpt-3.5-turbo
 	Model   string     `json:"model,omitempty"`
 	Engine  string     `json:"engine,omitempty"`
 	Secret  *SecretRef `json:"secret,omitempty"`
 	Enabled bool       `json:"enabled,omitempty"`
 	// +kubebuilder:default:=true
-	Anonymize bool `json:"anonymized,omitempty"`
+	Anonymize *bool `json:"anonymized,omitempty"`
 	// +kubebuilder:default:=english
 	Language string `json:"language,omitempty"`
 }
 
+type Trivy struct {
+	Enabled     bool   `json:"enabled,omitempty"`
+	SkipInstall bool   `json:"skipInstall,omitempty"`
+	Namespace   string `json:"namespace,omitempty"`
+}
+type Integrations struct {
+	Trivy *Trivy `json:"trivy,omitempty"`
+}
+
+type ImagePullSecrets struct {
+	Name string `json:"name,omitempty"`
+}
+
 // K8sGPTSpec defines the desired state of K8sGPT
 type K8sGPTSpec struct {
-	Version      string           `json:"version,omitempty"`
-	NoCache      bool             `json:"noCache,omitempty"`
-	Filters      []string         `json:"filters,omitempty"`
-	ExtraOptions *ExtraOptionsRef `json:"extraOptions,omitempty"`
-	Sink         *WebhookRef      `json:"sink,omitempty"`
-	AI           *AISpec          `json:"ai,omitempty"`
+	Version string `json:"version,omitempty"`
+	// +kubebuilder:default:=ghcr.io/k8sgpt-ai/k8sgpt
+	Repository       string             `json:"repository,omitempty"`
+	ImagePullSecrets []ImagePullSecrets `json:"imagePullSecrets,omitempty"`
+	NoCache          bool               `json:"noCache,omitempty"`
+	Filters          []string           `json:"filters,omitempty"`
+	ExtraOptions     *ExtraOptionsRef   `json:"extraOptions,omitempty"`
+	Sink             *WebhookRef        `json:"sink,omitempty"`
+	AI               *AISpec            `json:"ai,omitempty"`
+	RemoteCache      *RemoteCacheRef    `json:"remoteCache,omitempty"`
+	Integrations     *Integrations      `json:"integrations,omitempty"`
+	NodeSelector     map[string]string  `json:"nodeSelector,omitempty"`
+	TargetNamespace  string             `json:"targetNamespace,omitempty"`
+	// Define the kubeconfig the Deployment must use.
+	// If empty, the Deployment will use the ServiceAccount provided by Kubernetes itself.
+	Kubeconfig *SecretRef `json:"kubeconfig,omitempty"`
 }
 
 const (
-	OpenAI      = "openai"
-	AzureOpenAI = "azureopenai"
-	LocalAI     = "localai"
+	OpenAI          = "openai"
+	AzureOpenAI     = "azureopenai"
+	LocalAI         = "localai"
+	AmazonBedrock   = "amazonbedrock"
+	AmazonSageMaker = "AmazonSageMaker"
+	Cohere          = "cohere"
+	Google          = "google"
+	GoogleVertexAI  = "googlevertexai"
 )
 
 // K8sGPTStatus defines the observed state of K8sGPT
+// show the current backend used
+// +kubebuilder:printcolumn:name="Backend",type="string",JSONPath=".spec.ai.backend",description="The current backend used"
 type K8sGPTStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
