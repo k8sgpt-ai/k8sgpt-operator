@@ -44,10 +44,13 @@ const (
 
 func addSecretAsEnvToDeployment(secretName string, secretKey string,
 	config v1alpha1.K8sGPT, c client.Client,
-	deployment *appsv1.Deployment) error {
+	deployment *appsv1.Deployment,
+) error {
 	secret := &corev1.Secret{}
-	er := c.Get(context.Background(), types.NamespacedName{Name: secretName,
-		Namespace: config.Namespace}, secret)
+	er := c.Get(context.Background(), types.NamespacedName{
+		Name:      secretName,
+		Namespace: config.Namespace,
+	}, secret)
 	if er != nil {
 		return err.New("secret does not exist, cannot add to env of deployment")
 	}
@@ -103,7 +106,6 @@ func GetService(config v1alpha1.K8sGPT) (*corev1.Service, error) {
 
 // GetDeployment Create deployment with the latest K8sGPT image
 func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Client) (*appsv1.Deployment, error) {
-
 	// Create deployment
 	image := config.Spec.Repository + ":" + config.Spec.Version
 	replicas := int32(1)
@@ -318,16 +320,9 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 }
 
 func Sync(ctx context.Context, c client.Client, config v1alpha1.K8sGPT, i SyncOrDestroy) error {
-
 	var objs []client.Object
 
 	outOfClusterMode := config.Spec.Kubeconfig != nil
-
-	if !outOfClusterMode {
-		svcAcc, er := GetServiceAccount(config)
-		if er != nil {
-			return er
-		}
 
 	deployment, er := GetDeployment(config, outOfClusterMode, c)
 	if er != nil {
@@ -345,8 +340,10 @@ func Sync(ctx context.Context, c client.Client, config v1alpha1.K8sGPT, i SyncOr
 			if config.Spec.AI.Secret != nil {
 
 				secret := &corev1.Secret{}
-				er := c.Get(ctx, types.NamespacedName{Name: config.Spec.AI.Secret.Name,
-					Namespace: config.Namespace}, secret)
+				er := c.Get(ctx, types.NamespacedName{
+					Name:      config.Spec.AI.Secret.Name,
+					Namespace: config.Namespace,
+				}, secret)
 				if er != nil {
 					return err.New("references secret does not exist, cannot create deployment")
 				}
