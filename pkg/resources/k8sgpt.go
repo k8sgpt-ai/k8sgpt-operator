@@ -23,8 +23,7 @@ import (
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
-	r1 "k8s.io/api/rbac/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -52,11 +51,11 @@ func addSecretAsEnvToDeployment(secretName string, secretKey string,
 	if er != nil {
 		return err.New("secret does not exist, cannot add to env of deployment")
 	}
-	envVar := v1.EnvVar{
+	envVar := corev1.EnvVar{
 		Name: secretKey,
-		ValueFrom: &v1.EnvVarSource{
-			SecretKeyRef: &v1.SecretKeySelector{
-				LocalObjectReference: v1.LocalObjectReference{
+		ValueFrom: &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
 					Name: secretName,
 				},
 				Key: secretKey,
@@ -133,10 +132,10 @@ func GetServiceAccount(config v1alpha1.K8sGPT) (*corev1.ServiceAccount, error) {
 }
 
 // GetClusterRoleBinding Create cluster role binding for K8sGPT
-func GetClusterRoleBinding(config v1alpha1.K8sGPT) (*r1.ClusterRoleBinding, error) {
+func GetClusterRoleBinding(config v1alpha1.K8sGPT) (*rbacv1.ClusterRoleBinding, error) {
 
 	// Create cluster role binding
-	clusterRoleBinding := r1.ClusterRoleBinding{
+	clusterRoleBinding := rbacv1.ClusterRoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "k8sgpt",
 			OwnerReferences: []metav1.OwnerReference{
@@ -150,14 +149,14 @@ func GetClusterRoleBinding(config v1alpha1.K8sGPT) (*r1.ClusterRoleBinding, erro
 				},
 			},
 		},
-		Subjects: []r1.Subject{
+		Subjects: []rbacv1.Subject{
 			{
 				Kind:      "ServiceAccount",
 				Name:      "k8sgpt",
 				Namespace: config.Namespace,
 			},
 		},
-		RoleRef: r1.RoleRef{
+		RoleRef: rbacv1.RoleRef{
 			Kind:     "ClusterRole",
 			Name:     "k8sgpt",
 			APIGroup: "rbac.authorization.k8s.io",
@@ -168,10 +167,10 @@ func GetClusterRoleBinding(config v1alpha1.K8sGPT) (*r1.ClusterRoleBinding, erro
 }
 
 // GetClusterRole Create ClusterRole for K8sGPT with cluster read all
-func GetClusterRole(config v1alpha1.K8sGPT) (*r1.ClusterRole, error) {
+func GetClusterRole(config v1alpha1.K8sGPT) (*rbacv1.ClusterRole, error) {
 
 	// Create cluster role
-	clusterRole := r1.ClusterRole{
+	clusterRole := rbacv1.ClusterRole{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "k8sgpt",
 			OwnerReferences: []metav1.OwnerReference{
@@ -185,7 +184,7 @@ func GetClusterRole(config v1alpha1.K8sGPT) (*r1.ClusterRole, error) {
 				},
 			},
 		},
-		Rules: []r1.PolicyRule{
+		Rules: []rbacv1.PolicyRule{
 			{
 				APIGroups: []string{"*"},
 				Resources: []string{"*"},
@@ -316,7 +315,7 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 		})
 		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 			Name: "kubeconfig",
-			VolumeSource: v1.VolumeSource{
+			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
 					SecretName: config.Spec.Kubeconfig.Name,
 					Items: []corev1.KeyToPath{
@@ -350,11 +349,11 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 
 		// check to see if key/value exists
 		addRemoteCacheEnvVar := func(name, key string) {
-			envVar := v1.EnvVar{
+			envVar := corev1.EnvVar{
 				Name: name,
-				ValueFrom: &v1.EnvVarSource{
-					SecretKeyRef: &v1.SecretKeySelector{
-						LocalObjectReference: v1.LocalObjectReference{
+				ValueFrom: &corev1.EnvVarSource{
+					SecretKeyRef: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{
 							Name: config.Spec.RemoteCache.Credentials.Name,
 						},
 						Key: key,
