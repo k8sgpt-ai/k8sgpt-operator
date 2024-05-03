@@ -23,8 +23,8 @@ import (
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 
 	"github.com/prometheus/client_golang/prometheus"
-	v1 "k8s.io/api/apps/v1"
-	kcorev1 "k8s.io/api/core/v1"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -160,7 +160,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 
 	// Check and see if the instance is new or has a K8sGPT deployment in flight
-	deployment := v1.Deployment{}
+	deployment := appsv1.Deployment{}
 	err = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
 		Name: k8sgptConfig.Name}, &deployment)
 	if client.IgnoreNotFound(err) != nil {
@@ -371,7 +371,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			var sinkSecretValue string
 
 			if k8sgptConfig.Spec.Sink.Secret != nil {
-				secret := &kcorev1.Secret{}
+				secret := &corev1.Secret{}
 				secretNamespacedName := types.NamespacedName{
 					Namespace: req.Namespace,
 					Name:      k8sgptConfig.Spec.Sink.Secret.Name,
