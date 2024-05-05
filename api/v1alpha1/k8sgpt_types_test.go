@@ -49,7 +49,8 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 
 		k8sGPT = K8sGPT{
 			TypeMeta: metav1.TypeMeta{
-				Kind: kind,
+				Kind:       kind,
+				APIVersion: "core.k8sgpt.ai/v1alpha1",
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "k8s-gpt",
@@ -78,7 +79,8 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 		dontAnonymize = false
 		k8sGPT2       = K8sGPT{
 			TypeMeta: metav1.TypeMeta{
-				Kind: kind,
+				Kind:       kind,
+				APIVersion: "core.k8sgpt.ai/v1alpha1",
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "k8s-gpt-2",

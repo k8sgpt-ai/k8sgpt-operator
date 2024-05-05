@@ -1,6 +1,9 @@
 apiVersion: core.k8sgpt.ai/v1alpha1
 kind: K8sGPT
 metadata:
+  labels:
+    app.kubernetes.io/name: k8sgpt-operator
+    app.kubernetes.io/managed-by: kustomize
   name: k8sgpt-sample
   namespace: k8sgpt-operator-system
 spec:

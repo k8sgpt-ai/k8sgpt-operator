@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package controllers
+package controller
 
 import (
 	"context"
@@ -23,8 +23,8 @@ import (
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 
 	"github.com/prometheus/client_golang/prometheus"
-	v1 "k8s.io/api/apps/v1"
-	kcorev1 "k8s.io/api/core/v1"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -108,7 +108,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	// Add a finaliser if there isn't one
+	// Add a finalizer if there isn't one
 	if k8sgptConfig.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is not being deleted, so if it does not have our finalizer,
 		// then lets add the finalizer and update the object. This is equivalent
@@ -160,7 +160,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 
 	// Check and see if the instance is new or has a K8sGPT deployment in flight
-	deployment := v1.Deployment{}
+	deployment := appsv1.Deployment{}
 	err = r.Get(ctx, client.ObjectKey{Namespace: k8sgptConfig.Namespace,
 		Name: k8sgptConfig.Name}, &deployment)
 	if client.IgnoreNotFound(err) != nil {
@@ -371,7 +371,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			var sinkSecretValue string
 
 			if k8sgptConfig.Spec.Sink.Secret != nil {
-				secret := &kcorev1.Secret{}
+				secret := &corev1.Secret{}
 				secretNamespacedName := types.NamespacedName{
 					Namespace: req.Namespace,
 					Name:      k8sgptConfig.Spec.Sink.Secret.Name,

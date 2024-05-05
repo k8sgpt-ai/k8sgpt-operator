@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	appsv1 "k8s.io/api/apps/v1"
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/utils/pointer"
@@ -30,9 +30,9 @@ func Test_DeploymentShouldBeSynced(t *testing.T) {
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: pointer.Int32(1),
-			Template: v1.PodTemplateSpec{
-				Spec: v1.PodSpec{
-					Containers: []v1.Container{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
 						{
 							Name:  "k8sgpt",
 							Image: "ghcr.io/k8sgpt-ai/k8sgpt:v0.3.8",
@@ -74,14 +74,14 @@ func Test_DeploymentShouldBeSynced(t *testing.T) {
 
 func Test_ServiceAccountShouldNotBeSynced(t *testing.T) {
 	scheme := runtime.NewScheme()
-	require.NoError(t, v1.AddToScheme(scheme))
+	require.NoError(t, corev1.AddToScheme(scheme))
 	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
 	ctx := context.Background()
 
 	//
 	// create ServiceAccount
 	//
-	serviceAccount := &v1.ServiceAccount{
+	serviceAccount := &corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "k8sgpt",
 		},
@@ -92,7 +92,7 @@ func Test_ServiceAccountShouldNotBeSynced(t *testing.T) {
 	err := doSync(ctx, fakeClient, serviceAccount)
 	require.NoError(t, err)
 
-	existSA := &v1.ServiceAccount{}
+	existSA := &corev1.ServiceAccount{}
 	err = fakeClient.Get(ctx, client.ObjectKeyFromObject(serviceAccount), existSA)
 
 	// verify
