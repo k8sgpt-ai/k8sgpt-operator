@@ -23,7 +23,6 @@ import (
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
 	r1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -52,11 +51,11 @@ func addSecretAsEnvToDeployment(secretName string, secretKey string,
 	if er != nil {
 		return err.New("secret does not exist, cannot add to env of deployment")
 	}
-	envVar := v1.EnvVar{
+	envVar := corev1.EnvVar{
 		Name: secretKey,
-		ValueFrom: &v1.EnvVarSource{
-			SecretKeyRef: &v1.SecretKeySelector{
-				LocalObjectReference: v1.LocalObjectReference{
+		ValueFrom: &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
 					Name: secretName,
 				},
 				Key: secretKey,
@@ -316,7 +315,7 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 		})
 		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 			Name: "kubeconfig",
-			VolumeSource: v1.VolumeSource{
+			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
 					SecretName: config.Spec.Kubeconfig.Name,
 					Items: []corev1.KeyToPath{
@@ -350,11 +349,11 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 
 		// check to see if key/value exists
 		addRemoteCacheEnvVar := func(name, key string) {
-			envVar := v1.EnvVar{
+			envVar := corev1.EnvVar{
 				Name: name,
-				ValueFrom: &v1.EnvVarSource{
-					SecretKeyRef: &v1.SecretKeySelector{
-						LocalObjectReference: v1.LocalObjectReference{
+				ValueFrom: &corev1.EnvVarSource{
+					SecretKeyRef: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{
 							Name: config.Spec.RemoteCache.Credentials.Name,
 						},
 						Key: key,
@@ -396,6 +395,21 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 	} else if config.Spec.AI.Engine != "" && config.Spec.AI.Backend != v1alpha1.AzureOpenAI {
 		return &appsv1.Deployment{}, err.New("engine is supported only by azureopenai provider")
 	}
+
+	// ProxyEndpoint is required only when azureopenai or openai is the ai backend
+	if config.Spec.AI.ProxyEndpoint != "" && (config.Spec.AI.Backend == v1alpha1.AzureOpenAI || config.Spec.AI.Backend == v1alpha1.OpenAI) {
+		proxyEndpoint := corev1.EnvVar{
+			Name:  "K8SGPT_PROXY_ENDPOINT",
+			Value: config.Spec.AI.ProxyEndpoint,
+		}
+		deployment.Spec.Template.Spec.Containers[0].Env = append(
+			deployment.Spec.Template.Spec.Containers[0].Env, proxyEndpoint,
+		)
+	} else if config.Spec.AI.ProxyEndpoint != "" && config.Spec.AI.Backend != v1alpha1.AzureOpenAI && config.Spec.AI.Backend != v1alpha1.OpenAI {
+		return &appsv1.Deployment{}, err.New("proxyEndpoint is supported only by azureopenai and openai provider")
+
+	}
+
 	// Add checks for amazonbedrock
 	if config.Spec.AI.Backend == v1alpha1.AmazonBedrock {
 		if config.Spec.AI.Secret == nil {
