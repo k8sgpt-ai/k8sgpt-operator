@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.3.0-20240406062209-1cc152efbf5c.3
-	buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.34.0-20240406062209-1cc152efbf5c.1
+	buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.34.1-20240406062209-1cc152efbf5c.1
 	github.com/onsi/ginkgo/v2 v2.17.2
 	github.com/onsi/gomega v1.33.1
 	github.com/prometheus/client_golang v1.19.1
@@ -93,7 +93,7 @@ require (
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240318140521-94a12d6c2237 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240318140521-94a12d6c2237 // indirect
-	google.golang.org/protobuf v1.34.0 // indirect
+	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
