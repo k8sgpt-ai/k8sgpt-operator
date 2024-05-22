@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.5](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.1.4...v0.1.5) (2024-05-22)
+
+
+### Bug Fixes
+
+* **deps:** update module buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go to v1.3.0-20240406062209-1cc152efbf5c.3 ([#431](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/431)) ([1071f80](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/1071f80396ddda619b31fdac4507b92dd0881c8c))
+* **deps:** update module github.com/prometheus/client_golang to v1.19.1 ([#442](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/442)) ([3d895b0](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/3d895b04a6ab89062015ef521f6715c7d8c56c64))
+* **deps:** update module google.golang.org/grpc to v1.64.0 ([#445](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/445)) ([f73dc92](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/f73dc926bd8f7a7aa027c023f685d2ea2e87e0d3))
+* rollback namespace bug ([#449](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/449)) ([74fd8b6](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/74fd8b6e2552b2d7c1135450f361fb64be10334c))
+
+
+### Other
+
+* **deps:** update actions/checkout digest to 44c2b7a ([#440](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/440)) ([98d8fbf](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/98d8fbfd47de54626c0410f45be4f425e045f90f))
+* **deps:** update google-github-actions/release-please-action digest to e4dc86b ([#444](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/444)) ([f6b7ba5](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/f6b7ba5c4e063c319a7e3ce7444d366fe29f544f))
+
 ## [0.1.4](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.1.3...v0.1.4) (2024-05-07)
 
 
