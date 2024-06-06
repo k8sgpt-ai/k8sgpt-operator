@@ -24,7 +24,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
-	r1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -100,108 +99,6 @@ func GetService(config v1alpha1.K8sGPT) (*corev1.Service, error) {
 	}
 
 	return &service, nil
-}
-
-// GetServiceAccount Create Service Account for K8sGPT and bind it to K8sGPT role
-func GetServiceAccount(config v1alpha1.K8sGPT) (*corev1.ServiceAccount, error) {
-	// Create service account
-	serviceAccount := corev1.ServiceAccount{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "k8sgpt",
-			Namespace: config.Namespace,
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					Kind:               config.Kind,
-					Name:               config.Name,
-					UID:                config.UID,
-					APIVersion:         config.APIVersion,
-					BlockOwnerDeletion: utils.PtrBool(true),
-					Controller:         utils.PtrBool(true),
-				},
-			},
-		},
-		ImagePullSecrets: []corev1.LocalObjectReference{},
-	}
-	//Add image pull secrets to service account
-	for _, secret := range config.Spec.ImagePullSecrets {
-		serviceAccount.ImagePullSecrets = append(serviceAccount.ImagePullSecrets, corev1.LocalObjectReference{
-			Name: secret.Name,
-		})
-	}
-
-	return &serviceAccount, nil
-}
-
-// GetClusterRoleBinding Create cluster role binding for K8sGPT
-func GetClusterRoleBinding(config v1alpha1.K8sGPT) (*r1.ClusterRoleBinding, error) {
-
-	// Create cluster role binding
-	clusterRoleBinding := r1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "k8sgpt",
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					Kind:               config.Kind,
-					Name:               config.Name,
-					UID:                config.UID,
-					APIVersion:         config.APIVersion,
-					BlockOwnerDeletion: utils.PtrBool(true),
-					Controller:         utils.PtrBool(true),
-				},
-			},
-		},
-		Subjects: []r1.Subject{
-			{
-				Kind:      "ServiceAccount",
-				Name:      "k8sgpt",
-				Namespace: config.Namespace,
-			},
-		},
-		RoleRef: r1.RoleRef{
-			Kind:     "ClusterRole",
-			Name:     "k8sgpt",
-			APIGroup: "rbac.authorization.k8s.io",
-		},
-	}
-
-	return &clusterRoleBinding, nil
-}
-
-// GetClusterRole Create ClusterRole for K8sGPT with cluster read all
-func GetClusterRole(config v1alpha1.K8sGPT) (*r1.ClusterRole, error) {
-
-	// Create cluster role
-	clusterRole := r1.ClusterRole{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "k8sgpt",
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					Kind:               config.Kind,
-					Name:               config.Name,
-					UID:                config.UID,
-					APIVersion:         config.APIVersion,
-					BlockOwnerDeletion: utils.PtrBool(true),
-					Controller:         utils.PtrBool(true),
-				},
-			},
-		},
-		Rules: []r1.PolicyRule{
-			{
-				APIGroups: []string{"*"},
-				Resources: []string{"*"},
-				// This is necessary for the creation of integrations
-				Verbs: []string{"create", "list", "get", "watch", "delete"},
-			},
-			// Allow creation of custom resources
-			{
-				APIGroups: []string{"apiextensions.k8s.io"},
-				Resources: []string{"*"},
-				Verbs:     []string{"*"},
-			},
-		},
-	}
-
-	return &clusterRole, nil
 }
 
 // GetDeployment Create deployment with the latest K8sGPT image
@@ -426,29 +323,6 @@ func Sync(ctx context.Context, c client.Client,
 	var objs []client.Object
 
 	outOfClusterMode := config.Spec.Kubeconfig != nil
-
-	if !outOfClusterMode {
-		svcAcc, er := GetServiceAccount(config)
-		if er != nil {
-			return er
-		}
-
-		objs = append(objs, svcAcc)
-
-		clusterRole, er := GetClusterRole(config)
-		if er != nil {
-			return er
-		}
-
-		objs = append(objs, clusterRole)
-
-		clusterRoleBinding, er := GetClusterRoleBinding(config)
-		if er != nil {
-			return er
-		}
-
-		objs = append(objs, clusterRoleBinding)
-	}
 
 	svc, er := GetService(config)
 	if er != nil {
