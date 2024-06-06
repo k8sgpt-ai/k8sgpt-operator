@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.1.6](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.1.5...v0.1.6) (2024-06-06)
+
+
+### Features
+
+* add new RBAC configuration for k8sgpt ([#434](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/434)) ([2d5954c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/2d5954c4e622a01bf0215ca1cdcb3a5d4a5c3ecb))
+
+
+### Bug Fixes
+
+* **deps:** update module buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go to v1.4.0-20240406062209-1cc152efbf5c.1 ([#451](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/451)) ([389bc71](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/389bc713726702041deeb8dff59337127b361ffb))
+* **deps:** update module github.com/onsi/ginkgo/v2 to v2.19.0 ([#428](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/428)) ([0472732](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/04727326c4d95b715ef2cfe8ef8b64da52cb47a0))
+
+
+### Other
+
+* **deps:** update actions/checkout digest to a5ac7e5 ([#443](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/443)) ([9f6edab](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9f6edab8038ccec65f5812d71abf6999537305ce))
+* **deps:** update docker/login-action digest to 0d4c9c5 ([#450](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/450)) ([144485e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/144485e6eaa10aa5bf63d33ec4b4d831ff766401))
+
 ## [0.1.5](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.1.4...v0.1.5) (2024-05-22)
 
 
