@@ -1,3 +1,8 @@
+serviceAccount:
+  create: true
+  name: "k8sgpt"
+  # -- Annotations for the managed k8sgpt workload service account
+  annotations: {}
 serviceMonitor:
   enabled: false
   additionalLabels: {}
