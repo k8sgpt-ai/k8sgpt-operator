@@ -1,7 +1,8 @@
 buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.4.0-20240406062209-1cc152efbf5c.1 h1:LgzSBB4q8qpgOqpTJoUKEbsDMddSuMK/ccdCuyQkOV8=
 buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.4.0-20240406062209-1cc152efbf5c.1/go.mod h1:8O5QQzJX72VEsoGtQvjBYwA25KrvIN7unx+ahHfxPpc=
-buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.34.1-20240406062209-1cc152efbf5c.1 h1:DLKuL/RwZg0bRweSS18Bi67GzKOW3F6YnVU0nZYXZBU=
 buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.34.1-20240406062209-1cc152efbf5c.1/go.mod h1:qEarbrHjaZEQ5GeUH6XqSqqJMvtPwAGFpAc0nkSBzrQ=
+buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.34.2-20240406062209-1cc152efbf5c.2 h1:9lke4oMvLFuSb+tR1gU2FVBXVZJy84JLafjPdBxnK+E=
+buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.34.2-20240406062209-1cc152efbf5c.2/go.mod h1:1wq1qVxvJkTEUQsF5/XjmhQYXYhbVoLSGhKnzS3ie54=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.38.0/go.mod h1:990N+gfupTy94rShfmMCWGDn0LpTmnzTp2qbd1dvSRU=
@@ -2341,8 +2342,9 @@ google.golang.org/protobuf v1.28.1/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqw
 google.golang.org/protobuf v1.29.1/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
 google.golang.org/protobuf v1.30.0/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
 google.golang.org/protobuf v1.31.0/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
-google.golang.org/protobuf v1.34.1 h1:9ddQBjfCyZPOHPUiPxpYESBLc+T8P3E+Vo4IbKZgFWg=
 google.golang.org/protobuf v1.34.1/go.mod h1:c6P6GXX6sHbq/GpV6MGZEdwhWPcYBgnhAHhKbcUYpos=
+google.golang.org/protobuf v1.34.2 h1:6xV6lTsCfpGD21XK49h7MhtcApnLqkfYgPcdHftf6hg=
+google.golang.org/protobuf v1.34.2/go.mod h1:qYOHts0dSfpeUzUFpOMr/WGzszTmLH+DiWniOlNbLDw=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c h1:Hei/4ADfdWqJk1ZMxUNpqntNwaWcugrBjAiHlqqRiVk=
