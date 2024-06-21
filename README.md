@@ -282,7 +282,31 @@ EOF
 
 1. Install the operator from the [Installation](#installation) section.
 
-2. Create secret:
+2. When running on AWS, you have a number of ways to give permission to the managed K8sGPT workload to access Amazon Bedrock.
+* Grant access to Bedrock using the Kubernetes Service Account. This is the [best practices method for assigning permissions to Kubernetes Pods](https://aws.github.io/aws-eks-best-practices/security/docs/iam/#identities-and-credentials-for-eks-pods). There are a few ways to do this:
+    * On Amazon EKS, using [EKS Pod Identity](https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html)
+    * On Amazon EKS, using [IAM Roles for Service Accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html)
+    * On self-managed Kubernetes, using IAM Roles for Service Accounts (IRSA) with the [Pod Identity Webhook](https://github.com/aws/amazon-eks-pod-identity-webhook)
+* Grant access to Bedrock using AWS credentials in a Kubernetes Secret. Note this goes [against AWS best practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#bp-workloads-use-roles) and should be used with caution.
+
+To grant access to Bedrock using a Kubernetes Service account, create an IAM role with Bedrock permissions. An example policy is included below:
+```
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+To grant access to Bedrock using AWS credentials in a Kubernetes secret you can create a secret:
 ```sh 
 kubectl create secret generic bedrock-sample-secret --from-literal=AWS_ACCESS_KEY_ID="$(echo $AWS_ACCESS_KEY_ID)" --from-literal=AWS_SECRET_ACCESS_KEY="$(echo $AWS_SECRET_ACCESS_KEY)" -n k8sgpt-operator-system
 ```
@@ -297,8 +321,8 @@ metadata:
 spec:
   ai:
     enabled: true
-    secret:
-      name: bedrock-sample-secret
+    # secret:
+    #   name: bedrock-sample-secret
     model: anthropic.claude-v2
     region: eu-central-1
     backend: amazonbedrock

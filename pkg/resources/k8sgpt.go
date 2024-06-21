@@ -295,14 +295,13 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 	}
 	// Add checks for amazonbedrock
 	if config.Spec.AI.Backend == v1alpha1.AmazonBedrock {
-		if config.Spec.AI.Secret == nil {
-			return &appsv1.Deployment{}, err.New("secret is required for amazonbedrock backend")
-		}
-		if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "AWS_ACCESS_KEY_ID", config, c, &deployment); err != nil {
-			return &appsv1.Deployment{}, err
-		}
-		if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "AWS_SECRET_ACCESS_KEY", config, c, &deployment); err != nil {
-			return &appsv1.Deployment{}, err
+		if config.Spec.AI.Secret != nil {
+			if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "AWS_ACCESS_KEY_ID", config, c, &deployment); err != nil {
+				return &appsv1.Deployment{}, err
+			}
+			if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "AWS_SECRET_ACCESS_KEY", config, c, &deployment); err != nil {
+				return &appsv1.Deployment{}, err
+			}
 		}
 		if config.Spec.AI.Region == "" {
 			return &appsv1.Deployment{}, err.New("default region is required for amazonbedrock backend")
