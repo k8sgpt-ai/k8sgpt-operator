@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.1.7](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.1.6...v0.1.7) (2024-06-28)
+
+
+### Features
+
+* support IRSA and Pod Identities for Amazon Bedrock ([#454](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/454)) ([c3573e8](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c3573e8313457f6b5280514c06d7b62a79440c62))
+
+
+### Bug Fixes
+
+* **deps:** update module buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go to v1.34.2-20240406062209-1cc152efbf5c.2 ([#456](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/456)) ([5d1593a](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5d1593a54da5a8e80f46fc5d5bb455b90d116766))
+
+
+### Other
+
+* **deps:** update anchore/sbom-action action to v0.16.0 ([#448](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/448)) ([82d497f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/82d497fadf45e55343cf5e96e1af7030a393abf7))
+* **deps:** update docker/build-push-action action to v6 ([#458](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/458)) ([5700a8e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5700a8e1766b78a05b27d461f6d96f2c53434a21))
+* **deps:** update docker/build-push-action digest to 1556069 ([#455](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/455)) ([bff8d4f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/bff8d4f97239667375180471d21f777552e8d750))
+
 ## [0.1.6](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.1.5...v0.1.6) (2024-06-06)
 
 
