@@ -88,10 +88,12 @@ type AISpec struct {
 	BaseUrl string   `json:"baseUrl,omitempty"`
 	Region  string   `json:"region,omitempty"`
 	// +kubebuilder:default:=gpt-3.5-turbo
-	Model   string     `json:"model,omitempty"`
-	Engine  string     `json:"engine,omitempty"`
-	Secret  *SecretRef `json:"secret,omitempty"`
-	Enabled bool       `json:"enabled,omitempty"`
+	Model  string `json:"model,omitempty"`
+	Engine string `json:"engine,omitempty"`
+	// +kubebuilder:default:=0
+	Interval int        `json:"interval,omitempty"`
+	Secret   *SecretRef `json:"secret,omitempty"`
+	Enabled  bool       `json:"enabled,omitempty"`
 	// +kubebuilder:default:=true
 	Anonymize *bool `json:"anonymized,omitempty"`
 	// +kubebuilder:default:=english

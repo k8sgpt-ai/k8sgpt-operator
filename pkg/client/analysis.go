@@ -9,10 +9,9 @@ import (
 	schemav1 "buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go/schema/v1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/common"
-	v1 "k8s.io/api/apps/v1"
 )
 
-func (c *Client) ProcessAnalysis(deployment v1.Deployment, config *v1alpha1.K8sGPT, allowAIRequest bool) (*common.K8sGPTReponse, error) {
+func (c *Client) ProcessAnalysis(config *v1alpha1.K8sGPT, allowAIRequest bool) (*common.K8sGPTReponse, error) {
 
 	client := rpc.NewServerServiceClient(c.conn)
 	req := &schemav1.AnalyzeRequest{

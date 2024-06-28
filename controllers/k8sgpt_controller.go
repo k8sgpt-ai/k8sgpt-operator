@@ -34,6 +34,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	kclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/common"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/sinks"
@@ -77,6 +78,8 @@ var (
 	analysisRetryCount int
 	// allowBackendAIRequest a circuit breaker that switching on/off backend AI calls
 	allowBackendAIRequest = true
+	calledOnce            = false
+	latestResponse        = &common.K8sGPTReponse{}
 )
 
 // K8sGPTReconciler reconciles a K8sGPT object
@@ -86,6 +89,22 @@ type K8sGPTReconciler struct {
 	Integrations *integrations.Integrations
 	SinkClient   *sinks.Client
 	K8sGPTClient *kclient.Client
+}
+
+func repeatBackendRequest(interval time.Duration, k8sgptClient *kclient.Client, k8sgptConfig *corev1alpha1.K8sGPT) {
+	time.AfterFunc(interval, func() {
+		fmt.Println("Hello backend")
+		response, err := k8sgptClient.ProcessAnalysis(k8sgptConfig, allowBackendAIRequest)
+		if err != nil {
+			fmt.Printf("error: %s\n", err)
+			k8sgptClient.Close()
+			return
+		}
+
+		latestResponse = response
+		fmt.Println("Number of results", len(latestResponse.Results))
+		repeatBackendRequest(interval, k8sgptClient, k8sgptConfig)
+	})
 }
 
 // +kubebuilder:rbac:groups=core.k8sgpt.ai,resources=k8sgpts,verbs=get;list;watch;create;update;patch;delete
@@ -221,8 +240,6 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			return r.finishReconcile(err, false)
 		}
 
-		defer k8sgptClient.Close()
-
 		// Configure the k8sgpt deployment if required
 		if k8sgptConfig.Spec.RemoteCache != nil {
 			err = k8sgptClient.AddConfig(k8sgptConfig)
@@ -243,7 +260,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			}
 		}
 
-		response, err := k8sgptClient.ProcessAnalysis(deployment, k8sgptConfig, allowBackendAIRequest)
+		response, err := k8sgptClient.ProcessAnalysis(k8sgptConfig, allowBackendAIRequest)
 		if err != nil {
 			if k8sgptConfig.Spec.AI.Enabled {
 				k8sgptNumberOfFailedBackendAICalls.With(prometheus.Labels{
@@ -269,6 +286,18 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		}
 		// Reset analysisRetryCount
 		analysisRetryCount = 0
+
+		// interval := time.Duration(10) * time.Second
+		// if interval >= time.Duration(1)*time.Second && !calledOnce {
+		interval := time.Duration(k8sgptConfig.Spec.AI.Interval) * time.Second
+		if interval >= ReconcileSuccessInterval && !calledOnce {
+			calledOnce = true
+			repeatBackendRequest(interval, k8sgptClient, k8sgptConfig)
+		} else {
+			// If backend request interval is not set, close the client as soon
+			// as the reconciler call ends.
+			defer k8sgptClient.Close()
+		}
 
 		// Update metrics count
 		if k8sgptConfig.Spec.AI.Enabled && len(response.Results) > 0 {

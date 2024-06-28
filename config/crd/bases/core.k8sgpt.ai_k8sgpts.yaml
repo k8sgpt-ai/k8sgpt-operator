@@ -74,6 +74,9 @@ spec:
                     type: boolean
                   engine:
                     type: string
+                  interval:
+                    default: 0
+                    type: integer
                   language:
                     default: english
                     type: string
