@@ -321,8 +321,8 @@ metadata:
 spec:
   ai:
     enabled: true
-    # secret:
-    #   name: bedrock-sample-secret
+    secret:
+     name: bedrock-sample-secret
     model: anthropic.claude-v2
     region: eu-central-1
     backend: amazonbedrock
