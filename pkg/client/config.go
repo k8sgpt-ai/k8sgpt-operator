@@ -65,7 +65,6 @@ func (c *Client) AddConfig(config *v1alpha1.K8sGPT) error {
 
 func (c *Client) RemoveConfig(config *v1alpha1.K8sGPT) error {
 	client := rpc.NewServerServiceClient(c.conn)
-
 	req := &schemav1.RemoveConfigRequest{
 		Cache:           &schemav1.Cache{},
 		Integrations:    nil,
