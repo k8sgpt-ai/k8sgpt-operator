@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	rpc "buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go/schema/v1/schemav1grpc"
 	schemav1 "buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go/schema/v1"
@@ -43,7 +44,17 @@ func (c *Client) AddConfig(config *v1alpha1.K8sGPT) error {
 			},
 		}
 	}
-
+	if config.Spec.CustomAnalyzers != nil {
+		for _, customAnalyzer := range config.Spec.CustomAnalyzers {
+			req.CustomAnalyzers = append(req.CustomAnalyzers, &schemav1.CustomAnalyzer{
+				Name: customAnalyzer.Name,
+				Connection: &schemav1.Connection{
+					Url:  customAnalyzer.Connection.Url,
+					Port: strconv.Itoa(customAnalyzer.Connection.Port),
+				},
+			})
+		}
+	}
 	_, err := client.AddConfig(context.Background(), req)
 	if err != nil {
 		return fmt.Errorf("failed to call AddConfig RPC: %v", err)
