@@ -67,7 +67,9 @@ func (c *Client) RemoveConfig(config *v1alpha1.K8sGPT) error {
 	client := rpc.NewServerServiceClient(c.conn)
 
 	req := &schemav1.RemoveConfigRequest{
-		Cache: &schemav1.Cache{},
+		Cache:           &schemav1.Cache{},
+		Integrations:    nil,
+		CustomAnalyzers: make([]*schemav1.CustomAnalyzer, 0),
 	}
 
 	_, err := client.RemoveConfig(context.Background(), req)
