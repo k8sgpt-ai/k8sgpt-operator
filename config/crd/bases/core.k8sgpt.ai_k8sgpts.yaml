@@ -59,6 +59,7 @@ spec:
                   backend:
                     default: openai
                     enum:
+                    - watsonxai
                     - openai
                     - localai
                     - azureopenai
