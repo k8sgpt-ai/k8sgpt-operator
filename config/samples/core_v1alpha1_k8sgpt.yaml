@@ -16,8 +16,8 @@ spec:
   customAnalyzers:
     - name: Foo
       connection:
-        url: http://foo.local-ai.svc.cluster.local:8080/v1
-        port: 8080
+        url: localhost
+        port: 8085
   # remoteCache:
   #   credentials:
   #     name: k8sgpt-sample-cache-secret
