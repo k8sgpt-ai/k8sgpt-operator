@@ -322,12 +322,6 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 			if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "WATSONX_PROJECT_ID", config, c, &deployment); err != nil {
 				return &appsv1.Deployment{}, err
 			}
-			if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "WATSONX_URL_HOST", config, c, &deployment); err != nil {
-				return &appsv1.Deployment{}, err
-			}
-			if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "WATSONX_IAM_HOST", config, c, &deployment); err != nil {
-				return &appsv1.Deployment{}, err
-			}
 		}
 	}
 	return &deployment, nil
