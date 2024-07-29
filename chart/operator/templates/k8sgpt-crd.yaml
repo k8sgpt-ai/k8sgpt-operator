@@ -119,6 +119,15 @@ spec:
                       skipInstall:
                         type: boolean
                     type: object
+                  kyverno:
+                    properties:
+                      enabled:
+                        type: boolean
+                      namespace:
+                        type: string
+                      skipInstall:
+                        type: boolean
+                    type: object                    
                 type: object
               kubeconfig:
                 description: Define the kubeconfig the Deployment must use. If empty,

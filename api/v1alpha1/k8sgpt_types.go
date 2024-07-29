@@ -103,8 +103,16 @@ type Trivy struct {
 	SkipInstall bool   `json:"skipInstall,omitempty"`
 	Namespace   string `json:"namespace,omitempty"`
 }
+
+type Kyverno struct {
+	Enabled     bool   `json:"enabled,omitempty"`
+	SkipInstall bool   `json:"skipInstall,omitempty"`
+	Namespace   string `json:"namespace,omitempty"`
+}
+
 type Integrations struct {
-	Trivy *Trivy `json:"trivy,omitempty"`
+	Trivy   *Trivy   `json:"trivy,omitempty"`
+	Kyverno *Kyverno `json:"kyverno,omitempty"`
 }
 
 type ImagePullSecrets struct {
