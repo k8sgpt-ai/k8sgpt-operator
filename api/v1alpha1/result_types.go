@@ -50,6 +50,7 @@ type ResultStatus struct {
 //+kubebuilder:subresource:status
 //+kubebuilder:printcolumn:name="Kind",type="string",JSONPath=".spec.kind",description="Kind"
 //+kubebuilder:printcolumn:name="Backend",type="string",JSONPath=".spec.backend",description="Backend"
+//+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",description="Age"
 
 // Result is the Schema for the results API
 type Result struct {
