@@ -12,15 +12,20 @@ spec:
       name: k8sgpt-sample-secret
       key: openai-api-key
   noCache: false
-  version: v0.3.17
+  version: v0.3.39
+  customAnalyzers:
+    - name: Foo
+      connection:
+        url: localhost
+        port: 8085
   # remoteCache:
   #   credentials:
   #     name: k8sgpt-sample-cache-secret
   #   s3:
   #     bucketName: foo
   #     region: us-west-1
-  integrations:
-    trivy:
-      enabled: false
-      namespace: trivy-system
-      skipInstall: false
+  #  integrations:
+  #    trivy:
+  #      enabled: false
+  #      namespace: trivy-system
+  #      skipInstall: false
