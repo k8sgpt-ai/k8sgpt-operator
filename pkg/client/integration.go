@@ -12,7 +12,7 @@ import (
 func (c *Client) AddIntegration(config *v1alpha1.K8sGPT) error {
 
 	// Check if the integration is active already
-	client := rpc.NewServerServiceClient(c.conn)
+	client := rpc.NewServerConfigServiceClient(c.conn)
 	req := &schemav1.ListIntegrationsRequest{}
 
 	resp, err := client.ListIntegrations(context.Background(),

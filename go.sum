@@ -1,8 +1,16 @@
+buf.build/gen/go/k8sgpt-ai/k8sgpt/connectrpc/go v1.16.2-20240807134501-ea98c104104d.1 h1:hA8myZHNZ/d5R4F5sNl3auXCbTZS7d9h0i2Gx2ERrMs=
+buf.build/gen/go/k8sgpt-ai/k8sgpt/connectrpc/go v1.16.2-20240807134501-ea98c104104d.1/go.mod h1:mOKqBBRmen05DAepoy/4yOEyYINzsXTWLZV54U/mbEE=
+buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc-ecosystem/gateway/v2 v2.21.0-20240807134501-ea98c104104d.1 h1:9N1IZQO0qFyb3x4HrDE8xNP0McvdVOn+5v16iN5m1P4=
+buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc-ecosystem/gateway/v2 v2.21.0-20240807134501-ea98c104104d.1/go.mod h1:8XgN3APjjxe21HsGV4pb2cOgzItgDvhoGfOE+PTtLGU=
 buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.4.0-20240406062209-1cc152efbf5c.1 h1:LgzSBB4q8qpgOqpTJoUKEbsDMddSuMK/ccdCuyQkOV8=
 buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.4.0-20240406062209-1cc152efbf5c.1/go.mod h1:8O5QQzJX72VEsoGtQvjBYwA25KrvIN7unx+ahHfxPpc=
+buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.5.1-20240807134501-ea98c104104d.1 h1:W/4o/wizyw9oBry0PRZFDH9i55u8MLxmODUSZHW7krU=
+buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.5.1-20240807134501-ea98c104104d.1/go.mod h1:cJGWJGXgaTTqiPaZAuQPvkjkxQCWoAlCWte3/ZrpU8s=
 buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.34.1-20240406062209-1cc152efbf5c.1/go.mod h1:qEarbrHjaZEQ5GeUH6XqSqqJMvtPwAGFpAc0nkSBzrQ=
 buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.34.2-20240720172138-1b9bcd834f17.2 h1:IGBeVvzzeoEl0Ck0uxWXIUn8/my/ZeBvQEIaXCLteOc=
 buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.34.2-20240720172138-1b9bcd834f17.2/go.mod h1:1wq1qVxvJkTEUQsF5/XjmhQYXYhbVoLSGhKnzS3ie54=
+buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.34.2-20240807134501-ea98c104104d.2 h1:D3HPkRDfG1F4/yjNYTYkVgnh6aa1Fj14tiP5sBJ0pfA=
+buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.34.2-20240807134501-ea98c104104d.2/go.mod h1:1wq1qVxvJkTEUQsF5/XjmhQYXYhbVoLSGhKnzS3ie54=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.38.0/go.mod h1:990N+gfupTy94rShfmMCWGDn0LpTmnzTp2qbd1dvSRU=
