@@ -17,6 +17,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -108,7 +109,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	// Add a finaliser if there isn't one
+	// Add a finalizer if there isn't one
 	if k8sgptConfig.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is not being deleted, so if it does not have our finalizer,
 		// then lets add the finalizer and update the object. This is equivalent
@@ -144,6 +145,16 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		}
 		// Stop reconciliation as the item is being deleted
 		return r.finishReconcile(nil, false)
+	}
+
+	operatorNamespace := os.Getenv("OPERATOR_NAMESPACE")
+	if k8sgptConfig.Namespace != operatorNamespace {
+		fmt.Printf("K8sGPT CR (%s) is not in the operator namespace (%s)\n",
+			k8sgptConfig.Name, operatorNamespace)
+		k8sgptReconcileErrorCount.With(prometheus.Labels{
+			"k8sgpt": k8sgptConfig.Name,
+		}).Inc()
+		return ctrl.Result{}, nil
 	}
 
 	if k8sgptConfig.Spec.AI.BackOff == nil {
