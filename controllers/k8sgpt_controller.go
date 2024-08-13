@@ -23,6 +23,7 @@ import (
 
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 
+	"github.com/go-logr/logr"
 	"github.com/prometheus/client_golang/prometheus"
 	v1 "k8s.io/api/apps/v1"
 	kcorev1 "k8s.io/api/core/v1"
@@ -96,7 +97,8 @@ type K8sGPTReconciler struct {
 // +kubebuilder:rbac:groups="*",resources="*",verbs="*"
 // +kubebuilder:rbac:groups="apiextensions.k8s.io",resources="*",verbs="*"
 func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	log := log.FromContext(ctx)
+	log.Info("Reconciling K8sGPT")
 
 	// Look up the instance for this reconcile request
 	k8sgptConfig := &corev1alpha1.K8sGPT{}
@@ -109,7 +111,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	// Add a finaliser if there isn't one
+	// Add a finalizer if there isn't one
 	if k8sgptConfig.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is not being deleted, so if it does not have our finalizer,
 		// then lets add the finalizer and update the object. This is equivalent
@@ -120,7 +122,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 				k8sgptReconcileErrorCount.With(prometheus.Labels{
 					"k8sgpt": k8sgptConfig.Name,
 				}).Inc()
-				return r.finishReconcile(err, false)
+				return r.finishReconcile(log, err, false)
 			}
 		}
 	} else {
@@ -133,18 +135,18 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 				k8sgptReconcileErrorCount.With(prometheus.Labels{
 					"k8sgpt": k8sgptConfig.Name,
 				}).Inc()
-				return r.finishReconcile(err, false)
+				return r.finishReconcile(log, err, false)
 			}
 			controllerutil.RemoveFinalizer(k8sgptConfig, FinalizerName)
 			if err := r.Update(ctx, k8sgptConfig); err != nil {
 				k8sgptReconcileErrorCount.With(prometheus.Labels{
 					"k8sgpt": k8sgptConfig.Name,
 				}).Inc()
-				return r.finishReconcile(err, false)
+				return r.finishReconcile(log, err, false)
 			}
 		}
 		// Stop reconciliation as the item is being deleted
-		return r.finishReconcile(nil, false)
+		return r.finishReconcile(log, nil, false)
 	}
 
 	if k8sgptConfig.Spec.AI.BackOff == nil {
@@ -156,7 +158,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			k8sgptReconcileErrorCount.With(prometheus.Labels{
 				"k8sgpt": k8sgptConfig.Name,
 			}).Inc()
-			return r.finishReconcile(err, false)
+			return r.finishReconcile(log, err, false)
 		}
 	}
 
@@ -168,14 +170,14 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		k8sgptReconcileErrorCount.With(prometheus.Labels{
 			"k8sgpt": k8sgptConfig.Name,
 		}).Inc()
-		return r.finishReconcile(err, false)
+		return r.finishReconcile(log, err, false)
 	}
 	err = resources.Sync(ctx, r.Client, *k8sgptConfig, resources.SyncOp)
 	if err != nil {
 		k8sgptReconcileErrorCount.With(prometheus.Labels{
 			"k8sgpt": k8sgptConfig.Name,
 		}).Inc()
-		return r.finishReconcile(err, false)
+		return r.finishReconcile(log, err, false)
 	}
 
 	if deployment.Status.ReadyReplicas > 0 || os.Getenv("LOCAL_MODE") != "" {
@@ -197,10 +199,10 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 				k8sgptReconcileErrorCount.With(prometheus.Labels{
 					"k8sgpt": k8sgptConfig.Name,
 				}).Inc()
-				return r.finishReconcile(err, false)
+				return r.finishReconcile(log, err, false)
 			}
 
-			return r.finishReconcile(nil, false)
+			return r.finishReconcile(log, nil, false)
 		}
 
 		// If the deployment is active, we will query it directly for sis data
@@ -209,17 +211,18 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			k8sgptReconcileErrorCount.With(prometheus.Labels{
 				"k8sgpt": k8sgptConfig.Name,
 			}).Inc()
-			return r.finishReconcile(err, false)
+			return r.finishReconcile(log, err, false)
 		}
+
 		// Log address
-		fmt.Printf("K8sGPT address: %s\n", address)
+		log.Info(fmt.Sprintf("K8sGPT address: %s", address))
 
 		k8sgptClient, err := kclient.NewClient(address)
 		if err != nil {
 			k8sgptReconcileErrorCount.With(prometheus.Labels{
 				"k8sgpt": k8sgptConfig.Name,
 			}).Inc()
-			return r.finishReconcile(err, false)
+			return r.finishReconcile(log, err, false)
 		}
 
 		defer k8sgptClient.Close()
@@ -231,16 +234,16 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 				k8sgptReconcileErrorCount.With(prometheus.Labels{
 					"k8sgpt": k8sgptConfig.Name,
 				}).Inc()
-				return r.finishReconcile(err, false)
+				return r.finishReconcile(log, err, false)
 			}
 		}
 		if k8sgptConfig.Spec.Integrations != nil {
-			err = k8sgptClient.AddIntegration(k8sgptConfig)
+			err = k8sgptClient.AddIntegration(log, k8sgptConfig)
 			if err != nil {
 				k8sgptReconcileErrorCount.With(prometheus.Labels{
 					"k8sgpt": k8sgptConfig.Name,
 				}).Inc()
-				return r.finishReconcile(err, false)
+				return r.finishReconcile(log, err, false)
 			}
 		}
 
@@ -257,7 +260,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 				if k8sgptConfig.Spec.AI.BackOff.Enabled {
 					if analysisRetryCount > k8sgptConfig.Spec.AI.BackOff.MaxRetries {
 						allowBackendAIRequest = false
-						fmt.Printf("Disabled AI backend %s due to failures exceeding max retries\n", k8sgptConfig.Spec.AI.Backend)
+						log.Info(fmt.Sprintf("Disabled AI backend %s due to failures exceeding max retries", k8sgptConfig.Spec.AI.Backend))
 						analysisRetryCount = 0
 					}
 					analysisRetryCount++
@@ -266,7 +269,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			k8sgptReconcileErrorCount.With(prometheus.Labels{
 				"k8sgpt": k8sgptConfig.Name,
 			}).Inc()
-			return r.finishReconcile(err, false)
+			return r.finishReconcile(log, err, false)
 		}
 		// Reset analysisRetryCount
 		analysisRetryCount = 0
@@ -291,7 +294,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			k8sgptReconcileErrorCount.With(prometheus.Labels{
 				"k8sgpt": k8sgptConfig.Name,
 			}).Inc()
-			return r.finishReconcile(err, false)
+			return r.finishReconcile(log, err, false)
 		}
 		// Prior to creating or updating any results we will delete any stale results that
 		// no longer are relevent, we can do this by using the resultSpec composed name against
@@ -305,19 +308,19 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			k8sgptReconcileErrorCount.With(prometheus.Labels{
 				"k8sgpt": k8sgptConfig.Name,
 			}).Inc()
-			return r.finishReconcile(err, false)
+			return r.finishReconcile(log, err, false)
 		}
 		if len(resultList.Items) > 0 {
 			// If the result does not exist in the map we will delete it
 			for _, result := range resultList.Items {
-				fmt.Printf("Checking if %s is still relevant\n", result.Name)
+				log.Info(fmt.Sprintf("Checking if %s is still relevant", result.Name))
 				if _, ok := rawResults[result.Name]; !ok {
 					err = r.Delete(ctx, &result)
 					if err != nil {
 						k8sgptReconcileErrorCount.With(prometheus.Labels{
 							"k8sgpt": k8sgptConfig.Name,
 						}).Inc()
-						return r.finishReconcile(err, false)
+						return r.finishReconcile(log, err, false)
 					} else {
 						k8sgptNumberOfResultsByType.With(prometheus.Labels{
 							"kind":   result.Spec.Kind,
@@ -336,7 +339,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 				k8sgptReconcileErrorCount.With(prometheus.Labels{
 					"k8sgpt": k8sgptConfig.Name,
 				}).Inc()
-				return r.finishReconcile(err, false)
+				return r.finishReconcile(log, err, false)
 
 			}
 			// Update metrics
@@ -347,9 +350,8 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					"k8sgpt": k8sgptConfig.Name,
 				}).Inc()
 			} else if operation == resources.UpdatedResult {
-				fmt.Printf("Updated successfully %s \n", result.Name)
+				log.Info(fmt.Sprintf("Updated successfully %s", result.Name))
 			}
-
 		}
 
 		// We emit when result Status is not historical
@@ -359,10 +361,10 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			"k8sgpts.k8sgpt.ai/name":      k8sgptConfig.Name,
 			"k8sgpts.k8sgpt.ai/namespace": k8sgptConfig.Namespace,
 		})); err != nil {
-			return r.finishReconcile(err, false)
+			return r.finishReconcile(log, err, false)
 		}
 		if len(latestResultList.Items) == 0 {
-			return r.finishReconcile(nil, false)
+			return r.finishReconcile(log, nil, false)
 		}
 
 		sinkEnabled := k8sgptConfig.Spec.Sink != nil && k8sgptConfig.Spec.Sink.Type != "" && (k8sgptConfig.Spec.Sink.Endpoint != "" || k8sgptConfig.Spec.Sink.Secret != nil)
@@ -381,7 +383,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 					k8sgptReconcileErrorCount.With(prometheus.Labels{
 						"k8sgpt": k8sgptConfig.Name,
 					}).Inc()
-					return r.finishReconcile(fmt.Errorf("could not find sink secret: %w", err), false)
+					return r.finishReconcile(log, fmt.Errorf("could not find sink secret: %w", err), false)
 				}
 
 				sinkSecretValue = string(secret.Data[k8sgptConfig.Spec.Sink.Secret.Key])
@@ -393,7 +395,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		for _, result := range latestResultList.Items {
 			var res corev1alpha1.Result
 			if err := r.Get(ctx, client.ObjectKey{Namespace: result.Namespace, Name: result.Name}, &res); err != nil {
-				return r.finishReconcile(err, false)
+				return r.finishReconcile(log, err, false)
 			}
 
 			if sinkEnabled {
@@ -402,7 +404,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 						k8sgptReconcileErrorCount.With(prometheus.Labels{
 							"k8sgpt": k8sgptConfig.Name,
 						}).Inc()
-						return r.finishReconcile(err, false)
+						return r.finishReconcile(log, err, false)
 					}
 					res.Status.Webhook = k8sgptConfig.Spec.Sink.Endpoint
 				}
@@ -414,12 +416,12 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 				k8sgptReconcileErrorCount.With(prometheus.Labels{
 					"k8sgpt": k8sgptConfig.Name,
 				}).Inc()
-				return r.finishReconcile(err, false)
+				return r.finishReconcile(log, err, false)
 			}
 		}
 	}
 
-	return r.finishReconcile(nil, false)
+	return r.finishReconcile(log, nil, false)
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -436,20 +438,20 @@ func (r *K8sGPTReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return c
 }
 
-func (r *K8sGPTReconciler) finishReconcile(err error, requeueImmediate bool) (ctrl.Result, error) {
+func (r *K8sGPTReconciler) finishReconcile(logger logr.Logger, err error, requeueImmediate bool) (ctrl.Result, error) {
 	if err != nil {
 		interval := ReconcileErrorInterval
 		if requeueImmediate {
 			interval = 0
 		}
-		fmt.Printf("Finished Reconciling k8sGPT with error: %s\n", err.Error())
+		logger.Error(err, "Finished Reconciling k8sGPT with error")
 		return ctrl.Result{Requeue: true, RequeueAfter: interval}, err
 	}
 	interval := ReconcileSuccessInterval
 	if requeueImmediate {
 		interval = 0
 	}
-	fmt.Println("Finished Reconciling k8sGPT")
+	logger.Info("Finished Reconciling k8sGPT")
 	return ctrl.Result{Requeue: true, RequeueAfter: interval}, nil
 }
 

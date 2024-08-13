@@ -24,6 +24,7 @@ import (
 	"google.golang.org/grpc"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 // This is the client for communicating with the K8sGPT in cluster deployment
@@ -68,7 +69,9 @@ func GenerateAddress(ctx context.Context, cli client.Client, k8sgptConfig *v1alp
 		}
 	}
 
-	fmt.Printf("Creating new client for %s\n", address)
+	log := log.FromContext(ctx)
+	log.Info(fmt.Sprintf("Creating new client for %s", address))
+
 	// Test if the port is open
 	conn, err := net.DialTimeout("tcp", address, 1*time.Second)
 	if err != nil {
@@ -76,8 +79,8 @@ func GenerateAddress(ctx context.Context, cli client.Client, k8sgptConfig *v1alp
 	}
 	defer conn.Close()
 
-	fmt.Printf("Connection established between %s and localhost with time out of %d seconds.\n", address, int64(1))
-	fmt.Printf("Remote Address : %s \n", conn.RemoteAddr().String())
+	log.WithValues("Remote Address", conn.RemoteAddr().String()).
+		Info(fmt.Sprintf("Connection established between %s and localhost with time out of %d seconds.", address, int64(1)))
 
 	return address, nil
 }
