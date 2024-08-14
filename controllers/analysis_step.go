@@ -125,7 +125,7 @@ func (step *AnalysisStep) cleanUpStaleResults(rawResults map[string]corev1alpha1
 
 	if len(resultList.Items) > 0 {
 		for _, result := range resultList.Items {
-			instance.logger.Info("checking if %s is still relevant", result.Name)
+			instance.logger.Info(fmt.Sprintf("checking if %s is still relevant", result.Name))
 			if _, ok := rawResults[result.Name]; !ok {
 				err := instance.r.Delete(instance.ctx, &result)
 				if err != nil {
