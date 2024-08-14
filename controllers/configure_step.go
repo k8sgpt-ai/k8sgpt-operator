@@ -45,7 +45,9 @@ func (step *ConfigureStep) execute(instance *K8sGPTInstance) (ctrl.Result, error
 		return instance.r.FinishReconcile(err, false, instance.k8sgptConfig.Name)
 	}
 
-	if instance.k8sgptDeployment.Status.AvailableReplicas == 0 && os.Getenv("LOCAL_MODE") == "" {
+	instance.hasReadyReplicas = instance.k8sgptDeployment.Status.AvailableReplicas != 0
+
+	if !instance.hasReadyReplicas && os.Getenv("LOCAL_MODE") == "" {
 		instance.logger.Info("k8sgpt server not running, waiting next sync")
 		return instance.r.FinishReconcile(nil, false, instance.k8sgptConfig.Name)
 	}

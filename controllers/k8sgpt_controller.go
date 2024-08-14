@@ -62,6 +62,7 @@ type K8sGPTInstance struct {
 	k8sgptDeployment *v1.Deployment
 	logger           logr.Logger
 	kclient          *kclient.Client
+	hasReadyReplicas bool
 }
 
 type K8sGPT interface {

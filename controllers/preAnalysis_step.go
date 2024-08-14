@@ -28,14 +28,19 @@ type PreAnalysisStep struct {
 
 func (step *PreAnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, error) {
 	instance.logger.Info("starting PreAnalysisStep")
-	deployment := instance.k8sgptDeployment
 
-	imageURI := deployment.Spec.Template.Spec.Containers[0].Image
-	imageRepository, imageVersion := step.parseImageURI(imageURI)
+	// try to upgrade version if already deployed
+	if instance.hasReadyReplicas {
+		deployment := instance.k8sgptDeployment
 
-	// Update deployment image if change
-	if imageRepository != instance.k8sgptConfig.Spec.Repository || imageVersion != instance.k8sgptConfig.Spec.Version {
-		return step.updateDeploymentImage(instance)
+		imageURI := deployment.Spec.Template.Spec.Containers[0].Image
+		imageRepository, imageVersion := step.parseImageURI(imageURI)
+
+		// Update deployment image if change
+		if imageRepository != instance.k8sgptConfig.Spec.Repository || imageVersion != instance.k8sgptConfig.Spec.Version {
+			return step.updateDeploymentImage(instance)
+		}
+
 	}
 
 	// If the deployment is active, we will query it directly for sis data
