@@ -17,6 +17,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -177,7 +178,7 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return r.finishReconcile(err, false)
 	}
 
-	if deployment.Status.ReadyReplicas > 0 {
+	if deployment.Status.ReadyReplicas > 0 || os.Getenv("LOCAL_MODE") != "" {
 
 		// Check the repo and version of the deployment image matches the repo and version set in the K8sGPT CR
 		imageURI := deployment.Spec.Template.Spec.Containers[0].Image
