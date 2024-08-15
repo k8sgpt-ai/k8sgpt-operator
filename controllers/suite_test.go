@@ -14,8 +14,11 @@ limitations under the License.
 package controllers
 
 import (
+	"context"
+	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -28,7 +31,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/metrics"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/sinks"
+
 	//+kubebuilder:scaffold:imports
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
@@ -37,6 +45,8 @@ import (
 var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
+var ctx context.Context
+var cancel context.CancelFunc
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -68,10 +78,56 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	Expect(k8sClient).NotTo(BeNil())
 
+	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
+		Scheme: scheme.Scheme,
+	})
+	Expect(err).ToNot(HaveOccurred())
+
+	integration, err := integrations.NewIntegrations(k8sManager.GetClient(), context.Background())
+	Expect(err).ToNot(HaveOccurred())
+
+	timeout, exists := os.LookupEnv("OPERATOR_SINK_WEBHOOK_TIMEOUT_SECONDS")
+	if !exists {
+		timeout = "35s"
+	}
+
+	sinkTimeout, err := time.ParseDuration(timeout)
+	Expect(err).ToNot(HaveOccurred())
+
+	sinkClient := sinks.NewClient(sinkTimeout)
+
+	metricsBuilder := metrics.InitializeMetrics()
+
+	ctx, cancel = context.WithCancel(context.TODO())
+
+	err = (&K8sGPTReconciler{
+		Client:         k8sManager.GetClient(),
+		Scheme:         k8sManager.GetScheme(),
+		Integrations:   integration,
+		SinkClient:     sinkClient,
+		MetricsBuilder: metricsBuilder,
+	}).SetupWithManager(k8sManager)
+	Expect(err).ToNot(HaveOccurred())
+
+	go func() {
+		defer GinkgoRecover()
+		err = k8sManager.Start(ctx)
+		Expect(err).ToNot(HaveOccurred(), "failed to run manager")
+	}()
+
 })
 
 var _ = AfterSuite(func() {
-	By("tearing down the test environment")
+	By("cleaning test context")
+
+	// https://github.com/kubernetes-sigs/controller-runtime/issues/1571
+	cancel()
+	By("tearing down the test environment,but I do nothing here.")
 	err := testEnv.Stop()
+	// Set 4 with random
+	if err != nil {
+		time.Sleep(4 * time.Second)
+	}
+	err = testEnv.Stop()
 	Expect(err).NotTo(HaveOccurred())
 })
