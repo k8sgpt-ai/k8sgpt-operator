@@ -14,7 +14,7 @@ import (
 
 func (c *Client) ProcessAnalysis(deployment v1.Deployment, config *v1alpha1.K8sGPT, allowAIRequest bool) (*common.K8sGPTReponse, error) {
 
-	client := rpc.NewServerServiceClient(c.conn)
+	client := rpc.NewServerAnalyzerServiceClient(c.conn)
 	req := &schemav1.AnalyzeRequest{
 		Explain:   config.Spec.AI.Enabled && allowAIRequest,
 		Nocache:   config.Spec.NoCache,
