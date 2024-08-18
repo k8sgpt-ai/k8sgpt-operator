@@ -2,18 +2,6 @@ module github.com/k8sgpt-ai/k8sgpt-operator
 
 go 1.21
 
-replace github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1 => /Users/ronaldpetty/github.com/ronaldpetty/k8sgpt-operator/api/v1alpha1
-
-replace github.com/k8sgpt-ai/k8sgpt-operator/pkg/client => /Users/ronaldpetty/github.com/ronaldpetty/k8sgpt-operator/pkg/client
-
-replace github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations => /Users/ronaldpetty/github.com/ronaldpetty/k8sgpt-operator/pkg/integrations
-
-replace github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources => /Users/ronaldpetty/github.com/ronaldpetty/k8sgpt-operator/pkg/resources
-
-replace github.com/k8sgpt-ai/k8sgpt-operator/pkg/sinks => /Users/ronaldpetty/github.com/ronaldpetty/k8sgpt-operator/pkg/sinks
-
-replace github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils => /Users/ronaldpetty/github.com/ronaldpetty/k8sgpt-operator/pkg/utils
-
 require (
 	buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.5.1-20240807134501-ea98c104104d.1
 	buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.34.2-20240807134501-ea98c104104d.2

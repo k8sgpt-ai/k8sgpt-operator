@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strconv"
 
-	rpc "buf.build/gen/go/ronaldpetty/ronk8sgpt/grpc/go/schema/v1/schemav1grpc"
-	schemav1 "buf.build/gen/go/ronaldpetty/ronk8sgpt/protocolbuffers/go/schema/v1"
+	rpc "buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go/schema/v1/schemav1grpc"
+	schemav1 "buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go/schema/v1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 )
 
