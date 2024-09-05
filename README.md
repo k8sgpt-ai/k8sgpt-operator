@@ -47,6 +47,7 @@ spec:
       key: openai-api-key
     # anonymized: false
     # language: english
+    # proxyEndpoint: https://10.255.30.150 # use proxyEndpoint to setup backend through an HTTP/HTTPS proxy
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
   version: v0.3.8
