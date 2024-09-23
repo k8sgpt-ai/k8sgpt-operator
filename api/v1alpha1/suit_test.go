@@ -45,7 +45,7 @@ var _ = BeforeSuite(func() {
 	// Initial the scheme
 	scheme := runtime.NewScheme()
 	// For the standard k8s types
-	_ = cgScheme.AddToScheme(scheme)
+	_ = cgScheme.AddToScheme(scheme))
 	err := AddToScheme(scheme)
 	Expect(err).NotTo(HaveOccurred())
 	// Initial fake client
