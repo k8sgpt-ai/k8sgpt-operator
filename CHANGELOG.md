@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.2.0](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.1.7...v0.2.0) (2024-09-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* updating/buf dependencies ([#513](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/513))
+
+### Features
+
+* add proxysettings for azureopenai and openai ([#415](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/415)) ([7e7769c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/7e7769c4cc7ecdcbd74c5f2f58b6b85fe00b04b0))
+* rework controllers logic & add some simple tests ([#498](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/498)) ([460e6ff](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/460e6ff9422e2d46b3dc5c0e1be51af4c517cf2f))
+* supporting new schema refactor ([#494](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/494)) ([6c01390](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/6c01390c5e3a0e61d487357ba0e408b6da45178c))
+* updating/buf dependencies ([#513](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/513)) ([f60b654](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/f60b6543cef905ba9343be6a6719e1c19c28989f))
+
+
+### Bug Fixes
+
+* **deps:** update k8s.io/utils digest to 702e33f ([#501](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/501)) ([499b71f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/499b71f5f6b4d4a42b67919407eada35e9d8f850))
+* **deps:** update module github.com/onsi/ginkgo/v2 to v2.20.2 ([#493](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/493)) ([bd47980](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/bd47980d1f9c5953aeb67f736a9ead21a33c01cb))
+* **deps:** update module github.com/onsi/gomega to v1.34.2 ([#483](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/483)) ([5367ef5](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5367ef5a3354cc3a570ff1652385e70af797237f))
+* **deps:** update module github.com/prometheus/client_golang to v1.20.2 ([#500](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/500)) ([87754bc](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/87754bc6a7b9664f5c97370c1e85a60e90472c3d))
+* **deps:** update module github.com/prometheus/client_golang to v1.20.3 ([#508](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/508)) ([438c1ee](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/438c1eeaaa4792f65d815fdc3ff186f16fc14766))
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#506](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/506)) ([8cd2450](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8cd2450a4f251cc7f8f5b431fba6c2b79f0e70d2))
+
+
+### Other
+
+* buf dependencies ([#512](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/512)) ([a2a67e1](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/a2a67e1cde9e663f992cba845f1fae9b91843c88))
+* **deps:** update actions/checkout digest to 692973e ([#457](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/457)) ([e71cd1c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e71cd1ce8146505b5daad6d7e0c6aec73920d618))
+* **deps:** update actions/setup-go digest to 0a12ed9 ([#467](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/467)) ([57c6fa3](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/57c6fa376532508015df80dcb52b2056f831ef1b))
+* **deps:** update actions/setup-python digest to f677139 ([#504](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/504)) ([ca4828b](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/ca4828b291a42a1b5c8ee1e5d490d5b129a9d385))
+* **deps:** update actions/upload-artifact digest to 5076954 ([#490](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/490)) ([8cacbaf](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8cacbafa7b049d90f30ed8694ba179d79d2de4c2))
+* **deps:** update golang docker tag to v1.23 ([#499](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/499)) ([c33575d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c33575d98042174597b73ef648705caf3d76d201))
+* this allows local mode development without deploying out a dummy deployment, instead using k8sgpt locally ([#495](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/495)) ([2e1e599](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/2e1e5990181610e3e0b8ac6e99dbb8c4baff9147))
+
 ## [0.1.7](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.1.6...v0.1.7) (2024-08-05)
 
 
