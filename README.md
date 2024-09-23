@@ -50,7 +50,7 @@ spec:
     # proxyEndpoint: https://10.255.30.150 # use proxyEndpoint to setup backend through an HTTP/HTTPS proxy
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.8
+  version: v0.3.41
   #integrations:
   # trivy:
   #  enabled: true
@@ -181,7 +181,7 @@ spec:
       key: openai-api-key
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.8
+  version: v0.3.41
   remoteCache:
     credentials:
       name: k8sgpt-sample-cache-secret 
@@ -225,7 +225,7 @@ spec:
       key: openai-api-key
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.8
+  version: v0.3.41
   remoteCache:
     credentials:
       name: k8sgpt-sample-cache-secret
@@ -271,7 +271,7 @@ spec:
     engine: llm
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.8
+  version: v0.3.41
 EOF
 ```
 
@@ -329,7 +329,7 @@ spec:
     backend: amazonbedrock
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.29
+  version: v0.3.41
 EOF
 ```
 
@@ -360,7 +360,7 @@ spec:
     baseUrl: http://local-ai.local-ai.svc.cluster.local:8080/v1
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.8
+  version: v0.3.41
 EOF
 ```
    Note: ensure that the value of `baseUrl` is a properly constructed [DNS name](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#services) for the LocalAI Service. It should take the form: `http://local-ai.<namespace_local_ai_was_installed_in>.svc.cluster.local:8080/v1`.
