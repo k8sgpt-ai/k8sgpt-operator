@@ -140,7 +140,7 @@ const (
 	Cohere          = "cohere"
 	Google          = "google"
 	GoogleVertexAI  = "googlevertexai"
-	IBMWatsonXAI    = "ibmwatsonxai"
+	IBMWatsonxAI    = "ibmwatsonxai"
 )
 
 // K8sGPTStatus defines the observed state of K8sGPT
