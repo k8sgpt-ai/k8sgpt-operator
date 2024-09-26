@@ -226,7 +226,7 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 		})
 	}
 	// This check is necessary for the simple OpenAI journey, let's keep it here and guard from breaking other types of backend
-	if config.Spec.AI.Secret != nil && config.Spec.AI.Backend != v1alpha1.AmazonBedrock && config.Spec.AI.Backend != v1alpha1.IBMWatsonxAI {
+	if config.Spec.AI.Secret != nil && config.Spec.AI.Backend != v1alpha1.AmazonBedrock {
 		password := corev1.EnvVar{
 			Name: "K8SGPT_PASSWORD",
 			ValueFrom: &corev1.EnvVarSource{
@@ -330,10 +330,7 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 	// Add checks for ibmwatsonxai
 	if config.Spec.AI.Backend == v1alpha1.IBMWatsonxAI {
 		if config.Spec.AI.Secret != nil {
-			if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "WATSONX_API_KEY", config, c, &deployment); err != nil {
-				return &appsv1.Deployment{}, err
-			}
-			if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "WATSONX_PROJECT_ID", config, c, &deployment); err != nil {
+			if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "K8SGPT_PROVIDER_ID", config, c, &deployment); err != nil {
 				return &appsv1.Deployment{}, err
 			}
 		}
