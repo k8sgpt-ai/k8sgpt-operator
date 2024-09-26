@@ -78,6 +78,8 @@ spec:
                   model:
                     default: gpt-3.5-turbo
                     type: string
+                  proxyEndpoint:
+                    type: string
                   region:
                     type: string
                   secret:
@@ -213,3 +215,5 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
+
+

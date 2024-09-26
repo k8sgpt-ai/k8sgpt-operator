@@ -28,6 +28,7 @@ import (
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/controllers"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/metrics"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/sinks"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -117,11 +118,14 @@ func main() {
 	}
 	sinkClient := sinks.NewClient(sinkTimeout)
 
+	metricsBuilder := metrics.InitializeMetrics()
+
 	if err = (&controllers.K8sGPTReconciler{
-		Client:       mgr.GetClient(),
-		Scheme:       mgr.GetScheme(),
-		Integrations: integration,
-		SinkClient:   sinkClient,
+		Client:         mgr.GetClient(),
+		Scheme:         mgr.GetScheme(),
+		Integrations:   integration,
+		SinkClient:     sinkClient,
+		MetricsBuilder: metricsBuilder,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "K8sGPT")
 		os.Exit(1)

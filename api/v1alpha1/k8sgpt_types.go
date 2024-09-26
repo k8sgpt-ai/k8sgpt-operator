@@ -57,6 +57,16 @@ type AzureBackend struct {
 	ContainerName  string `json:"containerName,omitempty"`
 }
 
+type Connection struct {
+	Url  string `json:"url,omitempty"`
+	Port int    `json:"port,omitempty"`
+}
+
+type CustomAnalyzer struct {
+	Name       string      `json:"name,omitempty"`
+	Connection *Connection `json:"connection,omitempty"`
+}
+
 type GCSBackend struct {
 	BucketName string `json:"bucketName,omitempty"`
 	Region     string `json:"region,omitempty"`
@@ -95,7 +105,8 @@ type AISpec struct {
 	// +kubebuilder:default:=true
 	Anonymize *bool `json:"anonymized,omitempty"`
 	// +kubebuilder:default:=english
-	Language string `json:"language,omitempty"`
+	Language      string `json:"language,omitempty"`
+	ProxyEndpoint string `json:"proxyEndpoint,omitempty"`
 }
 
 type Trivy struct {
@@ -118,6 +129,7 @@ type K8sGPTSpec struct {
 	Repository       string             `json:"repository,omitempty"`
 	ImagePullSecrets []ImagePullSecrets `json:"imagePullSecrets,omitempty"`
 	NoCache          bool               `json:"noCache,omitempty"`
+	CustomAnalyzers  []CustomAnalyzer   `json:"customAnalyzers,omitempty"`
 	Filters          []string           `json:"filters,omitempty"`
 	ExtraOptions     *ExtraOptionsRef   `json:"extraOptions,omitempty"`
 	Sink             *WebhookRef        `json:"sink,omitempty"`

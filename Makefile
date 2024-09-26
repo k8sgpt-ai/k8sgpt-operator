@@ -191,3 +191,11 @@ $(ENVTEST): $(LOCALBIN)
 coverage: generate fmt vet manifests ## Run code coverage
 	go test -v -cover ./... -coverprofile coverage.out | grep -v /chart/ | grep -v /images/ | grep -v /charts/ | grep -v /config/ | grep -v /hack/ | grep -v /test/ | grep -v /vendor/
 	go tool cover -html=coverage.out -o coverage.html
+
+.PHONY: ginkgo-test
+ginkgo-test: envtest
+ifndef LABEL
+	$(error LABEL is not defined. Please set LABEL variable before running the target.)
+endif
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" \
+	ginkgo --github-output -label-filter="$(LABEL)" -r -v
