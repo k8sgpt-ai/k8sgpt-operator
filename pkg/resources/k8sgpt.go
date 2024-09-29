@@ -327,6 +327,14 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 			},
 		)
 	}
+	// Add checks for ibmwatsonxai
+	if config.Spec.AI.Backend == v1alpha1.IBMWatsonxAI {
+		if config.Spec.AI.Secret != nil {
+			if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "K8SGPT_PROVIDER_ID", config, c, &deployment); err != nil {
+				return &appsv1.Deployment{}, err
+			}
+		}
+	}
 	return &deployment, nil
 }
 
