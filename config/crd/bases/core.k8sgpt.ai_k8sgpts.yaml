@@ -183,6 +183,11 @@ spec:
                     properties:
                       bucketName:
                         type: string
+                      endpoint:
+                        type: string
+                      insecure:
+                        default: false
+                        type: boolean
                       region:
                         type: string
                     type: object
