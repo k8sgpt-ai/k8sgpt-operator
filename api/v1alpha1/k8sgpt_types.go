@@ -92,7 +92,7 @@ type BackOff struct {
 
 type AISpec struct {
 	// +kubebuilder:default:=openai
-	// +kubebuilder:validation:Enum=openai;localai;azureopenai;amazonbedrock;cohere;amazonsagemaker;google;googlevertexai
+	// +kubebuilder:validation:Enum=ibmwatsonxai;openai;localai;azureopenai;amazonbedrock;cohere;amazonsagemaker;google;googlevertexai
 	Backend string   `json:"backend"`
 	BackOff *BackOff `json:"backOff,omitempty"`
 	BaseUrl string   `json:"baseUrl,omitempty"`
@@ -105,7 +105,8 @@ type AISpec struct {
 	// +kubebuilder:default:=true
 	Anonymize *bool `json:"anonymized,omitempty"`
 	// +kubebuilder:default:=english
-	Language string `json:"language,omitempty"`
+	Language      string `json:"language,omitempty"`
+	ProxyEndpoint string `json:"proxyEndpoint,omitempty"`
 }
 
 type Trivy struct {
@@ -151,6 +152,7 @@ const (
 	Cohere          = "cohere"
 	Google          = "google"
 	GoogleVertexAI  = "googlevertexai"
+	IBMWatsonxAI    = "ibmwatsonxai"
 )
 
 // K8sGPTStatus defines the observed state of K8sGPT
