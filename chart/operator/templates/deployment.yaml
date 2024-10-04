@@ -98,8 +98,10 @@ spec:
           }}
         securityContext: {{- toYaml .Values.controllerManager.manager.containerSecurityContext
           | nindent 10 }}
+      {{- if .Values.controllerManager.podSecurityContext }}
       securityContext:
-        runAsNonRoot: true
+      {{- toYaml .Values.controllerManager.podSecurityContext | nindent 8 }}
+      {{- end }}
       serviceAccountName: {{ include "chart.fullname" . }}-controller-manager
       terminationGracePeriodSeconds: 10
     {{- if .Values.controllerManager.nodeSelector }}
