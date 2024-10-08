@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.2.1](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.0...v0.2.1) (2024-10-08)
+
+
+### Features
+
+* add watsonx ai provider ([#482](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/482)) ([bf65ff4](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/bf65ff4878a90015dba6ffd9775d7e69cc99c81e))
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/prometheus/client_golang to v1.20.4 ([#509](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/509)) ([5081c1c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5081c1ce70d48a0c50d9665679627de5439661ac))
+* **deps:** update module google.golang.org/grpc to v1.66.0 ([#505](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/505)) ([a6dd63c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/a6dd63c27af2bfb3930c9eb9615946387f258c0e))
+* **deps:** update module google.golang.org/grpc to v1.67.1 ([#524](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/524)) ([70ada57](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/70ada577a939bd389219a92f123979d6e6b9b59b))
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#507](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/507)) ([5051582](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5051582b692c618b118c3595d20ec762d3bcbe9b))
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#516](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/516)) ([2a4b37a](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/2a4b37aab480c735fa62986e2546cbf9a995f874))
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#523](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/523)) ([565a373](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/565a373b7bd55791c6fb64375dc1577026ac518a))
+
+
+### Other
+
+* **deps:** update actions/checkout digest to eef6144 ([#529](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/529)) ([a3102ed](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/a3102ed947746ab24d8d413717222cbce27852b3))
+* **deps:** update actions/upload-artifact digest to 604373d ([#530](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/530)) ([49099ee](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/49099ee5dc116a22f526f6a16e71346bd4f7856a))
+* **deps:** update anchore/sbom-action action to v0.17.2 ([#497](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/497)) ([8886c20](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8886c2033b5dde981457849d3db5e3071b17c534))
+* **deps:** update dependency go to v1.23.2 ([#522](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/522)) ([d1567e7](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d1567e75e4b3174e97d2cec02666f609c0f8afd6))
+* **deps:** update dependency ubuntu to v24 ([#518](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/518)) ([8f5ffd2](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8f5ffd27f6ad403b9b3637bec19a5ce2b6692d48))
+* **deps:** update docker/build-push-action digest to 4f58ea7 ([#519](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/519)) ([2772967](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/27729672028e555eb13221c3079e5535c923bf96))
+* **deps:** update docker/build-push-action digest to 5cd11c3 ([#491](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/491)) ([1f11912](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/1f1191242274baec5ba91a42ec6a24f63b085a21))
+* **deps:** update docker/setup-buildx-action digest to 8026d2b ([#525](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/525)) ([5ea370c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5ea370c5e9dfa3be329d22cb82289aaa1eed92a7))
+* **deps:** update docker/setup-buildx-action digest to c47758b ([#527](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/527)) ([8db06aa](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8db06aa19a3c546c7f7d00319eedcc8f3eebe9ec))
+* update readme ([#514](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/514)) ([800f0db](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/800f0db49d7a930e1e92e60b64ef3e50e580e018))
+
 ## [0.2.0](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.1.7...v0.2.0) (2024-09-23)
 
 
