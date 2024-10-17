@@ -1,7 +1,7 @@
 buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.5.1-20240920204244-7a91c8620515.1 h1:zrgiD9fwDXvwXw5P+lG5O+JEKvrUxsNs2xNS+c41xOA=
 buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.5.1-20240920204244-7a91c8620515.1/go.mod h1:UWLDF7rVrPUgIhYUkufxK2MQoCt8c2L2Mr2XKGepJdI=
-buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.34.2-20240920204244-7a91c8620515.2 h1:KNevBMEFHuPv6Z1Uhp9V3UNW06xnvp6hA2Jf6HPLdas=
-buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.34.2-20240920204244-7a91c8620515.2/go.mod h1:1wq1qVxvJkTEUQsF5/XjmhQYXYhbVoLSGhKnzS3ie54=
+buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.35.1-20240920204244-7a91c8620515.1 h1:7wItgYo4cLnAOyOuR6gRw0XbJvM8wKO0sCzd+yXjXC0=
+buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.35.1-20240920204244-7a91c8620515.1/go.mod h1:Qw10aXgiXROwxuE4RIBBmQXNccNqjVHMM37BWRksp1U=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 h1:UQHMgLO+TxOElx5B5HZ4hJQsoJ/PvUvKRhJHDQXO8P8=
 github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1/go.mod h1:xomTg63KZ2rFqZQzSB4Vz2SUXa1BpHTVz9L5PTmPC4E=
@@ -300,8 +300,8 @@ google.golang.org/protobuf v1.21.0/go.mod h1:47Nbq4nVaFHyn7ilMalzfO3qCViNmqZ2kzi
 google.golang.org/protobuf v1.22.0/go.mod h1:EGpADcykh3NcUnDUJcl1+ZksZNG86OlYog2l/sGQquU=
 google.golang.org/protobuf v1.23.1-0.20200526195155-81db48ad09cc/go.mod h1:EGpADcykh3NcUnDUJcl1+ZksZNG86OlYog2l/sGQquU=
 google.golang.org/protobuf v1.25.0/go.mod h1:9JNX74DMeImyA3h4bdi1ymwjUzf21/xIlbajtzgsN7c=
-google.golang.org/protobuf v1.34.2 h1:6xV6lTsCfpGD21XK49h7MhtcApnLqkfYgPcdHftf6hg=
-google.golang.org/protobuf v1.34.2/go.mod h1:qYOHts0dSfpeUzUFpOMr/WGzszTmLH+DiWniOlNbLDw=
+google.golang.org/protobuf v1.35.1 h1:m3LfL6/Ca+fqnjnlqQXNpFPABW1UD7mjh8KO2mKFytA=
+google.golang.org/protobuf v1.35.1/go.mod h1:9fA7Ob0pmnwhb644+1+CVWFRbNajQ6iRojtC/QF5bRE=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c h1:Hei/4ADfdWqJk1ZMxUNpqntNwaWcugrBjAiHlqqRiVk=
