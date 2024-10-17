@@ -22,6 +22,8 @@ func (c *Client) AddConfig(config *v1alpha1.K8sGPT) error {
 					S3Cache: &schemav1.S3Cache{
 						BucketName: config.Spec.RemoteCache.S3.BucketName,
 						Region:     config.Spec.RemoteCache.S3.Region,
+						Endpoint:   config.Spec.RemoteCache.S3.Endpoint,
+						Insecure:   config.Spec.RemoteCache.S3.Insecure,
 					},
 				},
 			}
