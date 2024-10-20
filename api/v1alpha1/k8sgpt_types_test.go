@@ -34,7 +34,7 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			Key:  "k8s-gpt",
 		}
 		backOff = BackOff{
-			Enabled:    true,
+			Enabled:    false,
 			MaxRetries: 5,
 		}
 		kind       = "K8sGPT"
@@ -134,7 +134,7 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			Expect(k8sGPTObject.APIVersion).Should(Equal(GroupVersion.String()))
 			Expect(k8sGPTObject.Spec.AI.Enabled).Should(Equal(true))
 
-			//get K8sGPT CRD by resource name
+			// get K8sGPT CRD by resource name
 			Expect(fakeClient.Get(ctx, types.NamespacedName{Name: "k8s-gpt-2", Namespace: Namespace}, &k8sGPTObject)).Should(Succeed())
 		})
 
