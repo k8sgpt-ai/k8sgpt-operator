@@ -59,6 +59,7 @@ spec:
                   backend:
                     default: openai
                     enum:
+                    - ibmwatsonxai
                     - openai
                     - localai
                     - azureopenai
@@ -80,6 +81,8 @@ spec:
                   model:
                     default: gpt-3.5-turbo
                     type: string
+                  proxyEndpoint:
+                    type: string
                   region:
                     type: string
                   secret:
@@ -92,6 +95,20 @@ spec:
                 required:
                 - backend
                 type: object
+              customAnalyzers:
+                items:
+                  properties:
+                    connection:
+                      properties:
+                        port:
+                          type: integer
+                        url:
+                          type: string
+                      type: object
+                    name:
+                      type: string
+                  type: object
+                type: array
               extraOptions:
                 properties:
                   backstage:
