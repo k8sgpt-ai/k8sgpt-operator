@@ -130,6 +130,15 @@ spec:
                 type: array
               integrations:
                 properties:
+                  kyverno:
+                    properties:
+                      enabled:
+                        type: boolean
+                      namespace:
+                        type: string
+                      skipInstall:
+                        type: boolean
+                    type: object
                   trivy:
                     properties:
                       enabled:
