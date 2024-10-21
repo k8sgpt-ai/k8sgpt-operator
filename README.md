@@ -25,11 +25,13 @@ helm install release k8sgpt/k8sgpt-operator -n k8sgpt-operator-system --create-n
 1. Install the operator from the [Installation](#installation) section.
 
 2. Create secret:
-```sh 
+
+```sh
 kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key=$OPENAI_TOKEN -n k8sgpt-operator-system
 ```
 
 3. Apply the K8sGPT configuration object:
+
 ```sh
 kubectl apply -f - << EOF
 apiVersion: core.k8sgpt.ai/v1alpha1
@@ -45,6 +47,9 @@ spec:
     secret:
       name: k8sgpt-sample-secret
       key: openai-api-key
+    # backOff:
+    #  enabled: false
+    #  maxRetries: 5
     # anonymized: false
     # language: english
     # proxyEndpoint: https://10.255.30.150 # use proxyEndpoint to setup backend through an HTTP/HTTPS proxy
@@ -70,7 +75,7 @@ EOF
 ```
 
 4. Once the custom resource has been applied the K8sGPT-deployment will be installed and
-you will be able to see the Results objects of the analysis after some minutes (if there are any issues in your cluster):
+   you will be able to see the Results objects of the analysis after some minutes (if there are any issues in your cluster):
 
 ```bash
 ❯ kubectl get results -o json | jq .
@@ -109,7 +114,6 @@ capi-quickstart-kubeconfig   Opaque   1      8s
 >
 > If your setup requires the least privilege approach,
 > a different `kubeconfig` must be provided since the Cluster API generated one is bounded to the `admin` user which has `clustr-admin` permissions.
- 
 
 Once you have a valid `kubeconfig`, a `k8sgpt` instance can be created as it follows.
 
@@ -158,12 +162,14 @@ as well as keeping confidentiality about the AI backend driver credentials.
 1. Install the operator from the [Installation](#installation) section.
 
 2. Create secret:
+
 ```sh
 kubectl create secret generic k8sgpt-sample-cache-secret --from-literal=azure_client_id=<AZURE_CLIENT_ID>  --from-literal=azure_tenant_id=<AZURE_TENANT_ID> --from-literal=azure_client_secret=<AZURE_CLIENT_SECRET> -n k8sgpt-
 operator-system
 ```
 
 3. Apply the K8sGPT configuration object:
+
 ```
 kubectl apply -f - << EOF
 apiVersion: core.k8sgpt.ai/v1alpha1
@@ -184,7 +190,7 @@ spec:
   version: v0.3.41
   remoteCache:
     credentials:
-      name: k8sgpt-sample-cache-secret 
+      name: k8sgpt-sample-cache-secret
     azure:
       # Storage account must already exist
       storageAccount: "account_name"
@@ -194,7 +200,6 @@ EOF
 
 </details>
 
-
 <details>
 
 <summary>S3</summary>
@@ -202,12 +207,14 @@ EOF
 1. Install the operator from the [Installation](#installation) section.
 
 2. Create secret:
+
 ```sh
 kubectl create secret generic k8sgpt-sample-cache-secret --from-literal=aws_access_key_id=<AWS_ACCESS_KEY_ID>  --from-literal=aws_secret_access_key=<AWS_SECRET_ACCESS_KEY> -n k8sgpt-
 operator-system
 ```
 
 3. Apply the K8sGPT configuration object:
+
 ```
 kubectl apply -f - << EOF
 apiVersion: core.k8sgpt.ai/v1alpha1
@@ -239,7 +246,6 @@ EOF
 
 ## Other AI Backend Examples
 
-
 <details>
 
 <summary>AzureOpenAI</summary>
@@ -247,11 +253,13 @@ EOF
 1. Install the operator from the [Installation](#installation) section.
 
 2. Create secret:
-```sh 
+
+```sh
 kubectl create secret generic k8sgpt-sample-secret --from-literal=azure-api-key=$AZURE_TOKEN -n k8sgpt-operator-system
 ```
 
 3. Apply the K8sGPT configuration object:
+
 ```
 kubectl apply -f - << EOF
 apiVersion: core.k8sgpt.ai/v1alpha1
@@ -284,13 +292,15 @@ EOF
 1. Install the operator from the [Installation](#installation) section.
 
 2. When running on AWS, you have a number of ways to give permission to the managed K8sGPT workload to access Amazon Bedrock.
-* Grant access to Bedrock using the Kubernetes Service Account. This is the [best practices method for assigning permissions to Kubernetes Pods](https://aws.github.io/aws-eks-best-practices/security/docs/iam/#identities-and-credentials-for-eks-pods). There are a few ways to do this:
-    * On Amazon EKS, using [EKS Pod Identity](https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html)
-    * On Amazon EKS, using [IAM Roles for Service Accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html)
-    * On self-managed Kubernetes, using IAM Roles for Service Accounts (IRSA) with the [Pod Identity Webhook](https://github.com/aws/amazon-eks-pod-identity-webhook)
-* Grant access to Bedrock using AWS credentials in a Kubernetes Secret. Note this goes [against AWS best practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#bp-workloads-use-roles) and should be used with caution.
+
+- Grant access to Bedrock using the Kubernetes Service Account. This is the [best practices method for assigning permissions to Kubernetes Pods](https://aws.github.io/aws-eks-best-practices/security/docs/iam/#identities-and-credentials-for-eks-pods). There are a few ways to do this:
+  - On Amazon EKS, using [EKS Pod Identity](https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html)
+  - On Amazon EKS, using [IAM Roles for Service Accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html)
+  - On self-managed Kubernetes, using IAM Roles for Service Accounts (IRSA) with the [Pod Identity Webhook](https://github.com/aws/amazon-eks-pod-identity-webhook)
+- Grant access to Bedrock using AWS credentials in a Kubernetes Secret. Note this goes [against AWS best practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#bp-workloads-use-roles) and should be used with caution.
 
 To grant access to Bedrock using a Kubernetes Service account, create an IAM role with Bedrock permissions. An example policy is included below:
+
 ```
 {
   "Version": "2012-10-17",
@@ -308,10 +318,13 @@ To grant access to Bedrock using a Kubernetes Service account, create an IAM rol
 ```
 
 To grant access to Bedrock using AWS credentials in a Kubernetes secret you can create a secret:
-```sh 
+
+```sh
 kubectl create secret generic bedrock-sample-secret --from-literal=AWS_ACCESS_KEY_ID="$(echo $AWS_ACCESS_KEY_ID)" --from-literal=AWS_SECRET_ACCESS_KEY="$(echo $AWS_SECRET_ACCESS_KEY)" -n k8sgpt-operator-system
 ```
+
 3. Apply the K8sGPT configuration object:
+
 ```
 kubectl apply -f - << EOF
 apiVersion: core.k8sgpt.ai/v1alpha1
@@ -339,12 +352,12 @@ EOF
 
 <summary>LocalAI</summary>
 
-
 1. Install the operator from the [Installation](#installation) section.
 
-2. Follow the [LocalAI installation guide](https://github.com/go-skynet/helm-charts#readme) to install LocalAI. (*No OpenAI secret is required when using LocalAI*).
+2. Follow the [LocalAI installation guide](https://github.com/go-skynet/helm-charts#readme) to install LocalAI. (_No OpenAI secret is required when using LocalAI_).
 
 3. Apply the K8sGPT configuration object:
+
 ```sh
 kubectl apply -f - << EOF
 apiVersion: core.k8sgpt.ai/v1alpha1
@@ -363,7 +376,8 @@ spec:
   version: v0.3.41
 EOF
 ```
-   Note: ensure that the value of `baseUrl` is a properly constructed [DNS name](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#services) for the LocalAI Service. It should take the form: `http://local-ai.<namespace_local_ai_was_installed_in>.svc.cluster.local:8080/v1`.
+
+Note: ensure that the value of `baseUrl` is a properly constructed [DNS name](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#services) for the LocalAI Service. It should take the form: `http://local-ai.<namespace_local_ai_was_installed_in>.svc.cluster.local:8080/v1`.
 
 1. Same as step 4. in the example above.
 
@@ -409,9 +423,9 @@ Optional parameters available for sink.
 ('type', 'webhook' are required parameters.)
 
 | tool       | channel | icon_url | username |
-|------------|---------|----------|----------|
+| ---------- | ------- | -------- | -------- |
 | Slack      |         |          |          |
-| Mattermost | ✔️       | ✔️        | ✔️        |
+| Mattermost | ✔️      | ✔️       | ✔️       |
 
 </details>
 
@@ -419,6 +433,6 @@ Optional parameters available for sink.
 
 For details please see [here](chart/operator/values.yaml)
 
-
 ## License
+
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fk8sgpt-ai%2Fk8sgpt-operator.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fk8sgpt-ai%2Fk8sgpt-operator?ref=badge_large)

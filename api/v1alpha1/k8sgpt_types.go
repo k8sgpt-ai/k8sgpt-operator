@@ -84,7 +84,7 @@ type WebhookRef struct {
 }
 
 type BackOff struct {
-	// +kubebuilder:default:=true
+	// +kubebuilder:default:=false
 	Enabled bool `json:"enabled"`
 	// +kubebuilder:default:=5
 	MaxRetries int `json:"maxRetries"`
