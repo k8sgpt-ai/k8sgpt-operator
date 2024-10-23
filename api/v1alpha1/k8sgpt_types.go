@@ -107,6 +107,11 @@ type AISpec struct {
 	// +kubebuilder:default:=english
 	Language      string `json:"language,omitempty"`
 	ProxyEndpoint string `json:"proxyEndpoint,omitempty"`
+	ProviderId    string `json:"providerId,omitempty"`
+	// +kubebuilder:default:="2048"
+	MaxTokens string `json:"maxTokens,omitempty"`
+	// +kubebuilder:default:="50"
+	Topk string `json:"topk,omitempty"`
 }
 
 type Trivy struct {
