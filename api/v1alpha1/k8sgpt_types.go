@@ -50,6 +50,9 @@ type RemoteCacheRef struct {
 type S3Backend struct {
 	BucketName string `json:"bucketName,omitempty"`
 	Region     string `json:"region,omitempty"`
+	Endpoint   string `json:"endpoint,omitempty"`
+	// +kubebuilder:default:=false
+	Insecure bool `json:"insecure,omitempty"`
 }
 
 type AzureBackend struct {
