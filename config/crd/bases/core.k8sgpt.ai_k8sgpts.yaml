@@ -78,8 +78,13 @@ spec:
                   language:
                     default: english
                     type: string
+                  maxTokens:
+                    default: "2048"
+                    type: string
                   model:
                     default: gpt-3.5-turbo
+                    type: string
+                  providerId:
                     type: string
                   proxyEndpoint:
                     type: string
@@ -92,6 +97,9 @@ spec:
                       name:
                         type: string
                     type: object
+                  topk:
+                    default: "50"
+                    type: string
                 required:
                 - backend
                 type: object
