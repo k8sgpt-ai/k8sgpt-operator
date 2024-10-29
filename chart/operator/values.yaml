@@ -50,7 +50,7 @@ controllerManager:
         - ALL
     image:
       repository: ghcr.io/k8sgpt-ai/k8sgpt-operator
-      tag: v0.1.7  # x-release-please-version
+      tag: v0.2.0  # x-release-please-version
     resources:
       limits:
         cpu: 500m
@@ -63,6 +63,11 @@ controllerManager:
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
   #
   nodeSelector: {}
+  podSecurityContext:
+    runAsNonRoot: true
+    # Set securityContext.runAsUser/runAsGroup if necessary. Values below were taken from https://github.com/k8sgpt-ai/k8sgpt-operator/blob/main/Dockerfile
+    # runAsUser: 65532
+    # runAsGroup: 65532
 kubernetesClusterDomain: cluster.local
 metricsService:
   ports:

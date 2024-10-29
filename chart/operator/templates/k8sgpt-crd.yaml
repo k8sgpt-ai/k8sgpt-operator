@@ -44,7 +44,7 @@ spec:
                   backOff:
                     properties:
                       enabled:
-                        default: true
+                        default: false
                         type: boolean
                       maxRetries:
                         default: 5
@@ -56,6 +56,7 @@ spec:
                   backend:
                     default: openai
                     enum:
+                    - ibmwatsonxai
                     - openai
                     - localai
                     - azureopenai
@@ -76,6 +77,8 @@ spec:
                     type: string
                   model:
                     default: gpt-3.5-turbo
+                    type: string
+                  proxyEndpoint:
                     type: string
                   region:
                     type: string

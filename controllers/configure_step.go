@@ -55,7 +55,6 @@ func (step *ConfigureStep) execute(instance *K8sGPTInstance) (ctrl.Result, error
 	instance.logger.Info("ending ConfigureStep")
 
 	return step.next.execute(instance)
-
 }
 
 func (step *ConfigureStep) setNext(next K8sGPT) {
@@ -63,9 +62,8 @@ func (step *ConfigureStep) setNext(next K8sGPT) {
 }
 
 func (step *ConfigureStep) configureBackoff(instance *K8sGPTInstance) error {
-
 	instance.k8sgptConfig.Spec.AI.BackOff = &corev1alpha1.BackOff{
-		Enabled:    true,
+		Enabled:    false,
 		MaxRetries: 5,
 	}
 	return instance.r.Update(instance.ctx, instance.k8sgptConfig)
@@ -74,8 +72,10 @@ func (step *ConfigureStep) configureBackoff(instance *K8sGPTInstance) error {
 func (step *ConfigureStep) getDeployment(instance *K8sGPTInstance) (*v1.Deployment, error) {
 	deployment := v1.Deployment{}
 
-	err := instance.r.Get(instance.ctx, client.ObjectKey{Namespace: instance.k8sgptConfig.Namespace,
-		Name: instance.k8sgptConfig.Name}, &deployment)
+	err := instance.r.Get(instance.ctx, client.ObjectKey{
+		Namespace: instance.k8sgptConfig.Namespace,
+		Name:      instance.k8sgptConfig.Name,
+	}, &deployment)
 
 	if client.IgnoreNotFound(err) != nil {
 		return &deployment, err
