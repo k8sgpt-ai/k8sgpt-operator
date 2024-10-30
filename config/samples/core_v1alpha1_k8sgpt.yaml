@@ -5,27 +5,38 @@ metadata:
   namespace: k8sgpt-operator-system
 spec:
   ai:
+    enabled: true
     model: gpt-3.5-turbo
     backend: openai
-    enabled: true
     secret:
       name: k8sgpt-sample-secret
       key: openai-api-key
+  backOff:
+    enabled: false
+    maxRetries: 5
+    anonymized: false
+    language: english
+    proxyEndpoint: https://10.255.30.150 # use proxyEndpoint to setup backend through an HTTP/HTTPS proxy
   noCache: false
-  version: v0.3.39
+  repository: ghcr.io/k8sgpt-ai/k8sgpt
+  version: v0.3.41
   customAnalyzers:
     - name: Foo
       connection:
         url: localhost
         port: 8085
-  # remoteCache:
-  #   credentials:
-  #     name: k8sgpt-sample-cache-secret
-  #   s3:
-  #     bucketName: foo
-  #     region: us-west-1
-  #  integrations:
-  #    trivy:
-  #      enabled: false
-  #      namespace: trivy-system
-  #      skipInstall: false
+  integrations:
+   trivy:
+    enabled: true
+    namespace: trivy-system
+  filters:
+  - Ingress
+  sink:
+    type: slack
+    webhook: <webhook-url> # use the sink secret if you want to keep your webhook url private
+    secret:
+      name: slack-webhook
+      key: url
+  extraOptions:
+    backstage:
+      enabled: true
