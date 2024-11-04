@@ -3,6 +3,7 @@ kind: ClusterRole
 metadata:
   name: {{ include "chart.fullname" . }}-k8sgpt
   labels:
+    app.kubernetes.io/component: rbac
     {{- include "chart.labels" . | nindent 4 }}
 rules:
   - apiGroups:

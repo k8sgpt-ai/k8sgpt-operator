@@ -6,8 +6,6 @@ metadata:
   namespace: {{ .Values.serviceMonitor.namespace | default (include "k8sgpt-operator.namespace" . ) }}
   labels:
     app.kubernetes.io/component: metrics
-    app.kubernetes.io/created-by: k8sgpt-operator
-    app.kubernetes.io/part-of: k8sgpt-operator
     control-plane: controller-manager
     {{- include "chart.labels" . | nindent 4 }}
   {{- if .Values.serviceMonitor.additionalLabels }}
@@ -29,4 +27,5 @@ spec:
   selector:
     matchLabels:
       control-plane: controller-manager
+      {{- include "chart.selectorLabels" . | nindent 6 }}
 {{ end -}}

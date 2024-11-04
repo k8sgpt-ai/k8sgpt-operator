@@ -4,9 +4,7 @@ metadata:
   name: {{ include "chart.fullname" . }}-metrics-reader
   labels:
     app.kubernetes.io/component: kube-rbac-proxy
-    app.kubernetes.io/created-by: k8sgpt-operator
-    app.kubernetes.io/part-of: k8sgpt-operator
-  {{- include "chart.labels" . | nindent 4 }}
+    {{- include "chart.labels" . | nindent 4 }}
 rules:
 - nonResourceURLs:
   - /metrics
