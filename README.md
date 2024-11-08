@@ -78,7 +78,7 @@ EOF
    you will be able to see the Results objects of the analysis after some minutes (if there are any issues in your cluster):
 
 ```bash
-❯ kubectl get results -o json | jq .
+❯ kubectl get results -n k8sgpt-operator-system -o json | jq .
 {
   "apiVersion": "v1",
   "items": [
