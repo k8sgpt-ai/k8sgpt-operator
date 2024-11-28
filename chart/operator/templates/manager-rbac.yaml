@@ -3,7 +3,8 @@ kind: ClusterRole
 metadata:
   name: {{ include "chart.fullname" . }}-manager-role
   labels:
-  {{- include "chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: manager-rbac
+    {{- include "chart.labels" . | nindent 4 }}
 rules:
 - apiGroups:
   - '*'

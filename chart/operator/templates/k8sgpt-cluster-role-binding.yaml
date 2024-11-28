@@ -3,6 +3,7 @@ kind: ClusterRoleBinding
 metadata:
   name: {{ include "chart.fullname" . }}-k8sgpt
   labels:
+    app.kubernetes.io/component: rbac
     {{- include "chart.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
