@@ -154,6 +154,14 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 									Value: config.Spec.AI.Backend,
 								},
 								{
+									Name:  "K8SGPT_MAX_TOKENS",
+									Value: config.Spec.AI.MaxTokens,
+								},
+								{
+									Name:  "K8SGPT_TOP_K",
+									Value: config.Spec.AI.Topk,
+								},
+								{
 									Name:  "XDG_CONFIG_HOME",
 									Value: "/k8sgpt-data/.config",
 								},
@@ -269,6 +277,17 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 			addRemoteCacheEnvVar("AWS_ACCESS_KEY_ID", "aws_access_key_id")
 			addRemoteCacheEnvVar("AWS_SECRET_ACCESS_KEY", "aws_secret_access_key")
 		}
+	}
+
+	// Add provider ID if in ai spec
+	if config.Spec.AI.ProviderId != "" {
+		providerId := corev1.EnvVar{
+			Name:  "K8SGPT_PROVIDER_ID",
+			Value: config.Spec.AI.ProviderId,
+		}
+		deployment.Spec.Template.Spec.Containers[0].Env = append(
+			deployment.Spec.Template.Spec.Containers[0].Env, providerId,
+		)
 	}
 
 	if config.Spec.AI.BaseUrl != "" {
