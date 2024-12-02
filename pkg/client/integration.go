@@ -21,21 +21,64 @@ func (c *Client) AddIntegration(config *v1alpha1.K8sGPT) error {
 		return err
 	}
 
-	if resp.Trivy.Enabled == config.Spec.Integrations.Trivy.Enabled {
-		fmt.Println("Skipping trivy installation, already enabled")
+	skipTrivy := false
+	skipKyverno := false
+
+	if resp.Trivy.Enabled {
+		if config.Spec.Integrations.Trivy != nil {
+			if config.Spec.Integrations.Trivy.Enabled {
+				fmt.Println("Skipping trivy installation, already enabled")
+				skipTrivy = true
+			}
+		}
+	} else {
+		skipTrivy = true
+	}
+
+	if resp.Kyverno.Enabled {
+		if config.Spec.Integrations.Kyverno != nil {
+			if config.Spec.Integrations.Kyverno.Enabled {
+				fmt.Println("Skipping kyverno installation, already enabled")
+				skipKyverno = true
+			}
+		}
+	} else {
+		skipKyverno = true
+	}
+
+	if skipTrivy && skipKyverno {
 		return nil
 	}
+
+	intergrate := &schemav1.Integrations{}
+
+	var trivy *schemav1.Trivy
+
+	if config.Spec.Integrations.Trivy != nil {
+		trivy = &schemav1.Trivy{
+			Enabled:     config.Spec.Integrations.Trivy.Enabled,
+			SkipInstall: config.Spec.Integrations.Trivy.SkipInstall,
+			Namespace:   config.Spec.Integrations.Trivy.Namespace,
+		}
+		intergrate.Trivy = trivy
+	}
+
+	var kyverno *schemav1.Kyverno
+
+	if config.Spec.Integrations.Kyverno != nil {
+		kyverno = &schemav1.Kyverno{
+			Enabled:     config.Spec.Integrations.Kyverno.Enabled,
+			SkipInstall: config.Spec.Integrations.Kyverno.SkipInstall,
+			Namespace:   config.Spec.Integrations.Kyverno.Namespace,
+		}
+		intergrate.Kyverno = kyverno
+	}
+
 	// If the integration is inactive, make it active
 	// Equally, if the flag has been deactivated we should also account for this
 	// TODO: Currently this only support trivy
 	configUpdatereq := &schemav1.AddConfigRequest{
-		Integrations: &schemav1.Integrations{
-			Trivy: &schemav1.Trivy{
-				Enabled:     config.Spec.Integrations.Trivy.Enabled,
-				SkipInstall: config.Spec.Integrations.Trivy.SkipInstall,
-				Namespace:   config.Spec.Integrations.Trivy.Namespace,
-			},
-		},
+		Integrations: intergrate,
 	}
 	_, err = client.AddConfig(context.Background(), configUpdatereq)
 	if err != nil {
