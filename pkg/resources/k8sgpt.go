@@ -67,6 +67,27 @@ func addSecretAsEnvToDeployment(secretName string, secretKey string,
 	return nil
 }
 
+// GetServiceAccount Create ServiceAccount for K8sGPT
+func GetServiceAccount(config v1alpha1.K8sGPT) (*corev1.ServiceAccount, error) {
+	serviceAccount := &corev1.ServiceAccount{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "k8sgpt", // Name of the ServiceAccount
+			Namespace: config.Namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					Kind:               config.Kind,
+					Name:               config.Name,
+					UID:                config.UID,
+					APIVersion:         config.APIVersion,
+					BlockOwnerDeletion: utils.PtrBool(true),
+					Controller:         utils.PtrBool(true),
+				},
+			},
+		},
+	}
+	return serviceAccount, nil
+}
+
 // GetService Create service for K8sGPT
 func GetService(config v1alpha1.K8sGPT) (*corev1.Service, error) {
 	// Create service
@@ -363,6 +384,13 @@ func Sync(ctx context.Context, c client.Client,
 	var objs []client.Object
 
 	outOfClusterMode := config.Spec.Kubeconfig != nil
+
+	sa, er := GetServiceAccount(config)
+	if er != nil {
+		return er
+	}
+
+	objs = append(objs, sa)
 
 	svc, er := GetService(config)
 	if er != nil {
