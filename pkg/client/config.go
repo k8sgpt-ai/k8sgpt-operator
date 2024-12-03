@@ -17,6 +17,13 @@ func (c *Client) AddConfig(config *v1alpha1.K8sGPT) error {
 	// which emulates the behaviour of K8sGPT cli
 	if config.Spec.RemoteCache != nil {
 		if config.Spec.RemoteCache.S3 != nil {
+			// validate inputs
+			if config.Spec.RemoteCache.S3.BucketName == "" {
+				return fmt.Errorf("s3 bucket name is required")
+			}
+			if config.Spec.RemoteCache.S3.Region == "" {
+				return fmt.Errorf("s3 region is required")
+			}
 			req.Cache = &schemav1.Cache{
 				CacheType: &schemav1.Cache_S3Cache{
 					S3Cache: &schemav1.S3Cache{
@@ -26,6 +33,12 @@ func (c *Client) AddConfig(config *v1alpha1.K8sGPT) error {
 				},
 			}
 		} else if config.Spec.RemoteCache.Azure != nil {
+			if config.Spec.RemoteCache.Azure.StorageAccount == "" {
+				return fmt.Errorf("azure storage account is required")
+			}
+			if config.Spec.RemoteCache.Azure.ContainerName == "" {
+				return fmt.Errorf("azure container name is required")
+			}
 			req.Cache = &schemav1.Cache{
 				CacheType: &schemav1.Cache_AzureCache{
 					AzureCache: &schemav1.AzureCache{
@@ -35,12 +48,32 @@ func (c *Client) AddConfig(config *v1alpha1.K8sGPT) error {
 				},
 			}
 		} else if config.Spec.RemoteCache.GCS != nil {
+			if config.Spec.RemoteCache.GCS.BucketName == "" {
+				return fmt.Errorf("gcs bucket name is required")
+			}
+			if config.Spec.RemoteCache.GCS.Region == "" {
+				return fmt.Errorf("gcs region is required")
+			}
+			if config.Spec.RemoteCache.GCS.ProjectId == "" {
+				return fmt.Errorf("gcs project id is required")
+			}
 			req.Cache = &schemav1.Cache{
 				CacheType: &schemav1.Cache_GcsCache{
 					GcsCache: &schemav1.GCSCache{
 						BucketName: config.Spec.RemoteCache.GCS.BucketName,
 						Region:     config.Spec.RemoteCache.GCS.Region,
 						ProjectId:  config.Spec.RemoteCache.GCS.ProjectId,
+					},
+				},
+			}
+		} else if config.Spec.RemoteCache.Interplex != nil {
+			if config.Spec.RemoteCache.Interplex.Endpoint == "" {
+				return fmt.Errorf("interplex endpoint is required")
+			}
+			req.Cache = &schemav1.Cache{
+				CacheType: &schemav1.Cache_InterplexCache{
+					InterplexCache: &schemav1.InterplexCache{
+						Endpoint: config.Spec.RemoteCache.Interplex.Endpoint,
 					},
 				},
 			}
