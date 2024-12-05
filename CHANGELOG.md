@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.2...v0.2.3) (2024-12-05)
+
+
+### Features
+
+* updated k8sgpt crd ([#565](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/565)) ([32c92ef](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/32c92ef01784a327142a4370bf177286b2ece7b7))
+
 ## [0.2.2](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.1...v0.2.2) (2024-12-05)
 
 
