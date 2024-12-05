@@ -16,212 +16,230 @@ spec:
     singular: k8sgpt
   scope: Namespaced
   versions:
-  - name: v1alpha1
-    schema:
-      openAPIV3Schema:
-        description: K8sGPT is the Schema for the k8sgpts API
-        properties:
-          apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-            type: string
-          kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-            type: string
-          metadata:
-            type: object
-          spec:
-            description: K8sGPTSpec defines the desired state of K8sGPT
-            properties:
-              ai:
-                properties:
-                  anonymized:
-                    default: true
-                    type: boolean
-                  backOff:
+    - name: v1alpha1
+      schema:
+        openAPIV3Schema:
+          description: K8sGPT is the Schema for the k8sgpts API
+          properties:
+            apiVersion:
+              description: |-
+                APIVersion defines the versioned schema of this representation of an object.
+                Servers should convert recognized schemas to the latest internal value, and
+                may reject unrecognized values.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+              type: string
+            kind:
+              description: |-
+                Kind is a string value representing the REST resource this object represents.
+                Servers may infer this from the endpoint the client submits requests to.
+                Cannot be updated.
+                In CamelCase.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: K8sGPTSpec defines the desired state of K8sGPT
+              properties:
+                ai:
+                  properties:
+                    anonymized:
+                      default: true
+                      type: boolean
+                    backOff:
+                      properties:
+                        enabled:
+                          default: false
+                          type: boolean
+                        maxRetries:
+                          default: 5
+                          type: integer
+                      required:
+                        - enabled
+                        - maxRetries
+                      type: object
+                    backend:
+                      default: openai
+                      enum:
+                        - ibmwatsonxai
+                        - openai
+                        - localai
+                        - azureopenai
+                        - amazonbedrock
+                        - cohere
+                        - amazonsagemaker
+                        - google
+                        - googlevertexai
+                      type: string
+                    baseUrl:
+                      type: string
+                    enabled:
+                      type: boolean
+                    engine:
+                      type: string
+                    language:
+                      default: english
+                      type: string
+                    maxTokens:
+                      default: "2048"
+                      type: string
+                    model:
+                      default: gpt-3.5-turbo
+                      type: string
+                    providerId:
+                      type: string
+                    proxyEndpoint:
+                      type: string
+                    region:
+                      type: string
+                    secret:
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          type: string
+                      type: object
+                    topk:
+                      default: "50"
+                      type: string
+                  required:
+                    - backend
+                  type: object
+                customAnalyzers:
+                  items:
                     properties:
-                      enabled:
-                        default: false
-                        type: boolean
-                      maxRetries:
-                        default: 5
-                        type: integer
-                    required:
-                      - enabled
-                      - maxRetries
-                    type: object
-                  backend:
-                    default: openai
-                    enum:
-                    - ibmwatsonxai
-                    - openai
-                    - localai
-                    - azureopenai
-                    - amazonbedrock
-                    - cohere
-                    - amazonsagemaker
-                    - google
-                    - googlevertexai
-                    type: string
-                  baseUrl:
-                    type: string
-                  enabled:
-                    type: boolean
-                  engine:
-                    type: string
-                  language:
-                    default: english
-                    type: string
-                  maxTokens:
-                    default: "2048"
-                    type: string
-                  model:
-                    default: gpt-3.5-turbo
-                    type: string
-                  providerId:
-                    type: string
-                  proxyEndpoint:
-                    type: string
-                  region:
-                    type: string
-                  secret:
-                    properties:
-                      key:
-                        type: string
+                      connection:
+                        properties:
+                          port:
+                            type: integer
+                          url:
+                            type: string
+                        type: object
                       name:
                         type: string
                     type: object
-                  topk:
-                    default: "50"
-                    type: string
-                required:
-                - backend
-                type: object
-              extraOptions:
-                properties:
-                  backstage:
-                    properties:
-                      enabled:
-                        type: boolean
-                    type: object
-                type: object
-              filters:
-                items:
-                  type: string
-                type: array
-              imagePullSecrets:
-                items:
+                  type: array
+                extraOptions:
                   properties:
+                    backstage:
+                      properties:
+                        enabled:
+                          type: boolean
+                      type: object
+                  type: object
+                filters:
+                  items:
+                    type: string
+                  type: array
+                imagePullSecrets:
+                  items:
+                    properties:
+                      name:
+                        type: string
+                    type: object
+                  type: array
+                integrations:
+                  properties:
+                    trivy:
+                      properties:
+                        enabled:
+                          type: boolean
+                        namespace:
+                          type: string
+                        skipInstall:
+                          type: boolean
+                      type: object
+                  type: object
+                kubeconfig:
+                  description: |-
+                    Define the kubeconfig the Deployment must use.
+                    If empty, the Deployment will use the ServiceAccount provided by Kubernetes itself.
+                  properties:
+                    key:
+                      type: string
                     name:
                       type: string
                   type: object
-                type: array
-              integrations:
-                properties:
-                  trivy:
-                    properties:
-                      enabled:
-                        type: boolean
-                      namespace:
-                        type: string
-                      skipInstall:
-                        type: boolean
-                    type: object
-                type: object
-              kubeconfig:
-                description: Define the kubeconfig the Deployment must use. If empty,
-                  the Deployment will use the ServiceAccount provided by Kubernetes
-                  itself.
-                properties:
-                  key:
+                noCache:
+                  type: boolean
+                nodeSelector:
+                  additionalProperties:
                     type: string
-                  name:
-                    type: string
-                type: object
-              noCache:
-                type: boolean
-              nodeSelector:
-                additionalProperties:
+                  type: object
+                remoteCache:
+                  properties:
+                    azure:
+                      properties:
+                        containerName:
+                          type: string
+                        storageAccount:
+                          type: string
+                      type: object
+                    credentials:
+                      properties:
+                        name:
+                          type: string
+                      type: object
+                    gcs:
+                      properties:
+                        bucketName:
+                          type: string
+                        projectId:
+                          type: string
+                        region:
+                          type: string
+                      type: object
+                    interplex:
+                      properties:
+                        endpoint:
+                          type: string
+                      type: object
+                    s3:
+                      properties:
+                        bucketName:
+                          type: string
+                        region:
+                          type: string
+                      type: object
+                  type: object
+                repository:
+                  default: ghcr.io/k8sgpt-ai/k8sgpt
                   type: string
-                type: object
-              remoteCache:
-                properties:
-                  azure:
-                    properties:
-                      containerName:
-                        type: string
-                      storageAccount:
-                        type: string
-                    type: object
-                  credentials:
-                    properties:
-                      name:
-                        type: string
-                    type: object
-                  gcs:
-                    properties:
-                      bucketName:
-                        type: string
-                      projectId:
-                        type: string
-                      region:
-                        type: string
-                    type: object
-                  s3:
-                    properties:
-                      bucketName:
-                        type: string
-                      region:
-                        type: string
-                    type: object
-                type: object
-              repository:
-                default: ghcr.io/k8sgpt-ai/k8sgpt
-                type: string
-              sink:
-                properties:
-                  channel:
-                    type: string
-                  icon_url:
-                    type: string
-                  secret:
-                    properties:
-                      key:
-                        type: string
-                      name:
-                        type: string
-                    type: object
-                  type:
-                    enum:
-                    - slack
-                    - mattermost
-                    type: string
-                  username:
-                    type: string
-                  webhook:
-                    type: string
-                type: object
-              targetNamespace:
-                type: string
-              version:
-                type: string
-            type: object
-          status:
-            description: K8sGPTStatus defines the observed state of K8sGPT show the current backend used
-            type: object
-        type: object
-    served: true
-    storage: true
-    subresources:
-      status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
-
-
+                sink:
+                  properties:
+                    channel:
+                      type: string
+                    icon_url:
+                      type: string
+                    secret:
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          type: string
+                      type: object
+                    type:
+                      enum:
+                        - slack
+                        - mattermost
+                      type: string
+                    username:
+                      type: string
+                    webhook:
+                      type: string
+                  type: object
+                targetNamespace:
+                  type: string
+                version:
+                  type: string
+              type: object
+            status:
+              description: |-
+                K8sGPTStatus defines the observed state of K8sGPT
+                show the current backend used
+              type: object
+          type: object
+      served: true
+      storage: true
+      subresources:
+        status: {}
