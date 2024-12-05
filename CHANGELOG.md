@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.2](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.1...v0.2.2) (2024-12-05)
+
+
+### Bug Fixes
+
+* **deps:** update module buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go to v1.35.2-20241118152629-1379a5a1889d.1 ([#562](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/562)) ([ddb6d0b](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/ddb6d0b4f66fce463c66abed4feabeddbad214d8))
+
+
+### Other
+
+* **deps:** update dependency go to v1.23.4 ([#560](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/560)) ([1ae0540](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/1ae05405c358d18b4a99913f1159b0dd508c54bc))
+
 ## [0.2.1](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.0...v0.2.1) (2024-12-03)
 
 
