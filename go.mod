@@ -24,7 +24,7 @@ require (
 
 require (
 	github.com/google/pprof v0.0.0-20240827171923-fa2c70bbbfe5 // indirect
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	golang.org/x/tools v0.24.0 // indirect
 )
 
