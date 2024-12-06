@@ -30,7 +30,7 @@ helm install release k8sgpt/k8sgpt-operator -n k8sgpt-operator-system --create-n
 kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key=$OPENAI_TOKEN -n k8sgpt-operator-system
 ```
 
-3. Apply the K8sGPT configuration object:
+3. Apply the K8sGPT configuration object (See [here](https://github.com/k8sgpt-ai/k8sgpt-operator/blob/main/config/samples/core_v1alpha1_k8sgpt.yaml) for exhaustive options):
 
 ```sh
 kubectl apply -f - << EOF
@@ -47,30 +47,9 @@ spec:
     secret:
       name: k8sgpt-sample-secret
       key: openai-api-key
-    # backOff:
-    #  enabled: false
-    #  maxRetries: 5
-    # anonymized: false
-    # language: english
-    # proxyEndpoint: https://10.255.30.150 # use proxyEndpoint to setup backend through an HTTP/HTTPS proxy
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
   version: v0.3.41
-  #integrations:
-  # trivy:
-  #  enabled: true
-  #  namespace: trivy-system
-  # filters:
-  #   - Ingress
-  # sink:
-  #   type: slack
-  #   webhook: <webhook-url> # use the sink secret if you want to keep your webhook url private
-  #   secret:
-  #     name: slack-webhook
-  #     key: url
-  #extraOptions:
-  #   backstage:
-  #     enabled: true
 EOF
 ```
 
@@ -382,6 +361,38 @@ Note: ensure that the value of `baseUrl` is a properly constructed [DNS name](ht
 1. Same as step 4. in the example above.
 
 </details>
+
+## Custom Analyzers
+There may be scenarios where you wish to write your own analyzer in a language of your choice. 
+K8sGPT now supports the ability to do so by abiding by the schema and serving the analyzer for consumption. 
+
+K8sGPT-Operator supports [Custom Analyzers](https://github.com/k8sgpt-ai/k8sgpt?tab=readme-ov-file#key-features) and they can be setup with the following configuration: 
+
+```
+kubectl apply -f - << EOF
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: K8sGPT
+metadata:
+  name: k8sgpt-sample
+  namespace: k8sgpt-operator-system
+spec:
+  ai:
+    enabled: true
+    model: gpt-3.5-turbo
+    backend: openai 
+    secret:
+      name: k8sgpt-sample-secret
+      key: openai-api-key
+  noCache: false
+  repository: ghcr.io/k8sgpt-ai/k8sgpt
+  version: v0.3.41
+  customAnalyzers:
+   - name: Foo
+     connection:
+     url: localhost
+     port: 8085
+EOF
+```
 
 ## K8sGPT Configuration Options
 
