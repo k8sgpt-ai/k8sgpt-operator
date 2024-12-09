@@ -167,7 +167,12 @@ as well as keeping confidentiality about the AI backend driver credentials.
 helm install release . -n k8sgpt-operator-system --create-namespace --set interplex.enabled=true
 ```
 
-2. Point your K8sGPT Custom resource to the interplex cache: (match the helm release name with the cache prefix e.g., myrelease-interplex-service:8084)
+2. Create the secret for your AI backend (_in this example we use OPENAI_):
+```
+kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key=$OPENAI_TOKEN -n k8sgpt-operator-system
+```
+
+3. Point your K8sGPT Custom resource to the interplex cache: (match the helm release name with the cache prefix e.g., myrelease-interplex-service:8084)
 
 ```
 apiVersion: core.k8sgpt.ai/v1alpha1
