@@ -164,7 +164,7 @@ as well as keeping confidentiality about the AI backend driver credentials.
 1. Install K8sGPT Operator with Interplex
 
 ```
-helm install release . -n k8sgpt-operator-system --create-namespace --set interplex.enabled=true
+helm install release k8sgpt/k8sgpt-operator -n k8sgpt-operator-system --create-namespace --set interplex.enabled=true
 ```
 
 2. Create the secret for your AI backend (_in this example we use OPENAI_):
