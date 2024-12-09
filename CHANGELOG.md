@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.5](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.4...v0.2.5) (2024-12-09)
+
+
+### Bug Fixes
+
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#569](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/569)) ([cd1bff6](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/cd1bff6c2642dfc0f2a7378961e4edf22173b9ce))
+
+
+### Other
+
+* **deps:** update actions/setup-go digest to 41dfa10 ([#547](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/547)) ([b36ec89](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/b36ec89e4068f3efe162609a358e60454bbcff6f))
+
 ## [0.2.4](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.3...v0.2.4) (2024-12-09)
 
 
