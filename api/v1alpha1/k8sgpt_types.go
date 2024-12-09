@@ -41,10 +41,15 @@ type CredentialsRef struct {
 }
 
 type RemoteCacheRef struct {
-	Credentials *CredentialsRef `json:"credentials,omitempty"`
-	GCS         *GCSBackend     `json:"gcs,omitempty"`
-	S3          *S3Backend      `json:"s3,omitempty"`
-	Azure       *AzureBackend   `json:"azure,omitempty"`
+	Credentials *CredentialsRef   `json:"credentials,omitempty"`
+	GCS         *GCSBackend       `json:"gcs,omitempty"`
+	S3          *S3Backend        `json:"s3,omitempty"`
+	Azure       *AzureBackend     `json:"azure,omitempty"`
+	Interplex   *InterplexBackend `json:"interplex,omitempty"`
+}
+
+type InterplexBackend struct {
+	Endpoint string `json:"endpoint,omitempty"`
 }
 
 type S3Backend struct {

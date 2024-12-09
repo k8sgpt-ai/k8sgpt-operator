@@ -187,6 +187,11 @@ spec:
                       region:
                         type: string
                     type: object
+                  interplex:
+                    properties:
+                      endpoint:
+                        type: string
+                    type: object
                   s3:
                     properties:
                       bucketName:
