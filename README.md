@@ -175,26 +175,27 @@ kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key
 3. Point your K8sGPT Custom resource to the interplex cache: (match the helm release name with the cache prefix e.g., myrelease-interplex-service:8084)
 
 ```
-apiVersion: core.k8sgpt.ai/v1alpha1
-kind: K8sGPT
-metadata:
-  name: k8sgpt-sample
-  namespace: k8sgpt-operator-system
-spec:
-  ai:
-    enabled: true
-    model: gpt-3.5-turbo
-    backend: openai
-    secret:
-      name: k8sgpt-sample-secret
-      key: openai-api-key
-  proxy
-  noCache: false
-  remoteCache:
-    interplex:
-      endpoint: release-interplex-service:8084
-  repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.48
+  kubectl apply -f - << EOF
+  apiVersion: core.k8sgpt.ai/v1alpha1
+  kind: K8sGPT
+  metadata:
+    name: k8sgpt-sample
+    namespace: k8sgpt-operator-system
+  spec:
+    ai:
+      enabled: true
+      model: gpt-3.5-turbo
+      backend: openai
+      secret:
+        name: k8sgpt-sample-secret
+        key: openai-api-key
+    noCache: false
+    remoteCache:
+      interplex:
+        endpoint: release-interplex-service:8084
+    repository: ghcr.io/k8sgpt-ai/k8sgpt
+    version: v0.3.48
+  EOF
 ```
 
 </details>
