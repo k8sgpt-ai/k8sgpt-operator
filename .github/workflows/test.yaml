@@ -58,8 +58,8 @@ jobs:
       - name: Run chart-testing (lint)
         if: steps.list-changed.outputs.changed == 'true'
         run: |
-        helm repo add k8sgpt https://charts.k8sgpt.ai/
-        ct lint --validate-maintainers=false --check-version-increment=false --chart-dirs chart --target-branch ${{ github.event.repository.default_branch }}
+          helm repo add k8sgpt https://charts.k8sgpt.ai/
+          ct lint --validate-maintainers=false --check-version-increment=false --chart-dirs chart --target-branch ${{ github.event.repository.default_branch }}
 
       - name: Create kind cluster
         if: steps.list-changed.outputs.changed == 'true'
