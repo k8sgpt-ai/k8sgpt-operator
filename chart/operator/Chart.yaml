@@ -16,3 +16,8 @@ annotations:
 type: application
 version: 0.2.3
 appVersion: 0.0.26
+dependencies:
+  - name: interplex
+    version: "0.0.11"
+    repository: "https://charts.k8sgpt.ai/"
+    condition: interplex.enabled

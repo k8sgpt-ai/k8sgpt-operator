@@ -1,3 +1,7 @@
+## Optional enable distributed cache
+interplex:
+  enabled: false
+
 serviceAccount:
   create: true
   name: "k8sgpt"
