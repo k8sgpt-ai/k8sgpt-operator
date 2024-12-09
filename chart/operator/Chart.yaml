@@ -21,4 +21,3 @@ dependencies:
     version: "0.0.11"
     repository: "https://charts.k8sgpt.ai/"
     condition: interplex.enabled
-    
