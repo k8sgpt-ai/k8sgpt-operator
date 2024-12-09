@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.4](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.3...v0.2.4) (2024-12-09)
+
+
+### Features
+
+* deploy interplex ([#570](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/570)) ([9343781](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9343781b6acd0930f9dd80a5ea5748cf2d43a1a3))
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/stretchr/testify to v1.10.0 ([#564](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/564)) ([8801fd1](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8801fd1d6e95b8fcabc67a80aa2920871c520384))
+* **deps:** update module google.golang.org/grpc to v1.68.1 ([#568](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/568)) ([1d0420a](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/1d0420a34eb902dae9cd9b5b9fd84f5a83b4da1b))
+
 ## [0.2.3](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.2...v0.2.3) (2024-12-05)
 
 
