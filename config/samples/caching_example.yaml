@@ -10,8 +10,9 @@ spec:
     backend: openai
     secret:
       name: k8sgpt-sample-secret
+      key: openai-api-key
   remoteCache:
     interplex:
       endpoint: release-interplex-service:8084
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.49
+  version: v0.3.48
