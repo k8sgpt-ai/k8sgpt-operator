@@ -10,6 +10,7 @@ spec:
     backend: openai
     secret:
       name: k8sgpt-sample-secret
+      key: openai-api-key
   remoteCache:
     interplex:
       endpoint: release-interplex-service:8084
