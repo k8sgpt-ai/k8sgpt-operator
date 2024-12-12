@@ -4,6 +4,7 @@ metadata:
   name: {{ include "chart.fullname" . }}-k8sgpt
   labels:
     {{- include "chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: rbac
 rules:
   - apiGroups:
       - '*'
