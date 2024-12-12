@@ -41,10 +41,15 @@ type CredentialsRef struct {
 }
 
 type RemoteCacheRef struct {
-	Credentials *CredentialsRef `json:"credentials,omitempty"`
-	GCS         *GCSBackend     `json:"gcs,omitempty"`
-	S3          *S3Backend      `json:"s3,omitempty"`
-	Azure       *AzureBackend   `json:"azure,omitempty"`
+	Credentials *CredentialsRef   `json:"credentials,omitempty"`
+	GCS         *GCSBackend       `json:"gcs,omitempty"`
+	S3          *S3Backend        `json:"s3,omitempty"`
+	Azure       *AzureBackend     `json:"azure,omitempty"`
+	Interplex   *InterplexBackend `json:"interplex,omitempty"`
+}
+
+type InterplexBackend struct {
+	Endpoint string `json:"endpoint,omitempty"`
 }
 
 type S3Backend struct {
@@ -107,6 +112,11 @@ type AISpec struct {
 	// +kubebuilder:default:=english
 	Language      string `json:"language,omitempty"`
 	ProxyEndpoint string `json:"proxyEndpoint,omitempty"`
+	ProviderId    string `json:"providerId,omitempty"`
+	// +kubebuilder:default:="2048"
+	MaxTokens string `json:"maxTokens,omitempty"`
+	// +kubebuilder:default:="50"
+	Topk string `json:"topk,omitempty"`
 }
 
 type Trivy struct {

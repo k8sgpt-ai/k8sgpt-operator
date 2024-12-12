@@ -1,3 +1,7 @@
+## Optional enable distributed cache
+interplex:
+  enabled: false
+
 serviceAccount:
   create: true
   name: "k8sgpt"
@@ -53,7 +57,7 @@ controllerManager:
         - ALL
     image:
       repository: ghcr.io/k8sgpt-ai/k8sgpt-operator
-      tag: v0.2.0  # x-release-please-version
+      tag: v0.2.4  # x-release-please-version
     resources:
       limits:
         cpu: 500m

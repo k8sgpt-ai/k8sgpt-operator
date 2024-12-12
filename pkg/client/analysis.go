@@ -12,7 +12,7 @@ import (
 	v1 "k8s.io/api/apps/v1"
 )
 
-func (c *Client) ProcessAnalysis(deployment v1.Deployment, config *v1alpha1.K8sGPT, allowAIRequest bool) (*common.K8sGPTReponse, error) {
+func (c *Client) ProcessAnalysis(deployment v1.Deployment, config *v1alpha1.K8sGPT, allowAIRequest bool) (*common.K8sGPTResponse, error) {
 
 	client := rpc.NewServerAnalyzerServiceClient(c.conn)
 	req := &schemav1.AnalyzeRequest{
@@ -42,7 +42,7 @@ func (c *Client) ProcessAnalysis(deployment v1.Deployment, config *v1alpha1.K8sG
 		return nil, err
 	}
 
-	response := &common.K8sGPTReponse{
+	response := &common.K8sGPTResponse{
 		Status:   res.Status,
 		Results:  target,
 		Problems: int(res.Problems),
