@@ -5,8 +5,7 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
   labels:
-    app.kubernetes.io/component: crd
-    {{- include "chart.labels" . | nindent 4 }}
+  {{- include "chart.labels" . | nindent 4 }}
 spec:
   group: core.k8sgpt.ai
   names:

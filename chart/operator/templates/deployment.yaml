@@ -3,17 +3,17 @@ kind: ServiceAccount
 metadata:
   name: {{ include "chart.fullname" . }}-controller-manager
   labels:
-    app.kubernetes.io/component: rbac
     {{- include "chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller-manager
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "chart.fullname" . }}-controller-manager
   labels:
-    app.kubernetes.io/component: manager
     control-plane: controller-manager
     {{- include "chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller-manager
 spec:
   replicas: {{ .Values.controllerManager.replicas }}
   selector:
@@ -24,8 +24,8 @@ spec:
     metadata:
       labels:
         control-plane: controller-manager
-        app.kubernetes.io/component: rbac
-        {{- include "chart.selectorLabels" . | nindent 8 }}
+        {{- include "chart.labels" . | nindent 8 }}
+        app.kubernetes.io/component: controller-manager
       annotations:
         kubectl.kubernetes.io/default-container: manager
     spec:

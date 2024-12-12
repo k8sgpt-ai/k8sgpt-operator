@@ -5,9 +5,9 @@ metadata:
   name: {{ include "chart.fullname" . }}-controller-manager-metrics-monitor
   namespace: {{ .Values.serviceMonitor.namespace | default (include "k8sgpt-operator.namespace" . ) }}
   labels:
-    app.kubernetes.io/component: metrics
     control-plane: controller-manager
     {{- include "chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: metrics
   {{- if .Values.serviceMonitor.additionalLabels }}
     {{- toYaml .Values.serviceMonitor.additionalLabels | nindent 4 }}
   {{- end }}

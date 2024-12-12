@@ -3,9 +3,9 @@ kind: Service
 metadata:
   name: {{ include "chart.fullname" . | trunc 20}}-controller-manager-metrics-service
   labels:
-    app.kubernetes.io/component: kube-rbac-proxy
     control-plane: controller-manager
     {{- include "chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: metrics-reader
 spec:
   type: {{ .Values.metricsService.type }}
   selector:
