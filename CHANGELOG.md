@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.2.5](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.4...v0.2.5) (2024-12-12)
+
+
+### Features
+
+* fix secret caching ([#575](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/575)) ([ad735b6](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/ad735b60245faf8f9bd985ee6e1b7ddfadaeb6d8))
+
+
+### Bug Fixes
+
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#569](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/569)) ([cd1bff6](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/cd1bff6c2642dfc0f2a7378961e4edf22173b9ce))
+* spelling fix ([#577](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/577)) ([83959b2](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/83959b2fa8b2c7b6639e637d4a15bf456b7f4424))
+
+
+### Other
+
+* **deps:** update actions/setup-go digest to 41dfa10 ([#547](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/547)) ([b36ec89](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/b36ec89e4068f3efe162609a358e60454bbcff6f))
+* **deps:** update helm release interplex to v1 ([#573](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/573)) ([7f55b2a](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/7f55b2a5af97a4b3ff337e6bb491cfccc31fe09b))
+
 ## [0.2.4](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.3...v0.2.4) (2024-12-09)
 
 
