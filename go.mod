@@ -12,7 +12,7 @@ require (
 	github.com/onsi/gomega v1.36.0
 	github.com/prometheus/client_golang v1.20.5
 	google.golang.org/grpc v1.68.1
-	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/yaml.v3 v3.0.1
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.29.3
 	k8s.io/apimachinery v0.29.3
