@@ -15,7 +15,7 @@ package common
 
 import "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 
-type K8sGPTReponse struct {
+type K8sGPTResponse struct {
 	Status   string                `json:"status"`
 	Problems int                   `json:"problems"`
 	Results  []v1alpha1.ResultSpec `json:"results"`
