@@ -3,6 +3,9 @@ serviceAccount:
   name: "k8sgpt"
   # -- Annotations for the managed k8sgpt workload service account
   annotations: {}
+# labels that'll be applied to all resources
+additionalLabels: {}
+  # app: k8s-operator
 serviceMonitor:
   enabled: false
   additionalLabels: {}
