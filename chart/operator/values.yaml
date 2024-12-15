@@ -36,8 +36,8 @@ controllerManager:
         drop:
         - ALL
     image:
-      repository: gcr.io/kubebuilder/kube-rbac-proxy
-      tag: v0.16.0
+      repository: quay.io/brancz/kube-rbac-proxy
+      tag: v0.18.2
     resources:
       limits:
         cpu: 500m
