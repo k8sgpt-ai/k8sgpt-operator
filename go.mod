@@ -9,11 +9,10 @@ require (
 	buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.35.2-20241118152629-1379a5a1889d.1
 	github.com/go-logr/logr v1.4.2
 	github.com/onsi/ginkgo/v2 v2.20.2
-	github.com/onsi/gomega v1.36.0
+	github.com/onsi/gomega v1.36.1
 	github.com/prometheus/client_golang v1.20.5
 	google.golang.org/grpc v1.68.1
 	gopkg.in/yaml.v2 v2.4.0
-	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.29.3
 	k8s.io/apimachinery v0.29.3
 	k8s.io/cli-runtime v0.29.3
@@ -99,6 +98,7 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240903143218-8af14fe29dc1 // indirect
 	google.golang.org/protobuf v1.35.2 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/apiextensions-apiserver v0.27.2 // indirect
 	k8s.io/component-base v0.29.3 // indirect
 	k8s.io/klog/v2 v2.110.1 // indirect
