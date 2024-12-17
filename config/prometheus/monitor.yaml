@@ -11,6 +11,7 @@ metadata:
     app.kubernetes.io/created-by: k8sgpt-operator
     app.kubernetes.io/part-of: k8sgpt-operator
     app.kubernetes.io/managed-by: kustomize
+    release: prometheus
   name: controller-manager-metrics-monitor
   namespace: system
 spec:
