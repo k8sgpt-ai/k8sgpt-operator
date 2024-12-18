@@ -131,7 +131,7 @@ func (step *AnalysisStep) cleanUpStaleResults(rawResults map[string]corev1alpha1
 				if err != nil {
 					return err
 				}
-				numberOfResultsByType := instance.r.MetricsBuilder.GetCounterVec("k8sgpt_number_of_results_by_type")
+				numberOfResultsByType := instance.r.MetricsBuilder.GetGaugeVec("k8sgpt_number_of_results_by_type")
 				if numberOfResultsByType != nil {
 					numberOfResultsByType.WithLabelValues(result.Spec.Kind, result.Spec.Name, instance.k8sgptConfig.Name).Desc()
 				}
@@ -143,20 +143,17 @@ func (step *AnalysisStep) cleanUpStaleResults(rawResults map[string]corev1alpha1
 }
 
 func (step *AnalysisStep) processRawResults(rawResults map[string]corev1alpha1.Result, instance *K8sGPTInstance) error {
+
+	m := instance.r.MetricsBuilder.GetGaugeVec("k8sgpt_number_of_results_by_type")
+	if m != nil {
+		m.Reset()
+	}
 	for _, result := range rawResults {
-		operation, err := resources.CreateOrUpdateResult(instance.ctx, instance.r.Client, result)
+		_, err := resources.CreateOrUpdateResult(instance.ctx, instance.r.Client, result)
 		if err != nil {
 			return err
 		}
-
-		if operation == resources.CreatedResult {
-			numberOfResultsByType := instance.r.MetricsBuilder.GetCounterVec("k8sgpt_number_of_results_by_type")
-			if numberOfResultsByType != nil {
-				numberOfResultsByType.WithLabelValues(result.Spec.Kind, result.Spec.Name, instance.k8sgptConfig.Name).Inc()
-			} else if operation == resources.UpdatedResult {
-				instance.logger.Info("updated successfully %s", result.Name)
-			}
-		}
+		m.WithLabelValues(result.Spec.Kind, result.Spec.Name, instance.k8sgptConfig.Name).Inc()
 	}
 
 	return nil
