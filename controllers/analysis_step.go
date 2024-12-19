@@ -144,16 +144,16 @@ func (step *AnalysisStep) cleanUpStaleResults(rawResults map[string]corev1alpha1
 
 func (step *AnalysisStep) processRawResults(rawResults map[string]corev1alpha1.Result, instance *K8sGPTInstance) error {
 
-	m := instance.r.MetricsBuilder.GetGaugeVec("k8sgpt_number_of_results_by_type")
-	if m != nil {
-		m.Reset()
+	numberOfResultsByType := instance.r.MetricsBuilder.GetGaugeVec("k8sgpt_number_of_results_by_type")
+	if numberOfResultsByType != nil {
+		numberOfResultsByType.Reset()
 	}
 	for _, result := range rawResults {
-		_, err := resources.CreateOrUpdateResult(instance.ctx, instance.r.Client, result)
+		err := resources.CreateOrUpdateResult(instance.ctx, instance.r.Client, result)
 		if err != nil {
 			return err
 		}
-		m.WithLabelValues(result.Spec.Kind, result.Spec.Name, instance.k8sgptConfig.Name).Inc()
+		numberOfResultsByType.WithLabelValues(result.Spec.Kind, result.Spec.Name, instance.k8sgptConfig.Name).Inc()
 	}
 
 	return nil
