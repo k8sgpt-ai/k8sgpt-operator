@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.6](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.5...v0.2.6) (2024-12-20)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/onsi/ginkgo/v2 to v2.22.1 ([#590](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/590)) ([ce604d9](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/ce604d9c0d4e09a7621f0a9177c775146d221d63))
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#582](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/582)) ([3c145ba](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/3c145ba95317513c3905cee11387241e43571023))
+
+
+### Other
+
+* **deps:** update anchore/sbom-action action to v0.17.9 ([#580](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/580)) ([9e36a6e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9e36a6e0f9ca3fd940c060128f639fc5ec17a23a))
+
 ## [0.2.5](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.4...v0.2.5) (2024-12-19)
 
 
