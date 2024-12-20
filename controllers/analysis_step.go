@@ -15,8 +15,9 @@ limitations under the License.
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
-
+	"github.com/go-logr/logr"
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -31,7 +32,15 @@ var (
 )
 
 type AnalysisStep struct {
-	next K8sGPT
+	next                K8sGPT
+	enableResultLogging bool
+	logger              logr.Logger
+}
+
+type AnalysisLogStatement struct {
+	Name    string
+	Error   string
+	Details string
 }
 
 func (step *AnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, error) {
@@ -149,9 +158,29 @@ func (step *AnalysisStep) processRawResults(rawResults map[string]corev1alpha1.R
 		numberOfResultsByType.Reset()
 	}
 	for _, result := range rawResults {
-		err := resources.CreateOrUpdateResult(instance.ctx, instance.r.Client, result)
+		result, err := resources.CreateOrUpdateResult(instance.ctx, instance.r.Client, result)
 		if err != nil {
 			return err
+		}
+		// Rather than using the raw corev1alpha.Result from the RPC, we log on the v1alpha.Result from KubeBuilder
+		if step.enableResultLogging {
+
+			// check if result.spec.error is nil
+			var errorString = ""
+			if len(result.Spec.Error) > 0 {
+				errorString = fmt.Sprintf("Error %s", result.Spec.Error)
+			}
+			logStatement := AnalysisLogStatement{
+				Name:    result.Spec.Name,
+				Details: result.Spec.Details,
+				Error:   errorString,
+			}
+			// to json
+			jsonBytes, err := json.Marshal(logStatement)
+			if err != nil {
+				step.logger.Error(err, "Error marshalling logStatement")
+			}
+			step.logger.Info(string(jsonBytes))
 		}
 		numberOfResultsByType.WithLabelValues(result.Spec.Kind, result.Spec.Name, instance.k8sgptConfig.Name).Inc()
 	}
