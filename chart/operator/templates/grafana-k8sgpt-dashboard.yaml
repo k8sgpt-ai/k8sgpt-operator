@@ -6,10 +6,8 @@ metadata:
     {{ .Values.grafanaDashboard.folder.annotation }}: {{ .Values.grafanaDashboard.folder.name }}
   labels:
     {{ .Values.grafanaDashboard.label.key }}: {{ .Values.grafanaDashboard.label.value | quote }}
-    app.kubernetes.io/component: configmap
-    app.kubernetes.io/created-by: k8sgpt-operator
-    app.kubernetes.io/part-of: k8sgpt-operator
-  {{- include "chart.labels" . | nindent 4 }}
+    {{- include "chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dashboard
   name: k8sgpt-overview
   namespace: {{ .Values.grafanaDashboard.namespace | default (include "k8sgpt-operator.namespace" .) }}
 data:
@@ -21,10 +19,8 @@ apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDashboard
 metadata:
   labels:
-    app.kubernetes.io/component: grafana-dashboard
-    app.kubernetes.io/created-by: k8sgpt-operator
-    app.kubernetes.io/part-of: k8sgpt-operator
-  {{- include "chart.labels" . | nindent 4 }}
+    {{- include "chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dashboard
   name: k8sgpt-overview
   namespace: {{ .Values.grafanaDashboard.namespace | default (include "k8sgpt-operator.namespace" .) }}
 spec:
