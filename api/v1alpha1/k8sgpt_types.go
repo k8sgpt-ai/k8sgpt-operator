@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -136,18 +137,19 @@ type ImagePullSecrets struct {
 type K8sGPTSpec struct {
 	Version string `json:"version,omitempty"`
 	// +kubebuilder:default:=ghcr.io/k8sgpt-ai/k8sgpt
-	Repository       string             `json:"repository,omitempty"`
-	ImagePullSecrets []ImagePullSecrets `json:"imagePullSecrets,omitempty"`
-	NoCache          bool               `json:"noCache,omitempty"`
-	CustomAnalyzers  []CustomAnalyzer   `json:"customAnalyzers,omitempty"`
-	Filters          []string           `json:"filters,omitempty"`
-	ExtraOptions     *ExtraOptionsRef   `json:"extraOptions,omitempty"`
-	Sink             *WebhookRef        `json:"sink,omitempty"`
-	AI               *AISpec            `json:"ai,omitempty"`
-	RemoteCache      *RemoteCacheRef    `json:"remoteCache,omitempty"`
-	Integrations     *Integrations      `json:"integrations,omitempty"`
-	NodeSelector     map[string]string  `json:"nodeSelector,omitempty"`
-	TargetNamespace  string             `json:"targetNamespace,omitempty"`
+	Repository       string                       `json:"repository,omitempty"`
+	ImagePullSecrets []ImagePullSecrets           `json:"imagePullSecrets,omitempty"`
+	Resources        *corev1.ResourceRequirements `json:"resources,omitempty"`
+	NoCache          bool                         `json:"noCache,omitempty"`
+	CustomAnalyzers  []CustomAnalyzer             `json:"customAnalyzers,omitempty"`
+	Filters          []string                     `json:"filters,omitempty"`
+	ExtraOptions     *ExtraOptionsRef             `json:"extraOptions,omitempty"`
+	Sink             *WebhookRef                  `json:"sink,omitempty"`
+	AI               *AISpec                      `json:"ai,omitempty"`
+	RemoteCache      *RemoteCacheRef              `json:"remoteCache,omitempty"`
+	Integrations     *Integrations                `json:"integrations,omitempty"`
+	NodeSelector     map[string]string            `json:"nodeSelector,omitempty"`
+	TargetNamespace  string                       `json:"targetNamespace,omitempty"`
 	// Define the kubeconfig the Deployment must use.
 	// If empty, the Deployment will use the ServiceAccount provided by Kubernetes itself.
 	Kubeconfig *SecretRef `json:"kubeconfig,omitempty"`
