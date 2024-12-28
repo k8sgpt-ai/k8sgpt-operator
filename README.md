@@ -464,6 +464,40 @@ EOF
 </details>
 
 <details>
+
+<summary>Resources</summary>
+You can use custom k8sgpt container resource usage by `resources`.
+
+```sh
+kubectl apply -f - << EOF
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: K8sGPT
+metadata:
+  name: k8sgpt-sample
+  namespace: k8sgpt-operator-system
+spec:
+  ai:
+    enabled: true
+    model: gpt-3.5-turbo
+    backend: openai
+    secret:
+      name: k8sgpt-sample-secret
+      key: openai-api-key
+  noCache: false
+  repository: ghcr.io/k8sgpt-ai/k8sgpt
+  resources:
+    limits:
+      cpu: 10
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 156Mi
+EOF
+```
+
+</details>
+
+<details>
 <summary>sink (integrations) </summary>
 
 Optional parameters available for sink.  
