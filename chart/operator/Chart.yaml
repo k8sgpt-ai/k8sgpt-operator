@@ -14,5 +14,10 @@ annotations:
   artifacthub.io/license: Apache-2.0
   artifacthub.io/categories: monitoring-logging
 type: application
-version: 0.2.0
+version: 0.2.5
 appVersion: 0.0.26
+dependencies:
+  - name: interplex
+    version: 1.0.0
+    repository: https://charts.k8sgpt.ai/
+    condition: interplex.enabled

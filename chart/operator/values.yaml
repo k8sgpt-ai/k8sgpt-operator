@@ -1,3 +1,7 @@
+## Optional enable distributed cache
+interplex:
+  enabled: false
+
 serviceAccount:
   create: true
   name: "k8sgpt"
@@ -32,8 +36,8 @@ controllerManager:
         drop:
         - ALL
     image:
-      repository: gcr.io/kubebuilder/kube-rbac-proxy
-      tag: v0.16.0
+      repository: quay.io/brancz/kube-rbac-proxy
+      tag: v0.18.2
     resources:
       limits:
         cpu: 500m
@@ -50,7 +54,7 @@ controllerManager:
         - ALL
     image:
       repository: ghcr.io/k8sgpt-ai/k8sgpt-operator
-      tag: v0.2.0  # x-release-please-version
+      tag: v0.2.5  # x-release-please-version
     resources:
       limits:
         cpu: 500m

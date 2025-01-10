@@ -67,6 +67,27 @@ func addSecretAsEnvToDeployment(secretName string, secretKey string,
 	return nil
 }
 
+// GetServiceAccount Create ServiceAccount for K8sGPT
+func GetServiceAccount(config v1alpha1.K8sGPT) (*corev1.ServiceAccount, error) {
+	serviceAccount := &corev1.ServiceAccount{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "k8sgpt", // Name of the ServiceAccount
+			Namespace: config.Namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					Kind:               config.Kind,
+					Name:               config.Name,
+					UID:                config.UID,
+					APIVersion:         config.APIVersion,
+					BlockOwnerDeletion: utils.PtrBool(true),
+					Controller:         utils.PtrBool(true),
+				},
+			},
+		},
+	}
+	return serviceAccount, nil
+}
+
 // GetService Create service for K8sGPT
 func GetService(config v1alpha1.K8sGPT) (*corev1.Service, error) {
 	// Create service
@@ -152,6 +173,14 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 								{
 									Name:  "K8SGPT_BACKEND",
 									Value: config.Spec.AI.Backend,
+								},
+								{
+									Name:  "K8SGPT_MAX_TOKENS",
+									Value: config.Spec.AI.MaxTokens,
+								},
+								{
+									Name:  "K8SGPT_TOP_K",
+									Value: config.Spec.AI.Topk,
 								},
 								{
 									Name:  "XDG_CONFIG_HOME",
@@ -271,6 +300,17 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 		}
 	}
 
+	// Add provider ID if in ai spec
+	if config.Spec.AI.ProviderId != "" {
+		providerId := corev1.EnvVar{
+			Name:  "K8SGPT_PROVIDER_ID",
+			Value: config.Spec.AI.ProviderId,
+		}
+		deployment.Spec.Template.Spec.Containers[0].Env = append(
+			deployment.Spec.Template.Spec.Containers[0].Env, providerId,
+		)
+	}
+
 	if config.Spec.AI.BaseUrl != "" {
 		baseUrl := corev1.EnvVar{
 			Name:  "K8SGPT_BASEURL",
@@ -279,6 +319,11 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 		deployment.Spec.Template.Spec.Containers[0].Env = append(
 			deployment.Spec.Template.Spec.Containers[0].Env, baseUrl,
 		)
+	}
+
+	// Configure the k8sgpt deployment resource if required
+	if config.Spec.Resources != nil {
+		deployment.Spec.Template.Spec.Containers[0].Resources = *config.Spec.Resources
 	}
 	// Engine is required only when azureopenai is the ai backend
 	if config.Spec.AI.Engine != "" && config.Spec.AI.Backend == v1alpha1.AzureOpenAI {
@@ -344,6 +389,13 @@ func Sync(ctx context.Context, c client.Client,
 	var objs []client.Object
 
 	outOfClusterMode := config.Spec.Kubeconfig != nil
+
+	sa, er := GetServiceAccount(config)
+	if er != nil {
+		return er
+	}
+
+	objs = append(objs, sa)
 
 	svc, er := GetService(config)
 	if er != nil {
