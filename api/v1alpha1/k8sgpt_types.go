@@ -96,7 +96,13 @@ type BackOff struct {
 	MaxRetries int `json:"maxRetries"`
 }
 
+type AutoRemediation struct {
+	// +kubebuilder:default:=false
+	Enabled bool `json:"enabled"`
+}
+
 type AISpec struct {
+	AutoRemediation AutoRemediation `json:"autoRemediation,omitempty"`
 	// +kubebuilder:default:=openai
 	// +kubebuilder:validation:Enum=ibmwatsonxai;openai;localai;azureopenai;amazonbedrock;cohere;amazonsagemaker;google;googlevertexai
 	Backend string   `json:"backend"`

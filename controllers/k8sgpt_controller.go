@@ -96,12 +96,15 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		logger:              instance.logger.WithName("analysis"),
 	}
 	resultStatusStep := ResultStatusStep{}
-
+	remediationStep := remediationStep{
+		logger: instance.logger.WithName("remediation"),
+	}
 	initStep.setNext(&finalizerStep)
 	finalizerStep.setNext(&configureStep)
 	configureStep.setNext(&preAnalysisStep)
 	preAnalysisStep.setNext(&analysisStep)
 	analysisStep.setNext(&resultStatusStep)
+	resultStatusStep.setNext(&remediationStep)
 
 	return initStep.execute(&instance)
 

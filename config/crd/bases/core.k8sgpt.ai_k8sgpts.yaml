@@ -44,6 +44,14 @@ spec:
                   anonymized:
                     default: true
                     type: boolean
+                  autoRemediation:
+                    properties:
+                      enabled:
+                        default: false
+                        type: boolean
+                    required:
+                    - enabled
+                    type: object
                   backOff:
                     properties:
                       enabled:

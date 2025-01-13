@@ -35,7 +35,7 @@ func (step *ResultStatusStep) execute(instance *K8sGPTInstance) (ctrl.Result, er
 
 	// We emit when result Status is not historical
 	// and when user configures a sink for the first time
-	latestResultList, err := step.emitIfNotHistorical(instance)
+	latestResultList, err := emitIfNotHistorical(instance)
 	if err != nil {
 		return instance.r.FinishReconcile(err, false, instance.k8sgptConfig.Name)
 	}
@@ -55,22 +55,12 @@ func (step *ResultStatusStep) execute(instance *K8sGPTInstance) (ctrl.Result, er
 	}
 
 	instance.logger.Info("ending ResultStatusStep")
-
-	return instance.r.FinishReconcile(nil, false, instance.k8sgptConfig.Name)
-
+	
+	return step.next.execute(instance)
 }
 
 func (step *ResultStatusStep) setNext(next K8sGPT) {
 	step.next = next
-}
-
-func (step *ResultStatusStep) emitIfNotHistorical(instance *K8sGPTInstance) (*corev1alpha1.ResultList, error) {
-	latestResultList := &corev1alpha1.ResultList{}
-	err := instance.r.List(instance.ctx, latestResultList, client.MatchingLabels(map[string]string{
-		"k8sgpts.k8sgpt.ai/name":      instance.k8sgptConfig.Name,
-		"k8sgpts.k8sgpt.ai/namespace": instance.k8sgptConfig.Namespace,
-	}))
-	return latestResultList, err
 }
 
 func (step *ResultStatusStep) initSinkType(instance *K8sGPTInstance) (bool, sinks.ISink, error) {
