@@ -5,6 +5,8 @@ metadata:
   namespace: default
 spec:
   ai:
+    autoRemediation:
+      enabled: true
     enabled: true
     model: gpt-3.5-turbo
     backend: openai
