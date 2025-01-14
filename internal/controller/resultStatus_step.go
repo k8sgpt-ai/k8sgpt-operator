@@ -55,7 +55,7 @@ func (step *ResultStatusStep) execute(instance *K8sGPTInstance) (ctrl.Result, er
 	}
 
 	instance.logger.Info("ending ResultStatusStep")
-	
+
 	return step.next.execute(instance)
 }
 

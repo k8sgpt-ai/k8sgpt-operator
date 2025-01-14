@@ -17,6 +17,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller"
 	"math/rand"
 	"os"
 	"time"
@@ -26,7 +27,6 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
-	"github.com/k8sgpt-ai/k8sgpt-operator/controllers"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/metrics"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/sinks"
