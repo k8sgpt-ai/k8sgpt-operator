@@ -122,7 +122,15 @@ func main() {
 
 	metricsBuilder := metrics.InitializeMetrics()
 
-	if err = (&controllers.K8sGPTReconciler{
+	if err = (&controller.MutationReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Mutation")
+		os.Exit(1)
+	}
+
+	if err = (&controller.K8sGPTReconciler{
 		Client:              mgr.GetClient(),
 		Scheme:              mgr.GetScheme(),
 		Integrations:        integration,

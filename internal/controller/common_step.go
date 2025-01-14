@@ -1,4 +1,4 @@
-package controllers
+package controller
 
 import (
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
