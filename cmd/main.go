@@ -17,7 +17,9 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller"
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/channel_types"
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/k8sgpt"
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/mutation"
 	"math/rand"
 	"os"
 	"time"
@@ -122,17 +124,23 @@ func main() {
 
 	metricsBuilder := metrics.InitializeMetrics()
 
-	if err = (&controller.MutationReconciler{
+	// This channel allows us to indicate when K8sGPT deployment is ready for active comms
+	// This is a necessity for the mutation system to work
+	ready := make(chan channel_types.InterControllerSignal)
+
+	if err = (&mutation.MutationReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
+		Signal: ready,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Mutation")
 		os.Exit(1)
 	}
 
-	if err = (&controller.K8sGPTReconciler{
+	if err = (&k8sgpt.K8sGPTReconciler{
 		Client:              mgr.GetClient(),
 		Scheme:              mgr.GetScheme(),
+		Signal:              ready,
 		Integrations:        integration,
 		SinkClient:          sinkClient,
 		MetricsBuilder:      metricsBuilder,

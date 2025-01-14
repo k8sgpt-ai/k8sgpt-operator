@@ -12,11 +12,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package controller
+package k8sgpt
 
 import (
 	"fmt"
-
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/sinks"
@@ -35,23 +34,23 @@ func (step *ResultStatusStep) execute(instance *K8sGPTInstance) (ctrl.Result, er
 
 	// We emit when result Status is not historical
 	// and when user configures a sink for the first time
-	latestResultList, err := emitIfNotHistorical(instance)
+	latestResultList, err := EmitIfNotHistorical(instance)
 	if err != nil {
-		return instance.r.FinishReconcile(err, false, instance.k8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
 	}
 
 	if len(latestResultList.Items) == 0 {
-		return instance.r.FinishReconcile(nil, false, instance.k8sgptConfig.Name)
+		return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name)
 	}
 
 	sinkEnabled, sinkType, err := step.initSinkType(instance)
 	if err != nil {
-		return instance.r.FinishReconcile(err, false, instance.k8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
 	}
 
 	err = step.processLatestResults(instance, sinkEnabled, sinkType, latestResultList)
 	if err != nil {
-		return instance.r.FinishReconcile(err, false, instance.k8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
 	}
 
 	instance.logger.Info("ending ResultStatusStep")
@@ -64,27 +63,27 @@ func (step *ResultStatusStep) setNext(next K8sGPT) {
 }
 
 func (step *ResultStatusStep) initSinkType(instance *K8sGPTInstance) (bool, sinks.ISink, error) {
-	sinkEnabled := instance.k8sgptConfig.Spec.Sink != nil && instance.k8sgptConfig.Spec.Sink.Type != "" && (instance.k8sgptConfig.Spec.Sink.Endpoint != "" || instance.k8sgptConfig.Spec.Sink.Secret != nil)
+	sinkEnabled := instance.K8sgptConfig.Spec.Sink != nil && instance.K8sgptConfig.Spec.Sink.Type != "" && (instance.K8sgptConfig.Spec.Sink.Endpoint != "" || instance.K8sgptConfig.Spec.Sink.Secret != nil)
 	var sinkType sinks.ISink
 
 	if sinkEnabled {
 		var sinkSecretValue string
 
-		if instance.k8sgptConfig.Spec.Sink.Secret != nil {
+		if instance.K8sgptConfig.Spec.Sink.Secret != nil {
 			secret := &kcorev1.Secret{}
 			secretNamespacedName := types.NamespacedName{
 				Namespace: instance.req.Namespace,
-				Name:      instance.k8sgptConfig.Spec.Sink.Secret.Name,
+				Name:      instance.K8sgptConfig.Spec.Sink.Secret.Name,
 			}
-			if err := instance.r.Get(instance.ctx, secretNamespacedName, secret); err != nil {
+			if err := instance.R.Get(instance.Ctx, secretNamespacedName, secret); err != nil {
 
 				return sinkEnabled, sinkType, fmt.Errorf("could not find sink secret: %w", err)
 			}
 
-			sinkSecretValue = string(secret.Data[instance.k8sgptConfig.Spec.Sink.Secret.Key])
+			sinkSecretValue = string(secret.Data[instance.K8sgptConfig.Spec.Sink.Secret.Key])
 		}
-		sinkType = sinks.NewSink(instance.k8sgptConfig.Spec.Sink.Type)
-		sinkType.Configure(*instance.k8sgptConfig, *instance.r.SinkClient, sinkSecretValue)
+		sinkType = sinks.NewSink(instance.K8sgptConfig.Spec.Sink.Type)
+		sinkType.Configure(*instance.K8sgptConfig, *instance.R.SinkClient, sinkSecretValue)
 	}
 
 	return sinkEnabled, sinkType, nil
@@ -94,7 +93,7 @@ func (step *ResultStatusStep) initSinkType(instance *K8sGPTInstance) (bool, sink
 func (step *ResultStatusStep) processLatestResults(instance *K8sGPTInstance, sinkEnabled bool, sinkType sinks.ISink, latestResultList *corev1alpha1.ResultList) error {
 	for _, result := range latestResultList.Items {
 		var res corev1alpha1.Result
-		if err := instance.r.Get(instance.ctx, client.ObjectKey{Namespace: result.Namespace, Name: result.Name}, &res); err != nil {
+		if err := instance.R.Get(instance.Ctx, client.ObjectKey{Namespace: result.Namespace, Name: result.Name}, &res); err != nil {
 			return err
 		}
 
@@ -103,13 +102,13 @@ func (step *ResultStatusStep) processLatestResults(instance *K8sGPTInstance, sin
 				if err := sinkType.Emit(res.Spec); err != nil {
 					return err
 				}
-				res.Status.Webhook = instance.k8sgptConfig.Spec.Sink.Endpoint
+				res.Status.Webhook = instance.K8sgptConfig.Spec.Sink.Endpoint
 			}
 		} else {
 			// Remove the Webhook status from results
 			res.Status.Webhook = ""
 		}
-		if err := instance.r.Status().Update(instance.ctx, &res); err != nil {
+		if err := instance.R.Status().Update(instance.Ctx, &res); err != nil {
 			return err
 		}
 	}

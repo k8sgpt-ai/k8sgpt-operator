@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controller
+package mutation
 
 import (
 	"context"
@@ -41,10 +41,10 @@ var _ = Describe("Mutation Controller", func() {
 			Namespace: "default", // TODO(user):Modify as needed
 		}
 		mutation := &corev1alpha1.Mutation{}
-
+		reconciler := &MutationReconciler{}
 		BeforeEach(func() {
 			By("creating the custom resource for the Kind Mutation")
-			err := k8sClient.Get(ctx, typeNamespacedName, mutation)
+			err := reconciler.Get(ctx, typeNamespacedName, mutation)
 			if err != nil && errors.IsNotFound(err) {
 				resource := &corev1alpha1.Mutation{
 					ObjectMeta: metav1.ObjectMeta{
@@ -53,24 +53,25 @@ var _ = Describe("Mutation Controller", func() {
 					},
 					// TODO(user): Specify other spec details if needed.
 				}
-				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
+				Expect(reconciler.Client.Create(ctx, resource)).To(Succeed())
 			}
 		})
 
 		AfterEach(func() {
 			// TODO(user): Cleanup logic after each test, like removing the resource instance.
+			reconciler := &MutationReconciler{}
 			resource := &corev1alpha1.Mutation{}
-			err := k8sClient.Get(ctx, typeNamespacedName, resource)
+			err := reconciler.Client.Get(ctx, typeNamespacedName, resource)
 			Expect(err).NotTo(HaveOccurred())
 
 			By("Cleanup the specific resource instance Mutation")
-			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
+			Expect(reconciler.Client.Delete(ctx, resource)).To(Succeed())
 		})
 		It("should successfully reconcile the resource", func() {
 			By("Reconciling the created resource")
 			controllerReconciler := &MutationReconciler{
-				Client: k8sClient,
-				Scheme: k8sClient.Scheme(),
+				Client: reconciler.Client,
+				Scheme: reconciler.Client.Scheme(),
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{

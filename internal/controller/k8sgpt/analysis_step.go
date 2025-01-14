@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package controller
+package k8sgpt
 
 import (
 	"encoding/json"
@@ -46,29 +46,29 @@ type AnalysisLogStatement struct {
 func (step *AnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, error) {
 	instance.logger.Info("starting AnalysisStep")
 
-	response, err := instance.kclient.ProcessAnalysis(*instance.k8sgptDeployment, instance.k8sgptConfig, allowBackendAIRequest)
+	response, err := instance.kclient.ProcessAnalysis(*instance.k8sgptDeployment, instance.K8sgptConfig, allowBackendAIRequest)
 	if err != nil {
-		if instance.k8sgptConfig.Spec.AI.Enabled {
+		if instance.K8sgptConfig.Spec.AI.Enabled {
 			step.incK8sgptNumberOfFailedBackendAICalls(instance)
 			step.handleAIFailureBackoff(instance)
 		}
-		return instance.r.FinishReconcile(err, false, instance.k8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
 	}
 
 	// reset analysisRetryCount
 	analysisRetryCount = 0
 
 	// Update metrics count
-	if instance.k8sgptConfig.Spec.AI.Enabled && len(response.Results) > 0 {
+	if instance.K8sgptConfig.Spec.AI.Enabled && len(response.Results) > 0 {
 		step.incK8sgptNumberOfFailedBackendAICalls(instance)
 	}
 
 	// Parse the k8sgpt-deployment response into a list of results
 	step.setk8sgptNumberOfResults(instance, float64(len(response.Results)))
 
-	rawResults, err := resources.MapResults(*instance.r.Integrations, response.Results, *instance.k8sgptConfig)
+	rawResults, err := resources.MapResults(*instance.R.Integrations, response.Results, *instance.K8sgptConfig)
 	if err != nil {
-		return instance.r.FinishReconcile(err, false, instance.k8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
 	}
 
 	// Prior to creating or updating any results we will delete any stale results that
@@ -76,14 +76,14 @@ func (step *AnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, error)
 	// the custom resource name
 	err = step.cleanUpStaleResults(rawResults, instance)
 	if err != nil {
-		return instance.r.FinishReconcile(err, false, instance.k8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
 	}
 
 	// At this point we are able to loop through our rawResults and create them or update
 	// them as needed
 	err = step.processRawResults(rawResults, instance)
 	if err != nil {
-		return instance.r.FinishReconcile(err, false, instance.k8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
 	}
 
 	instance.logger.Info("ending AnalysisStep")
@@ -97,10 +97,10 @@ func (step *AnalysisStep) setNext(next K8sGPT) {
 }
 
 func (step *AnalysisStep) handleAIFailureBackoff(instance *K8sGPTInstance) {
-	if instance.k8sgptConfig.Spec.AI.BackOff.Enabled {
-		if analysisRetryCount > instance.k8sgptConfig.Spec.AI.BackOff.MaxRetries {
+	if instance.K8sgptConfig.Spec.AI.BackOff.Enabled {
+		if analysisRetryCount > instance.K8sgptConfig.Spec.AI.BackOff.MaxRetries {
 			allowBackendAIRequest = false
-			instance.logger.Info(fmt.Sprintf("Disabled AI backend %s due to failures exceeding max retries\n", instance.k8sgptConfig.Spec.AI.Backend))
+			instance.logger.Info(fmt.Sprintf("Disabled AI backend %s due to failures exceeding max retries\n", instance.K8sgptConfig.Spec.AI.Backend))
 			analysisRetryCount = 0
 		}
 		analysisRetryCount++
@@ -108,25 +108,25 @@ func (step *AnalysisStep) handleAIFailureBackoff(instance *K8sGPTInstance) {
 }
 
 func (step *AnalysisStep) incK8sgptNumberOfFailedBackendAICalls(instance *K8sGPTInstance) {
-	reconcileErrorCounter := instance.r.MetricsBuilder.GetCounterVec("k8sgpt_number_of_failed_backend_ai_calls")
+	reconcileErrorCounter := instance.R.MetricsBuilder.GetCounterVec("k8sgpt_number_of_failed_backend_ai_calls")
 	if reconcileErrorCounter != nil {
-		reconcileErrorCounter.WithLabelValues(instance.k8sgptConfig.Spec.AI.Backend, instance.k8sgptDeployment.Name, instance.k8sgptDeployment.Namespace, instance.k8sgptConfig.Name).Inc()
+		reconcileErrorCounter.WithLabelValues(instance.K8sgptConfig.Spec.AI.Backend, instance.k8sgptDeployment.Name, instance.k8sgptDeployment.Namespace, instance.K8sgptConfig.Name).Inc()
 	}
 }
 
 func (step *AnalysisStep) setk8sgptNumberOfResults(instance *K8sGPTInstance, result float64) {
-	numberOfResultsGauge := instance.r.MetricsBuilder.GetGaugeVec("k8sgpt_number_of_results")
+	numberOfResultsGauge := instance.R.MetricsBuilder.GetGaugeVec("k8sgpt_number_of_results")
 	if numberOfResultsGauge != nil {
-		numberOfResultsGauge.WithLabelValues(instance.k8sgptConfig.Name).Set(result)
+		numberOfResultsGauge.WithLabelValues(instance.K8sgptConfig.Name).Set(result)
 	}
 
 }
 
 func (step *AnalysisStep) cleanUpStaleResults(rawResults map[string]corev1alpha1.Result, instance *K8sGPTInstance) error {
 	resultList := &corev1alpha1.ResultList{}
-	err := instance.r.List(instance.ctx, resultList, client.MatchingLabels(map[string]string{
-		"k8sgpts.k8sgpt.ai/name":      instance.k8sgptConfig.Name,
-		"k8sgpts.k8sgpt.ai/namespace": instance.k8sgptConfig.Namespace,
+	err := instance.R.List(instance.Ctx, resultList, client.MatchingLabels(map[string]string{
+		"k8sgpts.k8sgpt.ai/name":      instance.K8sgptConfig.Name,
+		"k8sgpts.k8sgpt.ai/namespace": instance.K8sgptConfig.Namespace,
 	}))
 	if err != nil {
 		return err
@@ -136,13 +136,13 @@ func (step *AnalysisStep) cleanUpStaleResults(rawResults map[string]corev1alpha1
 		for _, result := range resultList.Items {
 			instance.logger.Info(fmt.Sprintf("checking if %s is still relevant", result.Name))
 			if _, ok := rawResults[result.Name]; !ok {
-				err := instance.r.Delete(instance.ctx, &result)
+				err := instance.R.Delete(instance.Ctx, &result)
 				if err != nil {
 					return err
 				}
-				numberOfResultsByType := instance.r.MetricsBuilder.GetGaugeVec("k8sgpt_number_of_results_by_type")
+				numberOfResultsByType := instance.R.MetricsBuilder.GetGaugeVec("k8sgpt_number_of_results_by_type")
 				if numberOfResultsByType != nil {
-					numberOfResultsByType.WithLabelValues(result.Spec.Kind, result.Spec.Name, instance.k8sgptConfig.Name).Desc()
+					numberOfResultsByType.WithLabelValues(result.Spec.Kind, result.Spec.Name, instance.K8sgptConfig.Name).Desc()
 				}
 
 			}
@@ -153,12 +153,12 @@ func (step *AnalysisStep) cleanUpStaleResults(rawResults map[string]corev1alpha1
 
 func (step *AnalysisStep) processRawResults(rawResults map[string]corev1alpha1.Result, instance *K8sGPTInstance) error {
 
-	numberOfResultsByType := instance.r.MetricsBuilder.GetGaugeVec("k8sgpt_number_of_results_by_type")
+	numberOfResultsByType := instance.R.MetricsBuilder.GetGaugeVec("k8sgpt_number_of_results_by_type")
 	if numberOfResultsByType != nil {
 		numberOfResultsByType.Reset()
 	}
 	for _, result := range rawResults {
-		result, err := resources.CreateOrUpdateResult(instance.ctx, instance.r.Client, result)
+		result, err := resources.CreateOrUpdateResult(instance.Ctx, instance.R.Client, result)
 		if err != nil {
 			return err
 		}
@@ -182,7 +182,7 @@ func (step *AnalysisStep) processRawResults(rawResults map[string]corev1alpha1.R
 			}
 			step.logger.Info(string(jsonBytes))
 		}
-		numberOfResultsByType.WithLabelValues(result.Spec.Kind, result.Spec.Name, instance.k8sgptConfig.Name).Inc()
+		numberOfResultsByType.WithLabelValues(result.Spec.Kind, result.Spec.Name, instance.K8sgptConfig.Name).Inc()
 	}
 
 	return nil

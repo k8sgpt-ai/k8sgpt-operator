@@ -1,4 +1,4 @@
-package controller
+package k8sgpt
 
 import (
 	"context"
@@ -27,22 +27,22 @@ type calculateRemediationStep struct {
 
 func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Result, error) {
 	instance.logger.Info("starting RemediationStep")
-	if !instance.k8sgptConfig.Spec.AI.AutoRemediation.Enabled {
+	if !instance.K8sgptConfig.Spec.AI.AutoRemediation.Enabled {
 		instance.logger.Info("calculateRemediationStep skipped because auto-remediation disabled")
 		return ctrl.Result{}, nil
 	}
-	latestResultList, err := emitIfNotHistorical(instance)
+	latestResultList, err := EmitIfNotHistorical(instance)
 	if err != nil {
-		return instance.r.FinishReconcile(err, false, instance.k8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
 	}
 
 	if len(latestResultList.Items) == 0 {
-		return instance.r.FinishReconcile(nil, false, instance.k8sgptConfig.Name)
+		return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name)
 	}
 	for _, result := range latestResultList.Items {
 		var res corev1alpha1.Result
-		if err := instance.r.Get(instance.ctx, client.ObjectKey{Namespace: result.Namespace, Name: result.Name}, &res); err != nil {
-			return instance.r.FinishReconcile(err, false, result.Name)
+		if err := instance.R.Get(instance.Ctx, client.ObjectKey{Namespace: result.Namespace, Name: result.Name}, &res); err != nil {
+			return instance.R.FinishReconcile(err, false, result.Name)
 		}
 	}
 	//
@@ -54,7 +54,7 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 		mutation := corev1alpha1.Mutation{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      eligibleResource.Result.Name,
-				Namespace: instance.k8sgptConfig.Namespace,
+				Namespace: instance.K8sgptConfig.Namespace,
 			},
 			Spec: corev1alpha1.MutationSpec{
 				Resource:            eligibleResource.ObjectRef,
@@ -67,19 +67,19 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 			},
 		}
 		// Check if the mutation exists, else create it
-		mutationKey := client.ObjectKey{Namespace: instance.k8sgptConfig.Namespace, Name: eligibleResource.Result.Name}
+		mutationKey := client.ObjectKey{Namespace: instance.K8sgptConfig.Namespace, Name: eligibleResource.Result.Name}
 		var existingMutation corev1alpha1.Mutation
-		if err := instance.r.Get(instance.ctx, mutationKey, &existingMutation); err != nil {
+		if err := instance.R.Get(instance.Ctx, mutationKey, &existingMutation); err != nil {
 			if client.IgnoreNotFound(err) != nil {
-				return instance.r.FinishReconcile(err, false, eligibleResource.Result.Name)
+				return instance.R.FinishReconcile(err, false, eligibleResource.Result.Name)
 			}
-			if err := instance.r.Create(instance.ctx, &mutation); err != nil {
-				return instance.r.FinishReconcile(err, false, eligibleResource.Result.Name)
+			if err := instance.R.Create(instance.Ctx, &mutation); err != nil {
+				return instance.R.FinishReconcile(err, false, eligibleResource.Result.Name)
 			}
 		}
 	}
 	step.logger.Info("ending calculateRemediationStep")
-	return instance.r.FinishReconcile(nil, false, instance.k8sgptConfig.Name)
+	return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name)
 }
 
 func (step *calculateRemediationStep) parseEligibleResources(instance *K8sGPTInstance, items *corev1alpha1.ResultList) []eligibleResource {
@@ -102,11 +102,11 @@ func (step *calculateRemediationStep) parseEligibleResources(instance *K8sGPTIns
 		switch item.Spec.Kind {
 		case "Service":
 			var service corev1.Service
-			if err := instance.r.Get(c, client.ObjectKey{Namespace: namespace, Name: name}, &service); err != nil {
+			if err := instance.R.Get(c, client.ObjectKey{Namespace: namespace, Name: name}, &service); err != nil {
 				instance.logger.Error(err, "unable to fetch Service", "Service", item.Name)
 				continue
 			}
-			serviceRef, err := reference.GetReference(instance.r.Scheme, &service)
+			serviceRef, err := reference.GetReference(instance.R.Scheme, &service)
 			if err != nil {
 				step.logger.Error(err, "unable to create reference for Service", "Service", item.Name)
 			}
@@ -118,11 +118,11 @@ func (step *calculateRemediationStep) parseEligibleResources(instance *K8sGPTIns
 
 		case "Ingress":
 			var ingress networkingv1.Ingress
-			if err := instance.r.Get(c, client.ObjectKey{Namespace: namespace, Name: name}, &ingress); err != nil {
+			if err := instance.R.Get(c, client.ObjectKey{Namespace: namespace, Name: name}, &ingress); err != nil {
 				instance.logger.Error(err, "unable to fetch Ingress", "Ingress", item.Name)
 				continue
 			}
-			ingressRef, err := reference.GetReference(instance.r.Scheme, &ingress)
+			ingressRef, err := reference.GetReference(instance.R.Scheme, &ingress)
 			if err != nil {
 				step.logger.Error(err, "unable to create reference for Ingress", "Ingress", item.Name)
 			}

@@ -12,11 +12,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package controller
+package k8sgpt
 
 import (
 	"context"
 	"fmt"
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/channel_types"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -50,16 +51,16 @@ type K8sGPTReconciler struct {
 	Scheme              *runtime.Scheme
 	Integrations        *integrations.Integrations
 	SinkClient          *sinks.Client
-	K8sGPTClient        *kclient.Client
 	MetricsBuilder      *metricspkg.MetricBuilder
 	EnableResultLogging bool
+	Signal              chan channel_types.InterControllerSignal
 }
 
 type K8sGPTInstance struct {
-	r                *K8sGPTReconciler
+	R                *K8sGPTReconciler
 	req              ctrl.Request
-	ctx              context.Context
-	k8sgptConfig     *corev1alpha1.K8sGPT
+	Ctx              context.Context
+	K8sgptConfig     *corev1alpha1.K8sGPT
 	k8sgptDeployment *v1.Deployment
 	logger           logr.Logger
 	kclient          *kclient.Client
@@ -81,16 +82,20 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	_ = log.FromContext(ctx)
 
 	instance := K8sGPTInstance{
-		r:      r,
+		R:      r,
 		req:    req,
-		ctx:    ctx,
+		Ctx:    ctx,
 		logger: k8sgptControllerLog,
 	}
 
 	initStep := InitStep{}
 	finalizerStep := FinalizerStep{}
 	configureStep := ConfigureStep{}
-	preAnalysisStep := PreAnalysisStep{}
+	preAnalysisStep := PreAnalysisStep{
+		// This passes the channel into the pre-analysis step to flag when connection is ready
+		// This in turn is passed to the mutation controller
+		Signal: r.Signal,
+	}
 	analysisStep := AnalysisStep{
 		enableResultLogging: r.EnableResultLogging,
 		logger:              instance.logger.WithName("analysis"),

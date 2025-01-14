@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package controller
+package k8sgpt
 
 import (
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
@@ -32,31 +32,31 @@ type FinalizerStep struct {
 func (step *FinalizerStep) execute(instance *K8sGPTInstance) (ctrl.Result, error) {
 	instance.logger.Info("starting FinalizerStep")
 	FinalizerName := FinalizerName
-	if !instance.k8sgptConfig.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !instance.K8sgptConfig.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is being deleted
-		if utils.ContainsString(instance.k8sgptConfig.GetFinalizers(), FinalizerName) {
+		if utils.ContainsString(instance.K8sgptConfig.GetFinalizers(), FinalizerName) {
 
 			// Delete any external resources associated with the instance
-			err := resources.Sync(instance.ctx, instance.r.Client, *instance.k8sgptConfig, resources.DestroyOp)
+			err := resources.Sync(instance.Ctx, instance.R.Client, *instance.K8sgptConfig, resources.DestroyOp)
 			if err != nil {
-				return instance.r.FinishReconcile(err, false, instance.k8sgptConfig.Name)
+				return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
 			}
-			controllerutil.RemoveFinalizer(instance.k8sgptConfig, FinalizerName)
-			if err := instance.r.Update(instance.ctx, instance.k8sgptConfig); err != nil {
-				return instance.r.FinishReconcile(err, false, instance.k8sgptConfig.Name)
+			controllerutil.RemoveFinalizer(instance.K8sgptConfig, FinalizerName)
+			if err := instance.R.Update(instance.Ctx, instance.K8sgptConfig); err != nil {
+				return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
 			}
 		}
 		// Stop reconciliation as the item is being deleted
-		return instance.r.FinishReconcile(nil, false, instance.k8sgptConfig.Name)
+		return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name)
 	}
 
 	// The object is not being deleted, so if it does not have our finalizer,
 	// then lets add the finalizer and update the object. This is equivalent
 	// registering our finalizer.
-	if !utils.ContainsString(instance.k8sgptConfig.GetFinalizers(), FinalizerName) {
-		controllerutil.AddFinalizer(instance.k8sgptConfig, FinalizerName)
-		if err := instance.r.Update(instance.ctx, instance.k8sgptConfig); err != nil {
-			return instance.r.FinishReconcile(err, false, instance.k8sgptConfig.Name)
+	if !utils.ContainsString(instance.K8sgptConfig.GetFinalizers(), FinalizerName) {
+		controllerutil.AddFinalizer(instance.K8sgptConfig, FinalizerName)
+		if err := instance.R.Update(instance.Ctx, instance.K8sgptConfig); err != nil {
+			return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
 		}
 	}
 	instance.logger.Info("ending FinalizerStep")
