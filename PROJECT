@@ -27,4 +27,12 @@ resources:
   kind: Result
   path: github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1
   version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: k8sgpt.ai
+  group: core
+  kind: Mutation
+  path: github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1
+  version: v1alpha1
 version: "3"

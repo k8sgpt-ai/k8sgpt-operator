@@ -55,7 +55,7 @@ func (step *calculateRemediationStep) parseEligibleResources(instance *K8sGPTIns
 	// In the future, we will have a more sophisticated way to determine which resources are eligible
 	// for remediation
 	var eligibleResources = []eligibleResource{}
-	context := context.Background()
+	c := context.Background()
 	for _, item := range items.Items {
 		//demangle the name of the resource
 		names := strings.Split(item.Spec.Name, "/")
@@ -69,7 +69,7 @@ func (step *calculateRemediationStep) parseEligibleResources(instance *K8sGPTIns
 		switch item.Spec.Kind {
 		case "Service":
 			var service corev1.Service
-			if err := instance.r.Get(context, client.ObjectKey{Namespace: namespace, Name: name}, &service); err != nil {
+			if err := instance.r.Get(c, client.ObjectKey{Namespace: namespace, Name: name}, &service); err != nil {
 				instance.logger.Error(err, "unable to fetch Service", "Service", item.Name)
 				continue
 			}
@@ -77,7 +77,7 @@ func (step *calculateRemediationStep) parseEligibleResources(instance *K8sGPTIns
 
 		case "Ingress":
 			var ingress networkingv1.Ingress
-			if err := instance.r.Get(context, client.ObjectKey{Namespace: namespace, Name: name}, &ingress); err != nil {
+			if err := instance.r.Get(c, client.ObjectKey{Namespace: namespace, Name: name}, &ingress); err != nil {
 				instance.logger.Error(err, "unable to fetch Ingress", "Ingress", item.Name)
 				continue
 			}
