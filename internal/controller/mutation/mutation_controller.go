@@ -24,9 +24,14 @@ import (
 	"github.com/go-logr/logr"
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/channel_types"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/yaml"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"strings"
+	"time"
 )
 
 // MutationReconciler reconciles a Mutation object
@@ -34,7 +39,7 @@ type MutationReconciler struct {
 	client.Client
 	logger            logr.Logger
 	Scheme            *runtime.Scheme
-	ServerQueryClient rpc.ServerQueryServiceClient
+	ServerQueryClient *rpc.ServerQueryServiceClient
 	Signal            chan channel_types.InterControllerSignal
 	RemoteBackend     string
 }
@@ -58,15 +63,14 @@ var (
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.19.4/pkg/reconcile
 func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 
-	mutationControllerLog.Info("Awaiting signal for K8sGPT connection")
-	select {
-	case signal := <-r.Signal:
+	if r.ServerQueryClient == nil {
+		mutationControllerLog.Info("Awaiting signal for K8sGPT connection")
+		signal := <-r.Signal
 		c := rpc.NewServerQueryServiceClient(signal.K8sGPTClient.Conn)
-		r.ServerQueryClient = c
+		r.ServerQueryClient = &c
 		r.RemoteBackend = signal.Backend
 		mutationControllerLog.Info("Received signal for K8sGPT connection")
 	}
-
 	// List all mutations in all namespaces
 	var mutations corev1alpha1.MutationList
 	if err := r.List(ctx, &mutations); err != nil {
@@ -82,7 +86,7 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			// This phase means that there is an origin configuration, resource and result
 			// It needs an additional API call to determine targetConfiguration (mutation)
 			// The goal now is to set the target Configuration and move phases to InProgress
-			queryResponse, err := r.ServerQueryClient.Query(context.Background(), &schemav1.QueryRequest{
+			queryResponse, err := (*r.ServerQueryClient).Query(context.Background(), &schemav1.QueryRequest{
 				Backend: r.RemoteBackend,
 				Query: fmt.Sprintf(mutation_prompt, mutation.Spec.Result.Spec.Details,
 					mutation.Spec.OriginConfiguration),
@@ -91,19 +95,57 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 				mutationControllerLog.Error(err, "unable to query K8sGPT")
 				return ctrl.Result{}, err
 			}
+			mutationControllerLog.Info("Got mutation targetConfiguration for", "mutation", mutation.Name)
 			mutation.Spec.TargetConfiguration = queryResponse.GetResponse()
-			mutation.Status.Phase = corev1alpha1.AutoRemediationPhaseInProgress
-			if err := r.Update(ctx, &mutation); err != nil {
+			if err := r.Client.Update(ctx, &mutation); err != nil {
 				mutationControllerLog.Error(err, "unable to update mutation")
+				return ctrl.Result{}, err
+			}
+			// get again and set status
+			if err := r.Client.Get(ctx, client.ObjectKey{Namespace: mutation.Namespace, Name: mutation.Name}, &mutation); err != nil {
+				mutationControllerLog.Error(err, "unable to get mutation")
+				return ctrl.Result{}, err
+			}
+			mutation.Status.Phase = corev1alpha1.AutoRemediationPhaseInProgress
+			if err := r.Client.Status().Update(ctx, &mutation); err != nil {
+				mutationControllerLog.Error(err, "unable to update mutation status")
 				return ctrl.Result{}, err
 			}
 			break
 		case corev1alpha1.AutoRemediationPhaseInProgress:
 			// This means that the executor has applied the configuration and we are
 			// in a period of waiting for result to expire, therefore showing success
+			// here we loop through mutations and apply them
+			// we will also check if the result has expired
+
+			if mutation.Spec.TargetConfiguration == "" {
+				mutationControllerLog.Info("Target configuration is not set, this shouldn't occur at this phase", "mutation", mutation.Name)
+				return ctrl.Result{RequeueAfter: 60 * time.Second}, nil
+			}
+			// Convert the spec.targetConfiguration to an Object
+			// 1. Get the GVK from the Kind string
+			gv, err := schema.ParseGroupVersion(mutation.Spec.Result.Spec.Kind)
+			if err != nil {
+				mutationControllerLog.Error(err, "unable to parse group version from kind", "kind", mutation.Kind)
+				return ctrl.Result{}, err
+			}
+			gvk := gv.WithKind(mutation.Spec.Result.Spec.Kind)
+
+			// 2. Create an unstructured object
+			obj := &unstructured.Unstructured{}
+			obj.SetGroupVersionKind(gvk)
+
+			fmt.Println(mutation.Spec.TargetConfiguration)
+
+			// 3. Decode the targetConfiguration into the unstructured object
+			decoder := yaml.NewYAMLOrJSONDecoder(strings.NewReader(mutation.Spec.TargetConfiguration), 1000)
+			if err := decoder.Decode(obj); err != nil {
+				mutationControllerLog.Error(err, "unable to decode target configuration", "configuration", mutation.Spec.TargetConfiguration)
+				return ctrl.Result{RequeueAfter: 60 * time.Second}, err
+			}
 			break
 		case corev1alpha1.AutoRemediationPhaseCompleted:
-			// this is when the execute/apply is completed
+			// this 	is when the execute/apply is completed
 			break
 		case corev1alpha1.AutoRemediationPhaseFailed:
 			// This phase will occur when a result does not expire after phase completed

@@ -17,10 +17,9 @@ package k8sgpt
 import (
 	"fmt"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/channel_types"
-	"strings"
-
 	Kclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"strings"
 )
 
 type PreAnalysisStep struct {

@@ -126,7 +126,7 @@ func main() {
 
 	// This channel allows us to indicate when K8sGPT deployment is ready for active comms
 	// This is a necessity for the mutation system to work
-	ready := make(chan channel_types.InterControllerSignal)
+	ready := make(chan channel_types.InterControllerSignal, 10)
 
 	if err = (&mutation.MutationReconciler{
 		Client: mgr.GetClient(),

@@ -16,7 +16,6 @@ package k8sgpt
 
 import (
 	"context"
-	"fmt"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/channel_types"
 	"time"
 
@@ -147,7 +146,7 @@ func (r *K8sGPTReconciler) FinishReconcile(err error, requeueImmediate bool, nam
 		if requeueImmediate {
 			interval = 0
 		}
-		fmt.Printf("Finished Reconciling k8sGPT with error: %s\n", err.Error())
+		k8sgptControllerLog.Info("Finished Reconciling k8sGPT with error: %s\n", err.Error())
 		reconcileErrorCounter := r.MetricsBuilder.GetCounterVec("k8sgpt_reconcile_error_count")
 		if reconcileErrorCounter != nil {
 			reconcileErrorCounter.WithLabelValues(name).Inc()
@@ -158,6 +157,6 @@ func (r *K8sGPTReconciler) FinishReconcile(err error, requeueImmediate bool, nam
 	if requeueImmediate {
 		interval = 0
 	}
-	fmt.Println("Finished Reconciling k8sGPT")
+	k8sgptControllerLog.Info("Finished Reconciling k8sGPT")
 	return ctrl.Result{Requeue: true, RequeueAfter: interval}, nil
 }
