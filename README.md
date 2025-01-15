@@ -385,7 +385,7 @@ spec:
     secret:
      name: bedrock-sample-secret
     model: anthropic.claude-3-5-sonnet-20241022-v2:0
-    region: us-west-2
+    region: eu-central-1
     backend: amazonbedrock
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
