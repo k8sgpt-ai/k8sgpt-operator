@@ -124,12 +124,12 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			}
 			// Convert the spec.targetConfiguration to an Object
 			// 1. Get the GVK from the Kind string
-			gv, err := schema.ParseGroupVersion(mutation.Spec.Result.Spec.Kind)
+			gv, err := schema.ParseGroupVersion(mutation.Spec.Resource.Kind)
 			if err != nil {
 				mutationControllerLog.Error(err, "unable to parse group version from kind", "kind", mutation.Kind)
 				return ctrl.Result{}, err
 			}
-			gvk := gv.WithKind(mutation.Spec.Result.Spec.Kind)
+			gvk := gv.WithKind(mutation.Spec.Resource.Kind)
 
 			// 2. Create an unstructured object
 			obj := &unstructured.Unstructured{}
@@ -142,6 +142,23 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			if err := decoder.Decode(obj); err != nil {
 				mutationControllerLog.Error(err, "unable to decode target configuration", "configuration", mutation.Spec.TargetConfiguration)
 				return ctrl.Result{RequeueAfter: 60 * time.Second}, err
+			}
+			// 4. Set the object's name and namespace (important for updates!)
+			obj.SetName(mutation.Spec.Resource.Name)
+			obj.SetNamespace(mutation.Spec.Resource.Namespace)
+
+			// 5. Apply the update using Patch
+			patch := client.MergeFrom(obj) // Create a patch based on the current state of the object
+			if err := r.Client.Patch(ctx, obj, patch); err != nil {
+				mutationControllerLog.Error(err, "unable to patch object", "object", obj.GetName())
+				return ctrl.Result{RequeueAfter: 60 * time.Second}, err
+			}
+			mutationControllerLog.Info("Successfully patched object", "object", obj.GetName())
+			// update status with the crazy process again
+			mutation.Status.Phase = corev1alpha1.AutoRemediationPhaseCompleted
+			if err := r.Client.Status().Update(ctx, &mutation); err != nil {
+				mutationControllerLog.Error(err, "unable to update mutation status")
+				return ctrl.Result{}, err
 			}
 			break
 		case corev1alpha1.AutoRemediationPhaseCompleted:
