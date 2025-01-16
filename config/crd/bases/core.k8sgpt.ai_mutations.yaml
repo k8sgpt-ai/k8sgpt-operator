@@ -15,15 +15,15 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: The resource to mutate
-      jsonPath: .spec.resource.name
-      name: Resource
+    - description: The phase of the autoremediation
+      jsonPath: .status.phase
+      name: Phase
       type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:
         description: |-
-          Display in wide format
+          Display in wide format the autoremediationphase status
           Mutation is the Schema for the mutations API.
         properties:
           apiVersion:

@@ -44,8 +44,8 @@ type MutationStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// Display in wide format
-// +kubebuilder:printcolumn:name="Resource",type="string",JSONPath=".spec.resource.name",description="The resource to mutate"
+// Display in wide format the autoremediationphase status
+// +kubebuilder:printcolumn:name="Phase",type="string",JSONPath=".status.phase",description="The phase of the autoremediation"
 // Mutation is the Schema for the mutations API.
 type Mutation struct {
 	metav1.TypeMeta   `json:",inline"`

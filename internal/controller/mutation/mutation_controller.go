@@ -135,7 +135,7 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			obj := &unstructured.Unstructured{}
 			obj.SetGroupVersionKind(gvk)
 
-			fmt.Println(mutation.Spec.TargetConfiguration)
+			mutationControllerLog.Info(mutation.Spec.TargetConfiguration)
 
 			// 3. Decode the targetConfiguration into the unstructured object
 			decoder := yaml.NewYAMLOrJSONDecoder(strings.NewReader(mutation.Spec.TargetConfiguration), 1000)
@@ -163,6 +163,7 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			break
 		case corev1alpha1.AutoRemediationPhaseCompleted:
 			// this 	is when the execute/apply is completed
+			mutationControllerLog.Info("Mutation has been completed", "mutation", mutation.Name)
 			break
 		case corev1alpha1.AutoRemediationPhaseFailed:
 			// This phase will occur when a result does not expire after phase completed
