@@ -96,21 +96,19 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 				return ctrl.Result{}, err
 			}
 			mutationControllerLog.Info("Got mutation targetConfiguration for", "mutation", mutation.Name)
-			mutation.Spec.TargetConfiguration = queryResponse.GetResponse()
-			if err := r.Client.Update(ctx, &mutation); err != nil {
-				mutationControllerLog.Error(err, "unable to update mutation")
-				return ctrl.Result{}, err
-			}
-			// get again and set status
-			if err := r.Client.Get(ctx, client.ObjectKey{Namespace: mutation.Namespace, Name: mutation.Name}, &mutation); err != nil {
-				mutationControllerLog.Error(err, "unable to get mutation")
-				return ctrl.Result{}, err
-			}
+
 			mutation.Status.Phase = corev1alpha1.AutoRemediationPhaseInProgress
 			if err := r.Client.Status().Update(ctx, &mutation); err != nil {
 				mutationControllerLog.Error(err, "unable to update mutation status")
 				return ctrl.Result{}, err
 			}
+			mutation.Spec.TargetConfiguration = queryResponse.GetResponse()
+			// Update the spec (if needed)
+			if err := r.Client.Update(ctx, &mutation); err != nil {
+				mutationControllerLog.Error(err, "unable to update mutation")
+				return ctrl.Result{}, err
+			}
+
 			break
 		case corev1alpha1.AutoRemediationPhaseInProgress:
 			// This means that the executor has applied the configuration and we are
@@ -158,12 +156,31 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			mutation.Status.Phase = corev1alpha1.AutoRemediationPhaseCompleted
 			if err := r.Client.Status().Update(ctx, &mutation); err != nil {
 				mutationControllerLog.Error(err, "unable to update mutation status")
-				return ctrl.Result{}, err
+				return ctrl.Result{Requeue: false}, err
 			}
 			break
 		case corev1alpha1.AutoRemediationPhaseCompleted:
 			// this 	is when the execute/apply is completed
 			mutationControllerLog.Info("Mutation has been completed", "mutation", mutation.Name)
+			// check if the result still exists, if so, let's annotate it with a timestamp of our mutation
+			//var result corev1alpha1.Result
+			//if err := r.Client.Get(ctx, client.ObjectKey{Namespace: mutation.Spec.Result.Namespace, Name: mutation.Spec.Result.Name}, &result); err != nil {
+			//	mutationControllerLog.Error(err, "unable to get result")
+			//	return ctrl.Result{}, err
+			//}
+			//// check if it has a mutation timestamp
+			//if result.Annotations != nil {
+			//	if _, ok := result.Annotations["mutation-timestamp"]; ok {
+			//		mutationControllerLog.Info("Result already has a mutation timestamp", "result", result.Name)
+			//		break
+			//	}
+			//}
+			//// annotate with the mutation timestamp
+			//if result.Annotations == nil {
+			//	result.Annotations = make(map[string]string)
+			//}
+			//result.Annotations["mutation-timestamp"] = time.Now().String()
+			//mutationControllerLog.Info("Annotated result with mutation timestamp", "result", result.Name)
 			break
 		case corev1alpha1.AutoRemediationPhaseFailed:
 			// This phase will occur when a result does not expire after phase completed
