@@ -24,6 +24,7 @@ import (
 	"github.com/go-logr/logr"
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/channel_types"
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/util"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -95,19 +96,26 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 				mutationControllerLog.Error(err, "unable to query K8sGPT")
 				return ctrl.Result{}, err
 			}
-			mutationControllerLog.Info("Got mutation targetConfiguration for", "mutation", mutation.Name)
+			// compute similarity score
+			score := util.SimilarityScore(mutation.Spec.OriginConfiguration, queryResponse.GetResponse())
+			mutationControllerLog.Info("Similarity score", "score", score)
 
-			mutation.Status.Phase = corev1alpha1.AutoRemediationPhaseInProgress
-			if err := r.Client.Status().Update(ctx, &mutation); err != nil {
-				mutationControllerLog.Error(err, "unable to update mutation status")
-				return ctrl.Result{}, err
-			}
+			mutationControllerLog.Info("Got mutation targetConfiguration for", "mutation", mutation.Name)
 			mutation.Spec.TargetConfiguration = queryResponse.GetResponse()
+			mutation.Spec.SimilarityScore = fmt.Sprintf("%f", score)
 			// Update the spec (if needed)
 			if err := r.Client.Update(ctx, &mutation); err != nil {
 				mutationControllerLog.Error(err, "unable to update mutation")
 				return ctrl.Result{}, err
 			}
+			mutationControllerLog.Info("Updated mutation with targetConfiguration", "mutation", mutation.Name)
+			// Update the status
+			mutation.Status.Phase = corev1alpha1.AutoRemediationPhaseInProgress
+			if err := r.Client.Status().Update(ctx, &mutation); err != nil {
+				mutationControllerLog.Error(err, "unable to update mutation status")
+				return ctrl.Result{}, err
+			}
+			mutationControllerLog.Info("Updated mutation status to InProgress", "mutation", mutation.Name)
 
 			break
 		case corev1alpha1.AutoRemediationPhaseInProgress:
@@ -144,15 +152,21 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			// 4. Set the object's name and namespace (important for updates!)
 			obj.SetName(mutation.Spec.Resource.Name)
 			obj.SetNamespace(mutation.Spec.Resource.Namespace)
-
 			// 5. Apply the update using Patch
 			patch := client.MergeFrom(obj) // Create a patch based on the current state of the object
+			// print out the patch
+			mutationControllerLog.Info("Patch", "patch", patch)
 			if err := r.Client.Patch(ctx, obj, patch); err != nil {
 				mutationControllerLog.Error(err, "unable to patch object", "object", obj.GetName())
 				return ctrl.Result{RequeueAfter: 60 * time.Second}, err
 			}
 			mutationControllerLog.Info("Successfully patched object", "object", obj.GetName())
-			// update status with the crazy process again
+			// Fetch the mutation again, because otherwise we can get into async updates across the list
+			// I don't know, this just seems to fix it
+			if err := r.Client.Get(ctx, client.ObjectKey{Namespace: mutation.Namespace, Name: mutation.Name}, &mutation); err != nil {
+				mutationControllerLog.Error(err, "unable to get mutation")
+				return ctrl.Result{RequeueAfter: 60 * time.Second}, err
+			}
 			mutation.Status.Phase = corev1alpha1.AutoRemediationPhaseCompleted
 			if err := r.Client.Status().Update(ctx, &mutation); err != nil {
 				mutationControllerLog.Error(err, "unable to update mutation status")
@@ -181,10 +195,10 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			//}
 			//result.Annotations["mutation-timestamp"] = time.Now().String()
 			//mutationControllerLog.Info("Annotated result with mutation timestamp", "result", result.Name)
-			break
+			return ctrl.Result{RequeueAfter: time.Second * 30}, nil
 		case corev1alpha1.AutoRemediationPhaseFailed:
 			// This phase will occur when a result does not expire after phase completed
-			break
+			return ctrl.Result{RequeueAfter: time.Second * 120}, nil
 		}
 	}
 
