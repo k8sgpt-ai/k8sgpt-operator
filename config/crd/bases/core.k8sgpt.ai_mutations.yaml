@@ -26,7 +26,9 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Mutation is the Schema for the mutations API.
+        description: |-
+          Display in wide format the autoremediationphase status and similarity score
+          Mutation is the Schema for the mutations API.
         properties:
           apiVersion:
             description: |-
@@ -111,6 +113,8 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              resourceGVK:
+                type: string
               result:
                 description: Result is the Schema for the results API
                 properties:
@@ -204,4 +208,5 @@ spec:
         type: object
     served: true
     storage: true
-    subresources: {}
+    subresources:
+      status: {}

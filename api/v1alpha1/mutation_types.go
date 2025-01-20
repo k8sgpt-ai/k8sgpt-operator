@@ -29,6 +29,7 @@ type MutationSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 	SimilarityScore     string                 `json:"similarityScore,omitempty"`
+	ResourceGVK         string                 `json:"resourceGVK,omitempty"`
 	Resource            corev1.ObjectReference `json:"resource,omitempty"`
 	Result              Result                 `json:"result,omitempty"`
 	OriginConfiguration string                 `json:"originConfiguration,omitempty"`

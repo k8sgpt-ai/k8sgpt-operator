@@ -18,6 +18,7 @@ import (
 type eligibleResource struct {
 	Result              corev1alpha1.Result
 	ObjectRef           corev1.ObjectReference
+	GVK                 string
 	OriginConfiguration string
 }
 type calculateRemediationStep struct {
@@ -58,6 +59,7 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 			},
 			Spec: corev1alpha1.MutationSpec{
 				Resource:            eligibleResource.ObjectRef,
+				ResourceGVK:         eligibleResource.GVK,
 				Result:              eligibleResource.Result,
 				OriginConfiguration: eligibleResource.OriginConfiguration,
 				TargetConfiguration: "",
@@ -114,7 +116,8 @@ func (step *calculateRemediationStep) parseEligibleResources(instance *K8sGPTIns
 			if err != nil {
 				step.logger.Error(err, "unable to marshal Service to yaml", "Service", item.Name)
 			}
-			eligibleResources = append(eligibleResources, eligibleResource{Result: item, ObjectRef: *serviceRef, OriginConfiguration: string(yamlData)})
+			eligibleResources = append(eligibleResources, eligibleResource{Result: item, ObjectRef: *serviceRef, OriginConfiguration: string(yamlData),
+				GVK: serviceRef.GroupVersionKind().String()})
 
 		case "Ingress":
 			var ingress networkingv1.Ingress
@@ -130,7 +133,8 @@ func (step *calculateRemediationStep) parseEligibleResources(instance *K8sGPTIns
 			if err != nil {
 				step.logger.Error(err, "unable to marshal Ingress to yaml", "Service", item.Name)
 			}
-			eligibleResources = append(eligibleResources, eligibleResource{Result: item, ObjectRef: *ingressRef, OriginConfiguration: string(yamlData)})
+			eligibleResources = append(eligibleResources, eligibleResource{Result: item, ObjectRef: *ingressRef, OriginConfiguration: string(yamlData),
+				GVK: ingressRef.GroupVersionKind().String()})
 		}
 	}
 	return eligibleResources
