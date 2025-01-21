@@ -162,7 +162,7 @@ func (step *AnalysisStep) processRawResults(rawResults map[string]corev1alpha1.R
 		if err != nil {
 			return err
 		}
-		// Rather than using the raw corev1alpha.Result from the RPC, we log on the v1alpha.Result from KubeBuilder
+		// Rather than using the raw corev1alpha.ResultRef from the RPC, we log on the v1alpha.ResultRef from KubeBuilder
 		if step.enableResultLogging {
 
 			// check if result.spec.error is nil

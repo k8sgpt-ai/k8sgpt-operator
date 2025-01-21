@@ -61,7 +61,7 @@ var (
 // perform operations to make the cluster state reflect the state specified by
 // the user.
 //
-// For more details, check Reconcile and its Result here:
+// For more details, check Reconcile and its ResultRef here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.19.4/pkg/reconcile
 func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 
@@ -87,9 +87,18 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		// This phase means that there is an origin configuration, resource and result
 		// It needs an additional API call to determine targetConfiguration (mutation)
 		// The goal now is to set the target Configuration and move phases to InProgress
+		// Get the actual result from the reference
+		var result corev1alpha1.Result
+		err := r.Client.Get(ctx, client.ObjectKey{Name: mutation.Spec.ResultRef.Name,
+			Namespace: mutation.Spec.ResultRef.Namespace}, &result)
+		if err != nil {
+			mutationControllerLog.Error(err, "Unable to retrieve result from reference",
+				"Name", mutation.Spec.ResultRef.Name)
+		}
+
 		queryResponse, err := (*r.ServerQueryClient).Query(context.Background(), &schemav1.QueryRequest{
 			Backend: r.RemoteBackend,
-			Query: fmt.Sprintf(mutation_prompt, mutation.Spec.Result.Spec.Details,
+			Query: fmt.Sprintf(mutation_prompt, result.Spec.Details,
 				mutation.Spec.OriginConfiguration),
 		})
 		if err != nil {
@@ -134,7 +143,7 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			mutationControllerLog.Error(err, "unable to parse group version from kind", "kind", mutation.Kind)
 			return ctrl.Result{RequeueAfter: 30 * time.Second}, err
 		}
-		gvk := gv.WithKind(mutation.Spec.Resource.Kind)
+		gvk := gv.WithKind(mutation.Spec.ResourceRef.Kind)
 		// 2. Create an unstructured object
 		obj := &unstructured.Unstructured{}
 		obj.SetGroupVersionKind(gvk)
@@ -146,13 +155,13 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			return ctrl.Result{RequeueAfter: 30 * time.Second}, err
 		}
 		// 4. Set the object's name and namespace (important for updates!)
-		obj.SetName(mutation.Spec.Resource.Name)
-		obj.SetNamespace(mutation.Spec.Resource.Namespace)
+		obj.SetName(mutation.Spec.ResourceRef.Name)
+		obj.SetNamespace(mutation.Spec.ResourceRef.Namespace)
 
 		// 5. Get the existing object
 		var existingObj *unstructured.Unstructured
-		if existingObj, err = getObjectFromObjectReference(ctx, r.Client, mutation.Spec.Resource); err != nil {
-			mutationControllerLog.Error(err, "unable to get existing object", "object", mutation.Spec.Resource.Name)
+		if existingObj, err = getObjectFromObjectReference(ctx, r.Client, mutation.Spec.ResourceRef); err != nil {
+			mutationControllerLog.Error(err, "unable to get existing object", "object", mutation.Spec.ResourceRef.Name)
 			return ctrl.Result{RequeueAfter: 30 * time.Second}, err
 		}
 
@@ -165,24 +174,44 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			return ctrl.Result{RequeueAfter: 30 * time.Second}, err
 		}
 		mutationControllerLog.Info("Successfully patched object", "object", obj.GetName())
-		// Fetch the mutation again, because otherwise we can get into async updates across the list
-		// I don't know, this just seems to fix it
-		//if err := r.Client.Get(ctx, client.ObjectKey{Namespace: mutation.Namespace, Name: mutation.Name}, &mutation); err != nil {
-		//	mutationControllerLog.Error(err, "unable to get mutation")
-		//	return ctrl.Result{RequeueAfter: 60 * time.Second}, err
-		//}
 		mutation.Status.Phase = corev1alpha1.AutoRemediationPhaseCompleted
 		if err := r.Client.Status().Update(ctx, &mutation); err != nil {
 			mutationControllerLog.Error(err, "unable to update mutation status")
 			return ctrl.Result{RequeueAfter: 30 * time.Second}, err
 		}
-		return ctrl.Result{}, nil
+		// This should be fine tuned, there needs to be time for the patch to be applied
+		// And for a settling period
+		return ctrl.Result{RequeueAfter: time.Second * 60}, nil
 	case corev1alpha1.AutoRemediationPhaseCompleted:
 		// this 	is when the execute/apply is completed
 		mutationControllerLog.Info("Mutation has been completed", "mutation", mutation.Name)
+		// find the original result
+		var result corev1alpha1.Result
+		if err := r.Get(ctx, client.ObjectKey{
+			Name: mutation.Spec.ResultRef.Name, Namespace: mutation.Spec.ResultRef.Namespace}, &result); err != nil {
+			mutationControllerLog.Error(err, "unable to get result mutation successful", "mutation", mutation.Name, "result", mutation.Spec.ResultRef.Name)
+			mutation.Status.Phase = corev1alpha1.AutoRemediationPhaseSuccessful
+			// update status
+			if err := r.Client.Status().Update(ctx, &mutation); err != nil {
+				mutationControllerLog.Error(err, "unable to update mutation status")
+				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
+			}
+			return ctrl.Result{RequeueAfter: time.Second * 30}, nil
+		} else {
+			mutation.Status.Phase = corev1alpha1.AutoRemediationPhaseFailed
+			if err := r.Client.Status().Update(ctx, &mutation); err != nil {
+				mutationControllerLog.Error(err, "unable to update mutation status")
+				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
+			}
+		}
 		return ctrl.Result{RequeueAfter: time.Second * 30}, nil
+	case corev1alpha1.AutoRemediationPhaseSuccessful:
+		// This phase occurs when the result has expired and no longer exists
+		mutationControllerLog.Info("Mutation has been successful", "mutation", mutation.Name)
+		return ctrl.Result{RequeueAfter: time.Second * 120}, nil
 	case corev1alpha1.AutoRemediationPhaseFailed:
 		// This phase will occur when a result does not expire after phase completed
+		mutationControllerLog.Info("Mutation has failed, result still exists", "mutation", mutation.Name)
 		return ctrl.Result{RequeueAfter: time.Second * 120}, nil
 	}
 

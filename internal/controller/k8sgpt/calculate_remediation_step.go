@@ -16,7 +16,7 @@ import (
 )
 
 type eligibleResource struct {
-	Result              corev1alpha1.Result
+	ResultRef           corev1.ObjectReference
 	ObjectRef           corev1.ObjectReference
 	GVK                 string
 	OriginConfiguration string
@@ -54,13 +54,13 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 	for _, eligibleResource := range eligibleResources {
 		mutation := corev1alpha1.Mutation{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      eligibleResource.Result.Name,
+				Name:      eligibleResource.ResultRef.Name,
 				Namespace: instance.K8sgptConfig.Namespace,
 			},
 			Spec: corev1alpha1.MutationSpec{
-				Resource:            eligibleResource.ObjectRef,
+				ResourceRef:         eligibleResource.ObjectRef,
 				ResourceGVK:         eligibleResource.GVK,
-				Result:              eligibleResource.Result,
+				ResultRef:           eligibleResource.ResultRef,
 				OriginConfiguration: eligibleResource.OriginConfiguration,
 				TargetConfiguration: "",
 			},
@@ -69,14 +69,14 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 			},
 		}
 		// Check if the mutation exists, else create it
-		mutationKey := client.ObjectKey{Namespace: instance.K8sgptConfig.Namespace, Name: eligibleResource.Result.Name}
+		mutationKey := client.ObjectKey{Namespace: instance.K8sgptConfig.Namespace, Name: eligibleResource.ResultRef.Name}
 		var existingMutation corev1alpha1.Mutation
 		if err := instance.R.Get(instance.Ctx, mutationKey, &existingMutation); err != nil {
 			if client.IgnoreNotFound(err) != nil {
-				return instance.R.FinishReconcile(err, false, eligibleResource.Result.Name)
+				return instance.R.FinishReconcile(err, false, eligibleResource.ResultRef.Name)
 			}
 			if err := instance.R.Create(instance.Ctx, &mutation); err != nil {
-				return instance.R.FinishReconcile(err, false, eligibleResource.Result.Name)
+				return instance.R.FinishReconcile(err, false, eligibleResource.ResultRef.Name)
 			}
 		}
 	}
@@ -97,8 +97,13 @@ func (step *calculateRemediationStep) parseEligibleResources(instance *K8sGPTIns
 		namespace := names[0]
 		name := names[1]
 		if len(names) != 2 {
-			instance.logger.Error(fmt.Errorf("invalid resource name"), "unable to parse resource name", "Resource", item.Name)
+			instance.logger.Error(fmt.Errorf("invalid resource name"), "unable to parse resource name", "ResourceRef", item.Name)
 			continue
+		}
+		// create reference from the result
+		resultRef, err := reference.GetReference(instance.R.Scheme, &item)
+		if err != nil {
+			k8sgptControllerLog.Error(err, "Unable to create reference for ResultRef", "Name", item.Name)
 		}
 		// Support Service/Ingress currently
 		switch item.Spec.Kind {
@@ -116,7 +121,7 @@ func (step *calculateRemediationStep) parseEligibleResources(instance *K8sGPTIns
 			if err != nil {
 				step.logger.Error(err, "unable to marshal Service to yaml", "Service", item.Name)
 			}
-			eligibleResources = append(eligibleResources, eligibleResource{Result: item, ObjectRef: *serviceRef, OriginConfiguration: string(yamlData),
+			eligibleResources = append(eligibleResources, eligibleResource{ResultRef: *resultRef, ObjectRef: *serviceRef, OriginConfiguration: string(yamlData),
 				GVK: serviceRef.GroupVersionKind().String()})
 
 		case "Ingress":
@@ -133,7 +138,7 @@ func (step *calculateRemediationStep) parseEligibleResources(instance *K8sGPTIns
 			if err != nil {
 				step.logger.Error(err, "unable to marshal Ingress to yaml", "Service", item.Name)
 			}
-			eligibleResources = append(eligibleResources, eligibleResource{Result: item, ObjectRef: *ingressRef, OriginConfiguration: string(yamlData),
+			eligibleResources = append(eligibleResources, eligibleResource{ResultRef: *resultRef, ObjectRef: *ingressRef, OriginConfiguration: string(yamlData),
 				GVK: ingressRef.GroupVersionKind().String()})
 		}
 	}

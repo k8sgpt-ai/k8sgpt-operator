@@ -55,7 +55,7 @@ var _ = Describe("Mutation Controller", func() {
 						Namespace: "default",
 					},
 					Spec: corev1alpha1.MutationSpec{
-						Resource: v1.ObjectReference{
+						ResourceRef: v1.ObjectReference{
 							Kind:      "Service",
 							Name:      "my-service",
 							Namespace: "default",

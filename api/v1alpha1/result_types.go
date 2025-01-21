@@ -41,6 +41,7 @@ const (
 	AutoRemediationPhaseNotStarted AutoRemediationPhase = iota
 	AutoRemediationPhaseInProgress
 	AutoRemediationPhaseCompleted
+	AutoRemediationPhaseSuccessful
 	AutoRemediationPhaseFailed
 )
 
@@ -65,12 +66,11 @@ type ResultStatus struct {
 	Webhook   string `json:"webhook,omitempty"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-//+kubebuilder:printcolumn:name="Kind",type="string",JSONPath=".spec.kind",description="Kind"
-//+kubebuilder:printcolumn:name="Backend",type="string",JSONPath=".spec.backend",description="Backend"
-//+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",description="Age"
-
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Kind",type="string",JSONPath=".spec.kind",description="Kind"
+// +kubebuilder:printcolumn:name="Backend",type="string",JSONPath=".spec.backend",description="Backend"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",description="Age"
 // Result is the Schema for the results API
 type Result struct {
 	metav1.TypeMeta   `json:",inline"`

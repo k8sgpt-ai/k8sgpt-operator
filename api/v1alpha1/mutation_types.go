@@ -30,8 +30,8 @@ type MutationSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 	SimilarityScore     string                 `json:"similarityScore,omitempty"`
 	ResourceGVK         string                 `json:"resourceGVK,omitempty"`
-	Resource            corev1.ObjectReference `json:"resource,omitempty"`
-	Result              Result                 `json:"result,omitempty"`
+	ResourceRef         corev1.ObjectReference `json:"resource,omitempty"`
+	ResultRef           corev1.ObjectReference `json:"result,omitempty"`
 	OriginConfiguration string                 `json:"originConfiguration,omitempty"`
 	TargetConfiguration string                 `json:"targetConfiguration,omitempty"`
 }
