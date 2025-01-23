@@ -40,14 +40,14 @@ type MutationSpec struct {
 type MutationStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Phase AutoRemediationPhase `json:"phase,omitempty"`
+	Phase   AutoRemediationPhase `json:"phase,omitempty"`
+	Message string               `json:"message,omitempty"`
 }
 
 // +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
 
 // Display in wide format the autoremediationphase status and similarity score
-// +kubebuilder:printcolumn:name="Phase",type="string",JSONPath=".status.phase",description="The phase of the autoremediation"
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.message",description="Updates of the autoremediation phase"
 // +kubebuilder:printcolumn:name="Similarity Score",type="string",JSONPath=".spec.similarityScore",description="The similarity score of the autoremediation"
 // Mutation is the Schema for the mutations API.
 type Mutation struct {

@@ -15,9 +15,9 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: The phase of the autoremediation
-      jsonPath: .status.phase
-      name: Phase
+    - description: Updates of the autoremediation phase
+      jsonPath: .status.message
+      name: State
       type: string
     - description: The similarity score of the autoremediation
       jsonPath: .spec.similarityScore
@@ -187,6 +187,8 @@ spec:
           status:
             description: MutationStatus defines the observed state of Mutation.
             properties:
+              message:
+                type: string
               phase:
                 description: |-
                   INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
@@ -196,5 +198,4 @@ spec:
         type: object
     served: true
     storage: true
-    subresources:
-      status: {}
+    subresources: {}
