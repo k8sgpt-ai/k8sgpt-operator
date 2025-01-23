@@ -163,9 +163,8 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			return ctrl.Result{RequeueAfter: ErrorRequeueTime}, err
 		}
 		// check if the object exists first
-
-		if err := r.Client.Get(ctx, client.ObjectKey{Name: obj.GetName(), Namespace: obj.GetNamespace()}, obj); err != nil {
-
+		if err := r.Client.Get(ctx, client.ObjectKey{Name: obj.GetName(),
+			Namespace: obj.GetNamespace()}, obj); err != nil {
 			// If the object doesn't exist at this point, we should create it based on the targetConfiguration
 			if err := r.Client.Create(ctx, obj); err != nil {
 				mutationControllerLog.Error(err, "unable to create object", "object", obj.GetName())
@@ -191,9 +190,7 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 					return ctrl.Result{RequeueAfter: ErrorRequeueTime}, err
 				}
 			}
-
 		}
-
 		return ctrl.Result{RequeueAfter: InProgressRequeueTime}, nil
 	case corev1alpha1.AutoRemediationPhaseCompleted:
 		// this    is when the execute/apply is completed
