@@ -29,3 +29,10 @@ spec:
   #      enabled: false
   #      namespace: trivy-system
   #      skipInstall: false
+  #  resources:
+  #    limits:
+  #      cpu: 1
+  #      memory: 512Mi
+  #    requests:
+  #      cpu: 200m
+  #      memory: 156Mi

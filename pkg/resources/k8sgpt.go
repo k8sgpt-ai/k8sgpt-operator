@@ -320,6 +320,11 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 			deployment.Spec.Template.Spec.Containers[0].Env, baseUrl,
 		)
 	}
+
+	// Configure the k8sgpt deployment resource if required
+	if config.Spec.Resources != nil {
+		deployment.Spec.Template.Spec.Containers[0].Resources = *config.Spec.Resources
+	}
 	// Engine is required only when azureopenai is the ai backend
 	if config.Spec.AI.Engine != "" && config.Spec.AI.Backend == v1alpha1.AzureOpenAI {
 		engine := corev1.EnvVar{

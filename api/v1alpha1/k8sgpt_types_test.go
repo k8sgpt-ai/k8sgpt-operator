@@ -21,6 +21,8 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -44,6 +46,16 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 		version    = "v1alpha1"
 		language   = "english"
 		anonymize  = true
+		resource   = corev1.ResourceRequirements{
+			Limits: corev1.ResourceList{
+				corev1.ResourceCPU:    resource.MustParse("1"),
+				corev1.ResourceMemory: resource.MustParse("512Mi"),
+			},
+			Requests: corev1.ResourceList{
+				corev1.ResourceCPU:    resource.MustParse("0.2"),
+				corev1.ResourceMemory: resource.MustParse("156Mi"),
+			},
+		}
 
 		Namespace = "k8sGPT"
 
@@ -72,6 +84,7 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 				NodeSelector: map[string]string{
 					"nodepool": "management",
 				},
+				Resources: &resource,
 			},
 		}
 
