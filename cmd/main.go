@@ -17,9 +17,9 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/channel_types"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/k8sgpt"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/mutation"
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/types"
 	"math/rand"
 	"os"
 	"time"
@@ -126,7 +126,7 @@ func main() {
 
 	// This channel allows us to indicate when K8sGPT deployment is ready for active comms
 	// This is a necessity for the mutation system to work
-	ready := make(chan channel_types.InterControllerSignal, 10)
+	ready := make(chan types.InterControllerSignal, 10)
 
 	if err = (&mutation.MutationReconciler{
 		Client: mgr.GetClient(),

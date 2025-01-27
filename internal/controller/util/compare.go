@@ -14,11 +14,3 @@ func SimilarityScore(text1 string, text2 string) float64 {
 
 	return similarity
 }
-
-// max returns the maximum of two integers.
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}

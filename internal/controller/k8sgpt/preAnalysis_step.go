@@ -16,7 +16,7 @@ package k8sgpt
 
 import (
 	"fmt"
-	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/channel_types"
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/types"
 	Kclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"strings"
@@ -24,7 +24,7 @@ import (
 
 type PreAnalysisStep struct {
 	next   K8sGPT
-	Signal chan channel_types.InterControllerSignal
+	Signal chan types.InterControllerSignal
 }
 
 func (step *PreAnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, error) {
@@ -57,7 +57,7 @@ func (step *PreAnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, err
 		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
 	}
 
-	step.Signal <- channel_types.InterControllerSignal{
+	step.Signal <- types.InterControllerSignal{
 		K8sGPTClient: instance.kclient,
 		Backend:      instance.K8sgptConfig.Spec.AI.Backend,
 	}

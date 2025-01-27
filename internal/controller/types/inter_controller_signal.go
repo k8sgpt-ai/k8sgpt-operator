@@ -1,4 +1,4 @@
-package channel_types
+package types
 
 import kclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
 

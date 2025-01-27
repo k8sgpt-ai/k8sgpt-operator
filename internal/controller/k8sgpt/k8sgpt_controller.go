@@ -16,7 +16,7 @@ package k8sgpt
 
 import (
 	"context"
-	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/channel_types"
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/types"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -52,7 +52,7 @@ type K8sGPTReconciler struct {
 	SinkClient          *sinks.Client
 	MetricsBuilder      *metricspkg.MetricBuilder
 	EnableResultLogging bool
-	Signal              chan channel_types.InterControllerSignal
+	Signal              chan types.InterControllerSignal
 }
 
 type K8sGPTInstance struct {

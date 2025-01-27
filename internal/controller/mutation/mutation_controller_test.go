@@ -19,7 +19,7 @@ package mutation
 import (
 	rpc "buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go/schema/v1/schemav1grpc"
 	"context"
-	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/channel_types"
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/types"
 	v1 "k8s.io/api/core/v1"
 	"time"
 
@@ -96,15 +96,15 @@ spec:
 				Client:            reconciler.Client,
 				Scheme:            reconciler.Client.Scheme(),
 				ServerQueryClient: nil,
-				Signal:            make(chan channel_types.InterControllerSignal),
+				Signal:            make(chan types.InterControllerSignal),
 				RemoteBackend:     "test-backend",
 			}
-			controllerReconciler.Signal <- channel_types.InterControllerSignal{
+			controllerReconciler.Signal <- types.InterControllerSignal{
 				K8sGPTClient: nil,
 				Backend:      "test-backend",
 			}
 			go func() {
-				controllerReconciler.Signal <- channel_types.InterControllerSignal{
+				controllerReconciler.Signal <- types.InterControllerSignal{
 					K8sGPTClient: nil,
 					Backend:      "test-backend",
 				}

@@ -4,6 +4,7 @@ import (
 	"github.com/go-logr/logr"
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/conversions"
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/util"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -34,10 +35,14 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 			return instance.R.FinishReconcile(err, false, result.Name)
 		}
 	}
-	eligibleResources := conversions.ResultsToEligibleResources(instance.R.Client,
+	preEligibleResources := conversions.ResultsToEligibleResources(instance.R.Client,
 		instance.R.Scheme,
 		instance.logger.WithName("conversion"),
 		latestResultList)
+
+	// Merge results if they are duplicates or from the same origin e.g., pods in a rs
+	eligibleResources := util.Deduplicate(preEligibleResources, step.logger)
+
 	step.logger.Info("eligibleResources", "count", len(eligibleResources))
 
 	// Create mutations for eligible resources

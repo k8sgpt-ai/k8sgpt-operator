@@ -1,4 +1,4 @@
-package conversions
+package util
 
 import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"

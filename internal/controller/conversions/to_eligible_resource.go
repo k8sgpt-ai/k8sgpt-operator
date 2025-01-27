@@ -5,29 +5,23 @@ import (
 	"fmt"
 	"github.com/go-logr/logr"
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
-	"gopkg.in/yaml.v3"
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/types"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/reference"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/yaml"
 	"strings"
 )
 
-type EligibleResource struct {
-	ResultRef           corev1.ObjectReference
-	ObjectRef           corev1.ObjectReference
-	GVK                 string
-	OriginConfiguration string
-}
-
 func ResultsToEligibleResources(rc client.Client, scheme *runtime.Scheme,
-	logger logr.Logger, items *corev1alpha1.ResultList) []EligibleResource {
+	logger logr.Logger, items *corev1alpha1.ResultList) []types.EligibleResource {
 	// Currently this step is a watershed to ensure we are able to control directly what resources
 	// are going to be mutated
 	// In the future, we will have a more sophisticated way to determine which resources are eligible
 	// for remediation
-	var eligibleResources = []EligibleResource{}
+	var eligibleResources = []types.EligibleResource{}
 	c := context.Background()
 	for _, item := range items.Items {
 		//demangle the name of the resource
@@ -51,15 +45,20 @@ func ResultsToEligibleResources(rc client.Client, scheme *runtime.Scheme,
 				logger.Error(err, "unable to fetch Service", "Service", item.Name)
 				continue
 			}
+			// Strip out the stuff we don't need
+			service.ManagedFields = nil
 			serviceRef, err := reference.GetReference(scheme, &service)
 			if err != nil {
 				logger.Error(err, "unable to create reference for Service", "Service", item.Name)
 			}
+
+			// WARNING: This must be the sigs.k8s.io/yaml or it won't encode properly!!!!
+
 			yamlData, err := yaml.Marshal(service)
 			if err != nil {
 				logger.Error(err, "unable to marshal Service to yaml", "Service", item.Name)
 			}
-			eligibleResources = append(eligibleResources, EligibleResource{ResultRef: *resultRef, ObjectRef: *serviceRef, OriginConfiguration: string(yamlData),
+			eligibleResources = append(eligibleResources, types.EligibleResource{ResultRef: *resultRef, ObjectRef: *serviceRef, OriginConfiguration: string(yamlData),
 				GVK: serviceRef.GroupVersionKind().String()})
 
 		case "Ingress":
@@ -69,6 +68,8 @@ func ResultsToEligibleResources(rc client.Client, scheme *runtime.Scheme,
 				continue
 			}
 			ingressRef, err := reference.GetReference(scheme, &ingress)
+			// Strip out the stuff we don't need
+			ingress.ManagedFields = nil
 			if err != nil {
 				logger.Error(err, "unable to create reference for Ingress", "Ingress", item.Name)
 			}
@@ -76,7 +77,7 @@ func ResultsToEligibleResources(rc client.Client, scheme *runtime.Scheme,
 			if err != nil {
 				logger.Error(err, "unable to marshal Ingress to yaml", "Service", item.Name)
 			}
-			eligibleResources = append(eligibleResources, EligibleResource{ResultRef: *resultRef,
+			eligibleResources = append(eligibleResources, types.EligibleResource{ResultRef: *resultRef,
 				ObjectRef: *ingressRef, OriginConfiguration: string(yamlData),
 				GVK: ingressRef.GroupVersionKind().String()})
 
@@ -90,11 +91,13 @@ func ResultsToEligibleResources(rc client.Client, scheme *runtime.Scheme,
 			if err != nil {
 				logger.Error(err, "unable to create reference for Pod", "Pod", item.Name)
 			}
+			// Strip out the stuff we don't need
+			pod.ManagedFields = nil
 			yamlData, err := yaml.Marshal(pod)
 			if err != nil {
 				logger.Error(err, "unable to marshal Pod to yaml", "Pod", item.Name)
 			}
-			eligibleResources = append(eligibleResources, EligibleResource{ResultRef: *resultRef,
+			eligibleResources = append(eligibleResources, types.EligibleResource{ResultRef: *resultRef,
 				ObjectRef: *podRef, OriginConfiguration: string(yamlData),
 				GVK: podRef.GroupVersionKind().String()})
 		}

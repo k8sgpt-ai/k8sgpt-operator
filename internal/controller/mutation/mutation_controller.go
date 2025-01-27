@@ -21,13 +21,12 @@ import (
 	schemav1 "buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go/schema/v1"
 	"context"
 	"fmt"
-	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/conversions"
-	"time"
-
 	"github.com/go-logr/logr"
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
-	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/channel_types"
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/conversions"
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/types"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/util"
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/prompts"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -39,22 +38,12 @@ type MutationReconciler struct {
 	logger            logr.Logger
 	Scheme            *runtime.Scheme
 	ServerQueryClient *rpc.ServerQueryServiceClient
-	Signal            chan channel_types.InterControllerSignal
+	Signal            chan types.InterControllerSignal
 	RemoteBackend     string
 }
 
 var (
 	mutationControllerLog = ctrl.Log.WithName("mutation-controller")
-)
-
-// Define constants for the requeue timings
-const (
-	ErrorRequeueTime      = 30 * time.Second
-	NotStartedRequeueTime = 30 * time.Second
-	InProgressRequeueTime = 30 * time.Second
-	CompletedRequeueTime  = 60 * time.Second
-	SuccessfulRequeueTime = 120 * time.Second
-	FailedRequeueTime     = 120 * time.Second
 )
 
 // +kubebuilder:rbac:groups=core.k8sgpt.ai,resources=mutations,verbs=get;list;watch;create;update;patch;delete
@@ -106,12 +95,12 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 		queryResponse, err := (*r.ServerQueryClient).Query(context.Background(), &schemav1.QueryRequest{
 			Backend: r.RemoteBackend,
-			Query: fmt.Sprintf(mutation_prompt, result.Spec.Details,
+			Query: fmt.Sprintf(prompts.Mutation_prompt, result.Spec.Details,
 				mutation.Spec.OriginConfiguration),
 		})
 		if err != nil {
 			mutationControllerLog.Error(err, "unable to query K8sGPT")
-			return ctrl.Result{RequeueAfter: ErrorRequeueTime}, nil
+			return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, nil
 		}
 		if queryResponse.GetResponse() == "{null}" {
 			mutationControllerLog.Info("Unable to progress with this mutation, unknown solution", "name", mutation.Name)
@@ -120,14 +109,13 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			err := r.Client.Status().Update(ctx, &mutation)
 			if err != nil {
 				mutationControllerLog.Error(err, "unable to update mutation status")
-				return ctrl.Result{RequeueAfter: ErrorRequeueTime}, err
+				return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, err
 			}
-			return ctrl.Result{RequeueAfter: ErrorRequeueTime * 10}, nil
+			return ctrl.Result{RequeueAfter: util.ErrorRequeueTime * 10}, nil
 		}
 		// compute similarity score
 		score := util.SimilarityScore(mutation.Spec.OriginConfiguration, queryResponse.GetResponse())
 		mutationControllerLog.Info("Similarity score", "score", score)
-
 		mutationControllerLog.Info("Got mutation targetConfiguration for", "mutation", mutation.Name)
 		mutation.Spec.TargetConfiguration = queryResponse.GetResponse()
 		mutation.Spec.SimilarityScore = fmt.Sprintf("%f", score)
@@ -135,10 +123,10 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		mutation.Status.Message = "In Progress"
 		if err := r.Client.Update(ctx, &mutation); err != nil {
 			mutationControllerLog.Error(err, "unable to update mutation")
-			return ctrl.Result{RequeueAfter: ErrorRequeueTime}, err
+			return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, err
 		}
 		mutationControllerLog.Info("Updated mutation status to InProgress", "mutation", mutation.Name)
-		return ctrl.Result{RequeueAfter: NotStartedRequeueTime}, err
+		return ctrl.Result{RequeueAfter: util.NotStartedRequeueTime}, err
 	case corev1alpha1.AutoRemediationPhaseInProgress:
 		// This means that the executor has applied the configuration, and we are
 		// in a period of waiting for result to expire, therefore showing success
@@ -147,11 +135,11 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 		if mutation.Spec.TargetConfiguration == "" {
 			mutationControllerLog.Info("Target configuration is not set, this shouldn't occur at this phase", "mutation", mutation.Name)
-			return ctrl.Result{RequeueAfter: ErrorRequeueTime}, nil
+			return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, nil
 		}
 		// Convert the spec.targetConfiguration to an Object
 		// 1. Get the GVK from the Kind string
-		obj, err := conversions.FromConfig(conversions.FromObjectConfig{
+		obj, err := util.FromConfig(util.FromObjectConfig{
 			Kind:      mutation.Spec.ResourceRef.Kind,
 			GvkStr:    mutation.Spec.ResourceGVK,
 			Config:    mutation.Spec.TargetConfiguration,
@@ -160,38 +148,26 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		})
 		if err != nil {
 			mutationControllerLog.Error(err, "unable to convert targetConfiguration to object", "mutation", mutation.Name)
-			return ctrl.Result{RequeueAfter: ErrorRequeueTime}, err
+			return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, err
 		}
-		// check if the object exists first
-		if err := r.Client.Get(ctx, client.ObjectKey{Name: obj.GetName(),
-			Namespace: obj.GetNamespace()}, obj); err != nil {
-			// If the object doesn't exist at this point, we should create it based on the targetConfiguration
-			if err := r.Client.Create(ctx, obj); err != nil {
-				mutationControllerLog.Error(err, "unable to create object", "object", obj.GetName())
-				return ctrl.Result{RequeueAfter: ErrorRequeueTime}, err
-			}
-			mutationControllerLog.Info("Successfully updated object", "object", obj.GetName())
-			mutation.Status.Phase = corev1alpha1.AutoRemediationPhaseCompleted
-			mutation.Status.Message = "Completed"
-			if err := r.Client.Update(ctx, &mutation); err != nil {
-				mutationControllerLog.Error(err, "unable to update mutation status")
-				return ctrl.Result{RequeueAfter: ErrorRequeueTime}, err
-			}
-			return ctrl.Result{RequeueAfter: ErrorRequeueTime}, err
-		} else {
-			// Let's check if there is a deletion timestamp
-			if obj.GetDeletionTimestamp() != nil {
-				mutationControllerLog.Info("Object has a deletion timestamp, it is being deleted", "object", obj.GetName())
-				return ctrl.Result{RequeueAfter: ErrorRequeueTime}, nil
-			} else {
-				// Delete the object
-				if err := r.Client.Delete(ctx, obj); err != nil {
-					mutationControllerLog.Error(err, "unable to delete object", "object", obj.GetName())
-					return ctrl.Result{RequeueAfter: ErrorRequeueTime}, err
-				}
-			}
+		//This horrible code also needs to go here in case we reconcile before the signal is received
+		if r.ServerQueryClient == nil {
+			mutationControllerLog.Info("Awaiting signal for K8sGPT connection")
+			signal := <-r.Signal
+			c := rpc.NewServerQueryServiceClient(signal.K8sGPTClient.Conn)
+			r.ServerQueryClient = &c
+			r.RemoteBackend = signal.Backend
+			mutationControllerLog.Info("Received signal for K8sGPT connection")
 		}
-		return ctrl.Result{RequeueAfter: InProgressRequeueTime}, nil
+		return conversions.ResourceToExecution(conversions.ObjectExecutionConfig{
+			Ctx:         ctx,
+			Rc:          r.Client,
+			Log:         mutationControllerLog,
+			Obj:         obj,
+			Backend:     r.RemoteBackend,
+			Mutation:    mutation,
+			QueryClient: *r.ServerQueryClient,
+		})
 	case corev1alpha1.AutoRemediationPhaseCompleted:
 		// this    is when the execute/apply is completed
 		mutationControllerLog.Info("Mutation has been completed", "mutation", mutation.Name)
@@ -200,13 +176,12 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	case corev1alpha1.AutoRemediationPhaseSuccessful:
 		// This phase occurs when the result has expired and no longer exists
 		mutationControllerLog.Info("Mutation has been successful", "mutation", mutation.Name)
-		return ctrl.Result{RequeueAfter: SuccessfulRequeueTime}, nil
-	case corev1alpha1.AutoRemediationPhaseFailed:
+		return ctrl.Result{RequeueAfter: util.SuccessfulRequeueTime}, nil
+	case corev1alpha1.AutoRemediationPending:
 		// This phase will occur when a result does not expire after phase completed
-		mutationControllerLog.Info("Mutation has failed, result still exists", "mutation", mutation.Name)
+		mutationControllerLog.Info("Mutation is pending, result still exists", "mutation", mutation.Name)
 		return r.doesResultExist(ctx, mutation)
 	}
-
 	return ctrl.Result{}, nil
 }
 
@@ -227,16 +202,16 @@ func (r *MutationReconciler) doesResultExist(ctx context.Context, mutation corev
 		// update status
 		if err := r.Client.Update(ctx, &mutation); err != nil {
 			mutationControllerLog.Error(err, "unable to update mutation status")
-			return ctrl.Result{RequeueAfter: ErrorRequeueTime}, err
+			return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, err
 		}
 	} else {
-		mutation.Status.Phase = corev1alpha1.AutoRemediationPhaseFailed
-		mutation.Status.Message = "Failed"
+		mutation.Status.Phase = corev1alpha1.AutoRemediationPending
+		mutation.Status.Message = "Pending"
 		if err := r.Client.Update(ctx, &mutation); err != nil {
 			mutationControllerLog.Error(err, "unable to update mutation status")
-			return ctrl.Result{RequeueAfter: ErrorRequeueTime}, err
+			return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, err
 		}
-		return ctrl.Result{RequeueAfter: FailedRequeueTime}, nil
+		return ctrl.Result{RequeueAfter: util.FailedRequeueTime}, nil
 	}
-	return ctrl.Result{RequeueAfter: CompletedRequeueTime}, nil
+	return ctrl.Result{RequeueAfter: util.CompletedRequeueTime}, nil
 }
