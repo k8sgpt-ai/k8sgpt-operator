@@ -62,33 +62,33 @@ func GetResult(resultSpec v1alpha1.ResultSpec, name, namespace, backend string, 
 		},
 	}
 }
-func CreateOrUpdateResult(ctx context.Context, c client.Client, res v1alpha1.Result) error {
+func CreateOrUpdateResult(ctx context.Context, c client.Client, res v1alpha1.Result) (*v1alpha1.Result, error) {
 	var existing v1alpha1.Result
 	if err := c.Get(ctx, client.ObjectKey{Namespace: res.Namespace, Name: res.Name}, &existing); err != nil {
 		if !errors.IsNotFound(err) {
-			return err
+			return nil, err
 		}
 		if err := c.Create(ctx, &res); err != nil {
-			return err
+			return nil, err
 		}
 		fmt.Printf("Created result %s\n", res.Name)
-		return nil
+		return &existing, nil
 	}
 	if len(existing.Spec.Error) == len(res.Spec.Error) && reflect.DeepEqual(res.Labels, existing.Labels) {
 		existing.Status.LifeCycle = string(NoOpResult)
 		err := c.Status().Update(ctx, &existing)
-		return err
+		return &existing, err
 	}
 
 	existing.Spec = res.Spec
 	existing.Labels = res.Labels
 	if err := c.Update(ctx, &existing); err != nil {
-		return err
+		return nil, err
 	}
 	existing.Status.LifeCycle = string(UpdatedResult)
 	if err := c.Status().Update(ctx, &existing); err != nil {
-		return err
+		return nil, err
 	}
 	fmt.Printf("Updated result %s\n", res.Name)
-	return nil
+	return &existing, nil
 }

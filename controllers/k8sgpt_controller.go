@@ -47,11 +47,12 @@ var (
 // K8sGPTReconciler reconciles a K8sGPT object
 type K8sGPTReconciler struct {
 	client.Client
-	Scheme         *runtime.Scheme
-	Integrations   *integrations.Integrations
-	SinkClient     *sinks.Client
-	K8sGPTClient   *kclient.Client
-	MetricsBuilder *metricspkg.MetricBuilder
+	Scheme              *runtime.Scheme
+	Integrations        *integrations.Integrations
+	SinkClient          *sinks.Client
+	K8sGPTClient        *kclient.Client
+	MetricsBuilder      *metricspkg.MetricBuilder
+	EnableResultLogging bool
 }
 
 type K8sGPTInstance struct {
@@ -90,7 +91,10 @@ func (r *K8sGPTReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	finalizerStep := FinalizerStep{}
 	configureStep := ConfigureStep{}
 	preAnalysisStep := PreAnalysisStep{}
-	analysisStep := AnalysisStep{}
+	analysisStep := AnalysisStep{
+		enableResultLogging: r.EnableResultLogging,
+		logger:              instance.logger.WithName("analysis"),
+	}
 	resultStatusStep := ResultStatusStep{}
 
 	initStep.setNext(&finalizerStep)
