@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.2.6](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.5...v0.2.6) (2025-01-27)
+
+
+### Features
+
+* Add Resource Configuration Options to K8sGPT CRD ([#591](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/591)) ([8184876](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8184876f0a2f8cdd513adba0edad1a0444f5247a))
+* added functionality for emitting results into the k8sgpt-operator log ([#589](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/589)) ([9826bff](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9826bff8664a3b6372d344a6d7da3fa98b840882))
+
+
+### Bug Fixes
+
+* **deps:** update k8s.io/utils digest to 24370be ([#556](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/556)) ([49a2b6e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/49a2b6e8e21e3e6c968082e302e4a3e467908a62))
+* **deps:** update module github.com/onsi/ginkgo/v2 to v2.22.1 ([#590](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/590)) ([ce604d9](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/ce604d9c0d4e09a7621f0a9177c775146d221d63))
+* **deps:** update module github.com/onsi/gomega to v1.36.2 ([#593](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/593)) ([6db7ba8](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/6db7ba87371b8cd6962eda1608676bf3bc23227d))
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#582](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/582)) ([3c145ba](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/3c145ba95317513c3905cee11387241e43571023))
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#596](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/596)) ([a56af1b](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/a56af1b92db35f9538b7112ee7e53711fec9368c))
+
+
+### Other
+
+* **deps:** update anchore/sbom-action action to v0.17.9 ([#580](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/580)) ([9e36a6e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9e36a6e0f9ca3fd940c060128f639fc5ec17a23a))
+* **deps:** update docker/build-push-action digest to b32b51a ([#559](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/559)) ([4172ea7](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/4172ea7dfc55a5b755b34c47677a5eef7083d275))
+* **deps:** update docker/setup-buildx-action digest to 6524bf6 ([#583](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/583)) ([d2b341b](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d2b341bbd1008e0de08847da68cc0858275ce8e2))
+* **deps:** update softprops/action-gh-release digest to e7a8f85 ([#554](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/554)) ([0ad51d9](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0ad51d99e4ef6815118db1adef91bc8fe27cd7dd))
+
 ## [0.2.5](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.4...v0.2.5) (2024-12-19)
 
 
