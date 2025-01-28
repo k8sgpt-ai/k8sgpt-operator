@@ -137,6 +137,8 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			mutationControllerLog.Info("Target configuration is not set, this shouldn't occur at this phase", "mutation", mutation.Name)
 			return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, nil
 		}
+		// TODO; 0. Check if there is a riskThreshold set against the k8sgpt object
+
 		// Convert the spec.targetConfiguration to an Object
 		// 1. Get the GVK from the Kind string
 		obj, err := util.FromConfig(util.FromObjectConfig{

@@ -99,6 +99,9 @@ type BackOff struct {
 type AutoRemediation struct {
 	// +kubebuilder:default:=false
 	Enabled bool `json:"enabled"`
+	// Defaults to 10%
+	// +kubebuilder:default="10"
+	RiskThreshold string `json:"riskThreshold"`
 }
 
 type AISpec struct {

@@ -49,8 +49,13 @@ spec:
                       enabled:
                         default: false
                         type: boolean
+                      riskThreshold:
+                        default: "10"
+                        description: Defaults to 10%
+                        type: string
                     required:
                     - enabled
+                    - riskThreshold
                     type: object
                   backOff:
                     properties:
