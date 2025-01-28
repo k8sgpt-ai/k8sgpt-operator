@@ -7,9 +7,17 @@
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/k8sgpt)](https://artifacthub.io/packages/search?repo=k8sgpt)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fk8sgpt-ai%2Fk8sgpt-operator.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fk8sgpt-ai%2Fk8sgpt-operator?ref=badge_shield)
 
-_Alpha feature: Auto remediation of workloads is now available!
-See more [here](./AUTO_REMEDIATION.MD)_
+#### Feature Status:
 
+[![stability-mature](https://img.shields.io/badge/stability-mature-008000.svg)](https://github.com/k8sgpt-ai/k8sgpt-operator/README.md#Installatiion)
+
+- Analysis & Results generation
+
+[![stability-alpha](https://img.shields.io/badge/stability-alpha-f4d03f.svg)](https://github.com/k8sgpt-ai/k8sgpt-operator/AUTO_REMEDIATION.md)
+
+- [Auto Remediation](./AUTO_REMEDIATION.MD)
+
+---
 This Operator is designed to enable [K8sGPT](https://github.com/k8sgpt-ai/k8sgpt/) within a Kubernetes cluster.
 It will allow you to create a custom resource that defines the behaviour and scope of a managed K8sGPT workload. Analysis and outputs will also be configurable to enable integration into existing workflows.
 
