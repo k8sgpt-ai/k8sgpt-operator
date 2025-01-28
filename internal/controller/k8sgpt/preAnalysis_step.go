@@ -60,6 +60,7 @@ func (step *PreAnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, err
 	step.Signal <- types.InterControllerSignal{
 		K8sGPTClient: instance.kclient,
 		Backend:      instance.K8sgptConfig.Spec.AI.Backend,
+		K8sGPT:       instance.K8sgptConfig,
 	}
 	// This will need a refactor in future...
 	err = step.addRemoteCache(instance)

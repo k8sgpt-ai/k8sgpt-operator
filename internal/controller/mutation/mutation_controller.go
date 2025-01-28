@@ -30,6 +30,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"strconv"
+	"strings"
 )
 
 // MutationReconciler reconciles a Mutation object
@@ -40,6 +42,7 @@ type MutationReconciler struct {
 	ServerQueryClient *rpc.ServerQueryServiceClient
 	Signal            chan types.InterControllerSignal
 	RemoteBackend     string
+	K8sGPT            *corev1alpha1.K8sGPT
 }
 
 var (
@@ -75,6 +78,7 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		c := rpc.NewServerQueryServiceClient(signal.K8sGPTClient.Conn)
 		r.ServerQueryClient = &c
 		r.RemoteBackend = signal.Backend
+		r.K8sGPT = signal.K8sGPT
 		mutationControllerLog.Info("Received signal for K8sGPT connection")
 	}
 
@@ -138,7 +142,31 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, nil
 		}
 		// TODO; 0. Check if there is a riskThreshold set against the k8sgpt object
-
+		if r.K8sGPT != nil {
+			if r.K8sGPT.Spec.AI.AutoRemediation.RiskThreshold != "" {
+				// If the current Similarity score is less than the riskThreshold, we should not apply the mutation
+				ss, err := strconv.ParseFloat(strings.TrimSpace(mutation.Spec.SimilarityScore), 64)
+				if err != nil {
+					mutationControllerLog.Error(err, "unable to parse similarity score", "mutation", mutation.Name)
+				} else {
+					rt, err := strconv.ParseFloat(r.K8sGPT.Spec.AI.AutoRemediation.RiskThreshold, 64)
+					if err != nil {
+						mutationControllerLog.Error(err, "unable to parse risk threshold", "mutation", mutation.Name)
+					} else {
+						if ss < rt {
+							mutationControllerLog.Info("Similarity score is less than risk threshold, not applying mutation", "mutation", mutation.Name)
+							mutation.Status.Phase = corev1alpha1.AutoRemediationPending
+							mutation.Status.Message = "Risk threshold not met"
+							if err := r.Client.Update(ctx, &mutation); err != nil {
+								mutationControllerLog.Error(err, "unable to update mutation status")
+								return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, err
+							}
+							return ctrl.Result{RequeueAfter: util.SuccessfulRequeueTime}, nil
+						}
+					}
+				}
+			}
+		}
 		// Convert the spec.targetConfiguration to an Object
 		// 1. Get the GVK from the Kind string
 		obj, err := util.FromConfig(util.FromObjectConfig{
