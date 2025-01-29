@@ -1,8 +1,14 @@
 # Auto Remediation
 
 Status: Alpha 
+Supported AI Backends:
+- Amazonbedrock
+- OpenAI
 
-This feature is highly experiment and opt-in only.
+Auto Remediation will attempt to fix problems encountered in your cluster.
+To accomplish this, it interprets K8sGPT results and applying a patch to fix the issue on the target resource (or parent ).
+
+This feature is highly experimental and is not ready for use in a production environment.
 To enable this feature, you need to set the following K8sGPT custom resource field:
 
 ```bash
@@ -19,6 +25,7 @@ spec:
       riskThreshold: 10
 ...
 ```
+Complete example available [here](./config/samples/autoremediation/valid_k8sgpt_remediation_sample.yaml)
 
 ## How does it work?
 

@@ -101,7 +101,6 @@ func ResultsToEligibleResources(rc client.Client, scheme *runtime.Scheme,
 				ObjectRef: *podRef, OriginConfiguration: string(yamlData),
 				GVK: podRef.GroupVersionKind().String()})
 		}
-
 	}
 	return eligibleResources
 }

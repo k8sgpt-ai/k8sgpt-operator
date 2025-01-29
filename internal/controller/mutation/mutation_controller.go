@@ -141,7 +141,6 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			mutationControllerLog.Info("Target configuration is not set, this shouldn't occur at this phase", "mutation", mutation.Name)
 			return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, nil
 		}
-		// TODO; 0. Check if there is a riskThreshold set against the k8sgpt object
 		if r.K8sGPT != nil {
 			if r.K8sGPT.Spec.AI.AutoRemediation.RiskThreshold != "" {
 				// If the current Similarity score is less than the riskThreshold, we should not apply the mutation

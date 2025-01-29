@@ -53,7 +53,7 @@ metadata:
 spec:
   ai:
     enabled: true
-    model: gpt-3.5-turbo
+    model: gpt-4o-mini
     backend: openai
     secret:
       name: k8sgpt-sample-secret
@@ -66,7 +66,7 @@ spec:
     # proxyEndpoint: https://10.255.30.150 # use proxyEndpoint to setup backend through an HTTP/HTTPS proxy
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.41
+  version: v0.3.48
   #integrations:
   # trivy:
   #  enabled: true
@@ -139,7 +139,7 @@ spec:
     anonymized: true
     backend: openai
     language: english
-    model: gpt-3.5-turbo
+    model: gpt-4o-mini
     secret:
       key: api_key
       name: my_openai_secret
@@ -195,7 +195,7 @@ kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key
   spec:
     ai:
       enabled: true
-      model: gpt-3.5-turbo
+      model: gpt-4o-mini
       backend: openai
       secret:
         name: k8sgpt-sample-secret
@@ -237,7 +237,7 @@ metadata:
   namespace: k8sgpt-operator-system
 spec:
   ai:
-    model: gpt-3.5-turbo
+    model: gpt-4o-mini
     backend: openai
     enabled: true
     secret:
@@ -245,7 +245,7 @@ spec:
       key: openai-api-key
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.41
+  version: v0.3.48
   remoteCache:
     credentials:
       name: k8sgpt-sample-cache-secret
@@ -282,7 +282,7 @@ metadata:
   namespace: k8sgpt-operator-system
 spec:
   ai:
-    model: gpt-3.5-turbo
+    model: gpt-4o-mini
     backend: openai
     enabled: true
     secret:
@@ -290,7 +290,7 @@ spec:
       key: openai-api-key
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.41
+  version: v0.3.48
   remoteCache:
     credentials:
       name: k8sgpt-sample-cache-secret
@@ -331,13 +331,13 @@ spec:
     secret:
       name: k8sgpt-sample-secret
       key: azure-api-key
-    model: gpt-35-turbo
+    model: gpt-4o-mini
     backend: azureopenai
     baseUrl: https://k8sgpt.openai.azure.com/
     engine: llm
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.41
+  version: v0.3.48
 EOF
 ```
 
@@ -400,7 +400,7 @@ spec:
     backend: amazonbedrock
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.41
+  version: v0.3.48
 EOF
 ```
 
@@ -431,7 +431,7 @@ spec:
     baseUrl: http://local-ai.local-ai.svc.cluster.local:8080/v1
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.41
+  version: v0.3.48
 EOF
 ```
 
@@ -459,7 +459,7 @@ metadata:
 spec:
   ai:
     enabled: true
-    model: gpt-3.5-turbo
+    model: gpt-4o-mini
     backend: openai
     secret:
       name: k8sgpt-sample-secret
@@ -489,7 +489,7 @@ metadata:
 spec:
   ai:
     enabled: true
-    model: gpt-3.5-turbo
+    model: gpt-4o-mini
     backend: openai
     secret:
       name: k8sgpt-sample-secret
