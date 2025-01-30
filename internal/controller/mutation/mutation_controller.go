@@ -62,6 +62,11 @@ var (
 //
 // For more details, check Reconcile and its ResultRef here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.19.4/pkg/reconcile
+// +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=apps,resources=replicasets,verbs=get;list;watch
+// +kubebuilder:rbac:groups="*",resources="*",verbs="*"
+// +kubebuilder:rbac:groups="apiextensions.k8s.io",resources="*",verbs="*"
 func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 
 	// get the mutation resource
