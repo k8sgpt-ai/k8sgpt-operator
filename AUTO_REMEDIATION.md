@@ -47,14 +47,6 @@ Currently in Alpha state, the supported kinds are:
   - Owned (RS/Deployment)
   - Static
 
-## Permissions
-
-Be aware, this requires the operator to have the necessary permissions to apply changes to the cluster.
-```
-
-```
-
-
 ## Mutations
 
 Mutations are custom resources that hold the state and intent for mutating resources in the cluster.

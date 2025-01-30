@@ -7,7 +7,7 @@ spec:
   ai:
     autoRemediation:
       enabled: true
-      riskThreshold: 90
+      riskThreshold: "90"
     enabled: true
     model: gpt-4o-mini
     backend: openai
