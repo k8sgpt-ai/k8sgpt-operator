@@ -395,7 +395,7 @@ spec:
     enabled: true
     secret:
      name: bedrock-sample-secret
-    model: anthropic.claude-v2
+    model: anthropic.claude-3-5-sonnet-20241022-v2:0
     region: eu-central-1
     backend: amazonbedrock
   noCache: false
