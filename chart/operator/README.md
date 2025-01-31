@@ -12,6 +12,10 @@ The following table lists the configurable parameters of the K8sgpt-operator cha
 <!---x-release-please-start-version-->
 | Parameter                | Description             | Default        |
 | ------------------------ | ----------------------- | -------------- |
+| `interplex.enabled` |  | `false` |
+| `serviceAccount.create` |  | `true` |
+| `serviceAccount.name` |  | `"k8sgpt"` |
+| `serviceAccount.annotations` |  | `{}` |
 | `serviceMonitor.enabled` |  | `false` |
 | `serviceMonitor.additionalLabels` |  | `{}` |
 | `grafanaDashboard.enabled` |  | `false` |
@@ -40,7 +44,6 @@ The following table lists the configurable parameters of the K8sgpt-operator cha
 | `kubernetesClusterDomain` |  | `"cluster.local"` |
 | `metricsService.ports` |  | `[{"name": "https", "port": 8443, "protocol": "TCP", "targetPort": "https"}]` |
 | `metricsService.type` |  | `"ClusterIP"` |
-
 <!---x-release-please-end-->
 
 ---
