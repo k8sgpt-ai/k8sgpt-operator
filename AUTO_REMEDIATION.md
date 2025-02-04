@@ -22,7 +22,7 @@ spec:
   ai:
     autoRemediation:
       enabled: true
-      riskThreshold: 10
+      riskThreshold: 90
 ...
 ```
 Complete example available [here](./config/samples/autoremediation/valid_k8sgpt_remediation_sample.yaml)
@@ -52,3 +52,6 @@ Currently in Alpha state, the supported kinds are:
 Mutations are custom resources that hold the state and intent for mutating resources in the cluster.
 Eventually this will be compatible with a GitOps process ( you can pull the mutations out of cluster and re-apply).
 
+## Rollback 
+
+Deleting a mutation will revert the applied changes to the cluster resource. 

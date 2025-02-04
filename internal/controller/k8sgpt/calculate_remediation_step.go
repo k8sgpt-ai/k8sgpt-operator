@@ -15,6 +15,10 @@ type calculateRemediationStep struct {
 	next   K8sGPT
 }
 
+const (
+	mutationFinalizer = "mutation.finalizer.k8sgpt.ai"
+)
+
 func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Result, error) {
 	instance.logger.Info("starting RemediationStep")
 	if !instance.K8sgptConfig.Spec.AI.AutoRemediation.Enabled {
@@ -64,6 +68,7 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 				Message: "Not Started",
 			},
 		}
+		mutation.Finalizers = append(mutation.Finalizers, mutationFinalizer)
 		// Check if the mutation exists, else create it
 		mutationKey := client.ObjectKey{Namespace: instance.K8sgptConfig.Namespace, Name: eligibleResource.ResultRef.Name}
 		var existingMutation corev1alpha1.Mutation

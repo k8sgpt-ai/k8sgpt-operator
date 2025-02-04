@@ -86,6 +86,52 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		r.K8sGPT = signal.K8sGPT
 		mutationControllerLog.Info("Received signal for K8sGPT connection")
 	}
+	// check if the object is being deleted
+
+	// check if object has a finalizer
+	if mutation.ObjectMeta.Finalizers != nil && !mutation.ObjectMeta.DeletionTimestamp.IsZero() {
+		finalizer := mutation.ObjectMeta.GetFinalizers()
+		if util.IsStringInSlice("mutation.finalizer.k8sgpt.ai", finalizer) {
+			mutationControllerLog.Info("Mutation has finalizer, proceeding")
+			if mutation.Status.Phase == corev1alpha1.AutoRemediationPhaseSuccessful {
+				mutationControllerLog.Info("Rolling back mutation prior to deletion", "name", mutation.Name)
+
+				// attempt to roll back the resource
+				obj, err := util.FromConfig(util.FromObjectConfig{
+					Kind:      mutation.Spec.ResourceRef.Kind,
+					GvkStr:    mutation.Spec.ResourceGVK,
+					Config:    mutation.Spec.OriginConfiguration,
+					Name:      mutation.Spec.ResourceRef.Name,
+					Namespace: mutation.Spec.ResourceRef.Namespace,
+				})
+				if err != nil {
+					mutationControllerLog.Error(err, "unable to convert targetConfiguration to object", "mutation", mutation.Name)
+					return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, err
+				}
+				m, err := conversions.ResourceToExecution(conversions.ObjectExecutionConfig{
+					Ctx:         ctx,
+					Rc:          r.Client,
+					Log:         mutationControllerLog,
+					Obj:         obj,
+					Backend:     r.RemoteBackend,
+					Mutation:    mutation,
+					QueryClient: *r.ServerQueryClient,
+				})
+				// TODO; need to decide on what to do here
+				if err != nil {
+					return ctrl.Result{Requeue: false}, err
+				}
+				return m, nil
+			}
+		}
+		// After our inspection we must delete the object finaliser to release the hold
+		mutation.Finalizers = nil
+		// update object
+		if err := r.Client.Update(ctx, &mutation); err != nil {
+			mutationControllerLog.Error(err, "unable to update mutation")
+			return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, err
+		}
+	}
 
 	switch mutation.Status.Phase {
 	case corev1alpha1.AutoRemediationPhaseNotStarted:
@@ -159,13 +205,13 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 					} else {
 						if ss < rt {
 							mutationControllerLog.Info("Similarity score is less than risk threshold, not applying mutation", "mutation", mutation.Name)
-							mutation.Status.Phase = corev1alpha1.AutoRemediationPending
+							mutation.Status.Phase = corev1alpha1.AutoRemediationAborted
 							mutation.Status.Message = "Risk threshold not met"
 							if err := r.Client.Update(ctx, &mutation); err != nil {
 								mutationControllerLog.Error(err, "unable to update mutation status")
-								return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, err
+								return ctrl.Result{Requeue: false}, err
 							}
-							return ctrl.Result{RequeueAfter: util.SuccessfulRequeueTime}, nil
+							// On success, drop down through to the next phase
 						}
 					}
 				}

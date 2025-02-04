@@ -43,6 +43,7 @@ const (
 	AutoRemediationPhaseCompleted
 	AutoRemediationPhaseSuccessful
 	AutoRemediationPending
+	AutoRemediationAborted = 5
 )
 
 type AutoRemediationStatus struct {

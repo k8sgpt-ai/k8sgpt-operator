@@ -79,6 +79,7 @@ func deploymentExecution(config ObjectExecutionConfig, deployment appsv1.Deploym
 		config.Log.Error(err, "unable to query server", "deployment", deployment.GetName())
 		return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, err
 	}
+
 	// Parse the response into a deployment
 	var newDeployment appsv1.Deployment
 	if err := yaml.Unmarshal([]byte(response.Response), &newDeployment); err != nil {
@@ -103,6 +104,7 @@ func deploymentExecution(config ObjectExecutionConfig, deployment appsv1.Deploym
 func ResourceToExecution(config ObjectExecutionConfig) (ctrl.Result, error) {
 	config.Log.Info("ResourceToExecution", "kind", config.Obj.GetObjectKind().GroupVersionKind().Kind)
 	switch config.Obj.GetObjectKind().GroupVersionKind().Kind {
+
 	case "Pod":
 		var pod corev1.Pod
 		err := config.Rc.Get(context.Background(),
