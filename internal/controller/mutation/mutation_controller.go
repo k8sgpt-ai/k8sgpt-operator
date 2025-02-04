@@ -106,9 +106,8 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 				})
 				if err != nil {
 					mutationControllerLog.Error(err, "unable to convert targetConfiguration to object", "mutation", mutation.Name)
-					return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, err
 				}
-				m, err := conversions.ResourceToExecution(conversions.ObjectExecutionConfig{
+				_, err = conversions.ResourceToExecution(conversions.ObjectExecutionConfig{
 					Ctx:         ctx,
 					Rc:          r.Client,
 					Log:         mutationControllerLog,
@@ -119,9 +118,9 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 				})
 				// TODO; need to decide on what to do here
 				if err != nil {
-					return ctrl.Result{Requeue: false}, err
+					mutationControllerLog.Error(err, "unable to rollback mutation", "mutation", mutation.Name)
 				}
-				return m, nil
+
 			}
 		}
 		// After our inspection we must delete the object finaliser to release the hold
@@ -291,7 +290,7 @@ func (r *MutationReconciler) doesResultExist(ctx context.Context, mutation corev
 			mutationControllerLog.Error(err, "unable to update mutation status")
 			return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, err
 		}
-		return ctrl.Result{RequeueAfter: util.FailedRequeueTime}, nil
+		return ctrl.Result{RequeueAfter: util.PendingRequeueTime}, nil
 	}
 	return ctrl.Result{RequeueAfter: util.CompletedRequeueTime}, nil
 }
