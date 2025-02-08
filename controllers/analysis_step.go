@@ -72,7 +72,7 @@ func (step *AnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, error)
 	}
 
 	// Prior to creating or updating any results we will delete any stale results that
-	// no longer are relevent, we can do this by using the resultSpec composed name against
+	// no longer are relevant, we can do this by using the resultSpec composed name against
 	// the custom resource name
 	err = step.cleanUpStaleResults(rawResults, instance)
 	if err != nil {
