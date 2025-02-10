@@ -52,6 +52,12 @@ spec:
           spec:
             description: ResultSpec defines the desired state of Result
             properties:
+              autoRemediationStatus:
+                properties:
+                  phase:
+                    description: Enum for Phase
+                    type: integer
+                type: object
               backend:
                 type: string
               details:
@@ -79,6 +85,7 @@ spec:
               parentObject:
                 type: string
             required:
+            - autoRemediationStatus
             - backend
             - details
             - error

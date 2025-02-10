@@ -31,7 +31,7 @@ spec:
     engine: "davinci"
     language: "english"
     maxTokens: "4096"
-    model: "gpt-4"
+    model: "gpt-4o-mini"
     providerId: "provider-123"
     proxyEndpoint: "http://proxy.example.com"
     region: "us-east-1"
@@ -52,8 +52,8 @@ spec:
     backstage:
       enabled: true
   filters:
-    - "PodNotReady"
-    - "MemoryPressure"
+    - "Deployment"
+    - "Pod"
   imagePullSecrets:
     - name: my-image-pull-secret
   integrations:

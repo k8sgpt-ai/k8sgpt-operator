@@ -50,7 +50,7 @@ func (s *SlackSink) Configure(config v1alpha1.K8sGPT, c Client, sinkSecretValue 
 		s.Endpoint = config.Spec.Sink.Endpoint
 	}
 	s.Client = c
-	// take the name of the K8sGPT Custom Resource
+	// take the name of the K8sGPT Custom ResourceRef
 	s.K8sGPT = config.Name
 }
 

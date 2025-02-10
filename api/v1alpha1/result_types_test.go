@@ -32,7 +32,7 @@ var _ = Describe("The test cases for the K8sGPT CRDs result types", func() {
 	var (
 		ctx          context.Context
 		Namespace    = "k8sGPT"
-		Kind         = "Result"
+		Kind         = "ResultRef"
 		Unmasked     = "This is unmasked"
 		Masked       = "This is masked"
 		Text         = "This is a failure"
@@ -79,19 +79,19 @@ var _ = Describe("The test cases for the K8sGPT CRDs result types", func() {
 		ctx = context.Background()
 	})
 
-	Context("Create a new Result object", func() {
-		It("Should create a new Result object", func() {
+	Context("Create a new ResultRef object", func() {
+		It("Should create a new ResultRef object", func() {
 			Expect(fakeClient.Create(ctx, &result)).Should(Succeed())
 		})
 	})
 
-	// Get the Result object
-	Context("Get the Result object", func() {
-		It("Should get the Result object", func() {
+	// Get the ResultRef object
+	Context("Get the ResultRef object", func() {
+		It("Should get the ResultRef object", func() {
 			Expect(fakeClient.Get(ctx, typeNamespace, &result)).Should(Succeed())
 		})
-		// Check the Result object's filed values
-		It("Should check the Result object's filed values", func() {
+		// Check the ResultRef object's filed values
+		It("Should check the ResultRef object's filed values", func() {
 			Expect(result.Spec.Kind).Should(Equal(Kind))
 			Expect(result.Spec.Name).Should(Equal(Name))
 			Expect(result.Spec.Error[0].Text).Should(Equal(Text))
@@ -99,14 +99,14 @@ var _ = Describe("The test cases for the K8sGPT CRDs result types", func() {
 			Expect(result.Spec.ParentObject).Should(Equal(ParentObject))
 		})
 	})
-	// Update the Result object
-	Context("Update the Result object", func() {
-		It("Should update the Result object", func() {
+	// Update the ResultRef object
+	Context("Update the ResultRef object", func() {
+		It("Should update the ResultRef object", func() {
 			result.Spec.Details = "This is a new result"
 			Expect(fakeClient.Update(ctx, &result)).Should(Succeed())
 		})
-		// Check the Result object's filed values
-		It("Should check the Result object's filed values", func() {
+		// Check the ResultRef object's filed values
+		It("Should check the ResultRef object's filed values", func() {
 			Expect(result.Spec.Kind).Should(Equal(Kind))
 			Expect(result.Spec.Name).Should(Equal(Name))
 			Expect(result.Spec.Error[0].Text).Should(Equal(Text))
@@ -114,24 +114,24 @@ var _ = Describe("The test cases for the K8sGPT CRDs result types", func() {
 			Expect(result.Spec.ParentObject).Should(Equal(ParentObject))
 		})
 	})
-	// Get the Result object by list
-	Context("Get the Result object by list", func() {
-		It("Should get the Result object by list", func() {
+	// Get the ResultRef object by list
+	Context("Get the ResultRef object by list", func() {
+		It("Should get the ResultRef object by list", func() {
 			resultList := ResultList{}
 			Expect(fakeClient.List(ctx, &resultList)).Should(Succeed())
 		})
-		// Check the length of Result object list
-		It("Should check the length of Result object list", func() {
+		// Check the length of ResultRef object list
+		It("Should check the length of ResultRef object list", func() {
 			Expect(len(result.Spec.Error)).Should(Equal(1))
 		})
 	})
-	// delete the Result object
-	Context("Delete the Result object", func() {
-		It("Should delete the Result object", func() {
+	// delete the ResultRef object
+	Context("Delete the ResultRef object", func() {
+		It("Should delete the ResultRef object", func() {
 			Expect(fakeClient.Delete(ctx, &result)).Should(Succeed())
 		})
-		// Check the Result object has been deleted
-		It("Should check the Result object has been deleted", func() {
+		// Check the ResultRef object has been deleted
+		It("Should check the ResultRef object has been deleted", func() {
 			Expect(fakeClient.Get(ctx, typeNamespace, &result)).ShouldNot(Succeed())
 		})
 	})

@@ -11,7 +11,7 @@ import (
 )
 
 func (c *Client) AddConfig(config *v1alpha1.K8sGPT) error {
-	client := rpc.NewServerConfigServiceClient(c.conn)
+	client := rpc.NewServerConfigServiceClient(c.Conn)
 	req := &schemav1.AddConfigRequest{}
 	// If multiple caches are configured we pick S3
 	// which emulates the behaviour of K8sGPT cli
@@ -99,7 +99,7 @@ func (c *Client) AddConfig(config *v1alpha1.K8sGPT) error {
 }
 
 func (c *Client) RemoveConfig(config *v1alpha1.K8sGPT) error {
-	client := rpc.NewServerConfigServiceClient(c.conn)
+	client := rpc.NewServerConfigServiceClient(c.Conn)
 	req := &schemav1.RemoveConfigRequest{
 		Cache:           &schemav1.Cache{},
 		Integrations:    nil,

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: failing-pod
+spec:
+  containers:
+  - name: failing-container
+    image: nginx:latest # Replace with an image that will quickly exit
+    command: ["/bin/sh", "-c", "exit 1"] # This command will cause the container to exit with an error code

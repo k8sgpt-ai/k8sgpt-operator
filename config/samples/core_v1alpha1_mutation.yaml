@@ -1,0 +1,9 @@
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: Mutation
+metadata:
+  labels:
+    app.kubernetes.io/name: k8sgpt-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: mutation-sample
+spec:
+  # TODO(user): Add fields here

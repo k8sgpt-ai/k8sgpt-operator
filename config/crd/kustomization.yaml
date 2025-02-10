@@ -4,6 +4,7 @@
 resources:
 - bases/core.k8sgpt.ai_k8sgpts.yaml
 - bases/core.k8sgpt.ai_results.yaml
+- bases/core.k8sgpt.ai_mutations.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package controllers
+package k8sgpt
 
 import (
 	"os"
@@ -32,24 +32,24 @@ func (step *ConfigureStep) execute(instance *K8sGPTInstance) (ctrl.Result, error
 	var err error
 	instance.logger.Info("starting ConfigureStep")
 
-	if instance.k8sgptConfig.Spec.AI.BackOff == nil {
+	if instance.K8sgptConfig.Spec.AI.BackOff == nil {
 		err := step.configureBackoff(instance)
 		if err != nil {
-			return instance.r.FinishReconcile(err, false, instance.k8sgptConfig.Name)
+			return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
 		}
 	}
 
 	// Check and see if the instance is new or has a K8sGPT deployment in flight
 	instance.k8sgptDeployment, err = step.getDeployment(instance)
 	if err != nil {
-		return instance.r.FinishReconcile(err, false, instance.k8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
 	}
 
 	instance.hasReadyReplicas = instance.k8sgptDeployment.Status.AvailableReplicas != 0
 
 	if !instance.hasReadyReplicas && os.Getenv("LOCAL_MODE") == "" {
 		instance.logger.Info("k8sgpt server not running, waiting next sync")
-		return instance.r.FinishReconcile(nil, false, instance.k8sgptConfig.Name)
+		return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name)
 	}
 
 	instance.logger.Info("ending ConfigureStep")
@@ -62,26 +62,26 @@ func (step *ConfigureStep) setNext(next K8sGPT) {
 }
 
 func (step *ConfigureStep) configureBackoff(instance *K8sGPTInstance) error {
-	instance.k8sgptConfig.Spec.AI.BackOff = &corev1alpha1.BackOff{
+	instance.K8sgptConfig.Spec.AI.BackOff = &corev1alpha1.BackOff{
 		Enabled:    false,
 		MaxRetries: 5,
 	}
-	return instance.r.Update(instance.ctx, instance.k8sgptConfig)
+	return instance.R.Update(instance.Ctx, instance.K8sgptConfig)
 }
 
 func (step *ConfigureStep) getDeployment(instance *K8sGPTInstance) (*v1.Deployment, error) {
 	deployment := v1.Deployment{}
 
-	err := instance.r.Get(instance.ctx, client.ObjectKey{
-		Namespace: instance.k8sgptConfig.Namespace,
-		Name:      instance.k8sgptConfig.Name,
+	err := instance.R.Get(instance.Ctx, client.ObjectKey{
+		Namespace: instance.K8sgptConfig.Namespace,
+		Name:      instance.K8sgptConfig.Name,
 	}, &deployment)
 
 	if client.IgnoreNotFound(err) != nil {
 		return &deployment, err
 	}
 
-	err = resources.Sync(instance.ctx, instance.r.Client, *instance.k8sgptConfig, resources.SyncOp)
+	err = resources.Sync(instance.Ctx, instance.R.Client, *instance.K8sgptConfig, resources.SyncOp)
 
 	return &deployment, err
 }

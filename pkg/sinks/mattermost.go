@@ -68,7 +68,7 @@ func (s *MattermostSink) Configure(config v1alpha1.K8sGPT, c Client, sinkSecretV
 		s.IconURL = config.Spec.Sink.IconURL
 	}
 	s.Client = c
-	// take the name of the K8sGPT Custom Resource
+	// take the name of the K8sGPT Custom ResourceRef
 	s.K8sGPT = config.Name
 }
 
