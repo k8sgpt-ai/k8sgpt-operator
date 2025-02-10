@@ -93,35 +93,35 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		finalizer := mutation.ObjectMeta.GetFinalizers()
 		if util.IsStringInSlice("mutation.finalizer.k8sgpt.ai", finalizer) {
 			mutationControllerLog.Info("Mutation has finalizer, proceeding")
-			if mutation.Status.Phase == corev1alpha1.AutoRemediationPhaseSuccessful {
-				mutationControllerLog.Info("Rolling back mutation prior to deletion", "name", mutation.Name)
-
-				// attempt to roll back the resource
-				obj, err := util.FromConfig(util.FromObjectConfig{
-					Kind:      mutation.Spec.ResourceRef.Kind,
-					GvkStr:    mutation.Spec.ResourceGVK,
-					Config:    mutation.Spec.OriginConfiguration,
-					Name:      mutation.Spec.ResourceRef.Name,
-					Namespace: mutation.Spec.ResourceRef.Namespace,
-				})
-				if err != nil {
-					mutationControllerLog.Error(err, "unable to convert targetConfiguration to object", "mutation", mutation.Name)
-				}
-				_, err = conversions.ResourceToExecution(conversions.ObjectExecutionConfig{
-					Ctx:         ctx,
-					Rc:          r.Client,
-					Log:         mutationControllerLog,
-					Obj:         obj,
-					Backend:     r.RemoteBackend,
-					Mutation:    mutation,
-					QueryClient: *r.ServerQueryClient,
-				})
-				// TODO; need to decide on what to do here
-				if err != nil {
-					mutationControllerLog.Error(err, "unable to rollback mutation", "mutation", mutation.Name)
-				}
-
-			}
+			//if mutation.Status.Phase == corev1alpha1.AutoRemediationPhaseSuccessful {
+			//	mutationControllerLog.Info("Rolling back mutation prior to deletion", "name", mutation.Name)
+			//
+			//	// attempt to roll back the resource
+			//	obj, err := util.FromConfig(util.FromObjectConfig{
+			//		Kind:      mutation.Spec.ResourceRef.Kind,
+			//		GvkStr:    mutation.Spec.ResourceGVK,
+			//		Config:    mutation.Spec.OriginConfiguration,
+			//		Name:      mutation.Spec.ResourceRef.Name,
+			//		Namespace: mutation.Spec.ResourceRef.Namespace,
+			//	})
+			//	if err != nil {
+			//		mutationControllerLog.Error(err, "unable to convert targetConfiguration to object", "mutation", mutation.Name)
+			//	}
+			//	_, err = conversions.ResourceToExecution(conversions.ObjectExecutionConfig{
+			//		Ctx:         ctx,
+			//		Rc:          r.Client,
+			//		Log:         mutationControllerLog,
+			//		Obj:         obj,
+			//		Backend:     r.RemoteBackend,
+			//		Mutation:    mutation,
+			//		QueryClient: *r.ServerQueryClient,
+			//	})
+			//	// TODO; need to decide on what to do here
+			//	if err != nil {
+			//		mutationControllerLog.Error(err, "unable to rollback mutation", "mutation", mutation.Name)
+			//	}
+			//
+			//}
 		}
 		// After our inspection we must delete the object finaliser to release the hold
 		mutation.Finalizers = nil
