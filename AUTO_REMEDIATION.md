@@ -54,4 +54,4 @@ Eventually this will be compatible with a GitOps process ( you can pull the muta
 
 ## Rollback 
 
-Deleting a mutation will revert the applied changes to the cluster resource. 
+TODO: Deleting a mutation will revert the applied changes to the cluster resource. 
