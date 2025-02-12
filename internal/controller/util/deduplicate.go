@@ -10,6 +10,8 @@ func Deduplicate(input []types.EligibleResource, log logr.Logger) []types.Eligib
 	var ownedResources = make(map[string]types.EligibleResource)
 	for _, resource := range input {
 		switch resource.ObjectRef.Kind {
+		default:
+			eligibleResource = append(eligibleResource, resource)
 		case "Pod":
 			// Get the object and look for owner references
 			obj, err := FromConfig(FromObjectConfig{
@@ -28,12 +30,14 @@ func Deduplicate(input []types.EligibleResource, log logr.Logger) []types.Eligib
 				eligibleResource = append(eligibleResource, resource)
 				continue
 			}
-			// Check if the owner is already in the map
-			ownerKey := ownerReferences[0].Name + ownerReferences[0].Kind
-			if _, ok := ownedResources[ownerKey]; !ok {
-				ownedResources[ownerKey] = resource
+			// Check if the owner is in the incoming results list
+			for _, owner := range ownerReferences {
+				if _, ok := ownedResources[owner.Name]; !ok {
+					ownedResources[owner.Name] = resource
+				}
 			}
 		}
+
 	}
 	for _, resource := range ownedResources {
 		eligibleResource = append(eligibleResource, resource)

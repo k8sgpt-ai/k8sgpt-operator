@@ -6,6 +6,7 @@ import (
 	"github.com/go-logr/logr"
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/types"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -15,14 +16,109 @@ import (
 	"strings"
 )
 
-func ResultsToEligibleResources(rc client.Client, scheme *runtime.Scheme,
+// TODO: how do we stop results colliding by modifying the same resources
+// e.g. pod and deployment in the same replica set
+var (
+	SupportedResources = map[string]func(*[]types.EligibleResource,
+		client.Client, *runtime.Scheme,
+		logr.Logger, *corev1.ObjectReference, string, string) error{
+
+		"Deployment": func(eligibleResources *[]types.EligibleResource, c client.Client, scheme *runtime.Scheme,
+			logger logr.Logger, resultRef *corev1.ObjectReference, namespace string, name string) error {
+			var deployment appsv1.Deployment
+			if err := c.Get(context.Background(), client.ObjectKey{Namespace: namespace, Name: name}, &deployment); err != nil {
+				return err
+			}
+			deploymentRef, err := reference.GetReference(scheme, &deployment)
+			if err != nil {
+				return err
+			}
+			deployment.ManagedFields = nil
+			yamlData, err := yaml.Marshal(deployment)
+			if err != nil {
+				return err
+			}
+			*eligibleResources = append(*eligibleResources, types.EligibleResource{ResultRef: *resultRef,
+				ObjectRef: *deploymentRef, OriginConfiguration: string(yamlData),
+				GVK: deploymentRef.GroupVersionKind().String()})
+			return nil
+		},
+		"Pod": func(eligibleResources *[]types.EligibleResource, c client.Client, scheme *runtime.Scheme,
+			logger logr.Logger, resultRef *corev1.ObjectReference, namespace string, name string) error {
+			var pod corev1.Pod
+			if err := c.Get(context.Background(), client.ObjectKey{Namespace: namespace, Name: name}, &pod); err != nil {
+				return err
+			}
+			podRef, err := reference.GetReference(scheme, &pod)
+			if err != nil {
+				logger.Error(err, "unable to create reference for Pod", "Pod", name)
+			}
+			// Strip out the stuff we don't need
+			pod.ManagedFields = nil
+			yamlData, err := yaml.Marshal(pod)
+			if err != nil {
+				logger.Error(err, "unable to marshal Pod to yaml", "Pod", name)
+			}
+			*eligibleResources = append(*eligibleResources, types.EligibleResource{ResultRef: *resultRef,
+				ObjectRef: *podRef, OriginConfiguration: string(yamlData),
+				GVK: podRef.GroupVersionKind().String()})
+			return nil
+		},
+		"Ingress": func(eligibleResources *[]types.EligibleResource, c client.Client, scheme *runtime.Scheme,
+			logger logr.Logger, resultRef *corev1.ObjectReference, namespace string, name string) error {
+
+			var ingress networkingv1.Ingress
+			if err := c.Get(context.Background(), client.ObjectKey{Namespace: namespace, Name: name}, &ingress); err != nil {
+				return err
+			}
+			ingressRef, err := reference.GetReference(scheme, &ingress)
+			ingress.ManagedFields = nil
+			if err != nil {
+				return err
+			}
+			yamlData, err := yaml.Marshal(ingress)
+			if err != nil {
+				return err
+			}
+			*eligibleResources = append(*eligibleResources, types.EligibleResource{ResultRef: *resultRef,
+				ObjectRef: *ingressRef, OriginConfiguration: string(yamlData),
+				GVK: ingressRef.GroupVersionKind().String()})
+
+			return nil
+		},
+		"Service": func(eligibleResources *[]types.EligibleResource, c client.Client, scheme *runtime.Scheme,
+			logger logr.Logger, resultRef *corev1.ObjectReference, namespace string, name string) error {
+			var service corev1.Service
+			if err := c.Get(context.Background(), client.ObjectKey{Namespace: namespace, Name: name}, &service); err != nil {
+				return err
+			}
+			// Strip out the stuff we don't need
+			service.ManagedFields = nil
+			serviceRef, err := reference.GetReference(scheme, &service)
+			if err != nil {
+				return err
+			}
+			yamlData, err := yaml.Marshal(service)
+			if err != nil {
+				return err
+			}
+			*eligibleResources = append(*eligibleResources, types.EligibleResource{ResultRef: *resultRef, ObjectRef: *serviceRef, OriginConfiguration: string(yamlData),
+				GVK: serviceRef.GroupVersionKind().String()})
+
+			return nil
+		},
+	}
+)
+
+func ResultsToEligibleResources(config *corev1alpha1.K8sGPT,
+	rc client.Client, scheme *runtime.Scheme,
 	logger logr.Logger, items *corev1alpha1.ResultList) []types.EligibleResource {
 	// Currently this step is a watershed to ensure we are able to control directly what resources
 	// are going to be mutated
 	// In the future, we will have a more sophisticated way to determine which resources are eligible
 	// for remediation
 	var eligibleResources = []types.EligibleResource{}
-	c := context.Background()
+
 	for _, item := range items.Items {
 		//demangle the name of the resource
 		names := strings.Split(item.Spec.Name, "/")
@@ -37,69 +133,14 @@ func ResultsToEligibleResources(rc client.Client, scheme *runtime.Scheme,
 		if err != nil {
 			logger.Error(err, "Unable to create reference for ResultRef", "Name", item.Name)
 		}
-		// Support Service/Ingress currently
-		switch item.Spec.Kind {
-		case "Service":
-			var service corev1.Service
-			if err := rc.Get(c, client.ObjectKey{Namespace: namespace, Name: name}, &service); err != nil {
-				logger.Error(err, "unable to fetch Service", "Service", item.Name)
-				continue
-			}
-			// Strip out the stuff we don't need
-			service.ManagedFields = nil
-			serviceRef, err := reference.GetReference(scheme, &service)
+		// check if it's in the SupportedResources map
+		if supportedResource, ok := SupportedResources[item.Spec.Kind]; ok {
+			err := supportedResource(&eligibleResources, rc, scheme, logger, resultRef, namespace, name)
 			if err != nil {
-				logger.Error(err, "unable to create reference for Service", "Service", item.Name)
+				logger.Error(err, "unable to create eligible resource", "ResourceRef", item.Name)
 			}
-
-			// WARNING: This must be the sigs.k8s.io/yaml or it won't encode properly!!!!
-
-			yamlData, err := yaml.Marshal(service)
-			if err != nil {
-				logger.Error(err, "unable to marshal Service to yaml", "Service", item.Name)
-			}
-			eligibleResources = append(eligibleResources, types.EligibleResource{ResultRef: *resultRef, ObjectRef: *serviceRef, OriginConfiguration: string(yamlData),
-				GVK: serviceRef.GroupVersionKind().String()})
-
-		case "Ingress":
-			var ingress networkingv1.Ingress
-			if err := rc.Get(c, client.ObjectKey{Namespace: namespace, Name: name}, &ingress); err != nil {
-				logger.Error(err, "unable to fetch Ingress", "Ingress", item.Name)
-				continue
-			}
-			ingressRef, err := reference.GetReference(scheme, &ingress)
-			// Strip out the stuff we don't need
-			ingress.ManagedFields = nil
-			if err != nil {
-				logger.Error(err, "unable to create reference for Ingress", "Ingress", item.Name)
-			}
-			yamlData, err := yaml.Marshal(ingress)
-			if err != nil {
-				logger.Error(err, "unable to marshal Ingress to yaml", "Service", item.Name)
-			}
-			eligibleResources = append(eligibleResources, types.EligibleResource{ResultRef: *resultRef,
-				ObjectRef: *ingressRef, OriginConfiguration: string(yamlData),
-				GVK: ingressRef.GroupVersionKind().String()})
-
-		case "Pod":
-			var pod corev1.Pod
-			if err := rc.Get(c, client.ObjectKey{Namespace: namespace, Name: name}, &pod); err != nil {
-				logger.Error(err, "unable to fetch Pod", "Pod", item.Name)
-				continue
-			}
-			podRef, err := reference.GetReference(scheme, &pod)
-			if err != nil {
-				logger.Error(err, "unable to create reference for Pod", "Pod", item.Name)
-			}
-			// Strip out the stuff we don't need
-			pod.ManagedFields = nil
-			yamlData, err := yaml.Marshal(pod)
-			if err != nil {
-				logger.Error(err, "unable to marshal Pod to yaml", "Pod", item.Name)
-			}
-			eligibleResources = append(eligibleResources, types.EligibleResource{ResultRef: *resultRef,
-				ObjectRef: *podRef, OriginConfiguration: string(yamlData),
-				GVK: podRef.GroupVersionKind().String()})
+		} else {
+			logger.Info("Resource not supported", "ResourceRef", item.Name, "Kind", item.Spec.Kind)
 		}
 	}
 	return eligibleResources

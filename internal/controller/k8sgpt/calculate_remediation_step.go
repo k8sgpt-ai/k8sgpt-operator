@@ -39,7 +39,8 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 			return instance.R.FinishReconcile(err, false, result.Name)
 		}
 	}
-	preEligibleResources := conversions.ResultsToEligibleResources(instance.R.Client,
+	preEligibleResources := conversions.ResultsToEligibleResources(instance.K8sgptConfig,
+		instance.R.Client,
 		instance.R.Scheme,
 		instance.logger.WithName("conversion"),
 		latestResultList)

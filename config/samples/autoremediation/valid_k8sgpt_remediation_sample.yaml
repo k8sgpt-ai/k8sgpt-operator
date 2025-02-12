@@ -8,6 +8,10 @@ spec:
     autoRemediation:
       enabled: true
       riskThreshold: "90"
+      resources:
+        - Pod
+        - Service
+        - Deployment
     enabled: true
     model: gpt-4o-mini
     backend: openai

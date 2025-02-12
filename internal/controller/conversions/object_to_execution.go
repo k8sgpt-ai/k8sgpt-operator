@@ -114,6 +114,7 @@ func ResourceToExecution(config ObjectExecutionConfig) (ctrl.Result, error) {
 			config.Log.Error(err, "unable to get pod", "pod", pod.GetName())
 			return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, err
 		}
+		// TODO: Maybe defer this to a deployment result to fix
 		if len(pod.OwnerReferences) > 0 {
 			// Fetch the owner replica set
 			var rs appsv1.ReplicaSet
@@ -138,7 +139,17 @@ func ResourceToExecution(config ObjectExecutionConfig) (ctrl.Result, error) {
 
 		}
 		return staticPodExecution(config)
-	}
 
+	case "Deployment":
+		var deployment appsv1.Deployment
+		err := config.Rc.Get(context.Background(),
+			client.ObjectKey{Name: config.Obj.GetName(),
+				Namespace: config.Obj.GetNamespace()}, &deployment)
+		if err != nil {
+			config.Log.Error(err, "unable to get deployment", "deployment", deployment.GetName())
+			return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, err
+		}
+		return deploymentExecution(config, deployment)
+	}
 	return ctrl.Result{}, nil
 }

@@ -102,6 +102,9 @@ type AutoRemediation struct {
 	// Defaults to 10%
 	// +kubebuilder:default="10"
 	RiskThreshold string `json:"riskThreshold"`
+	// Support Pod, Deployment, Service and Ingress
+	// +kubebuilder:default:={"Pod","Deployment","Service","Ingress"}
+	Resources []string `json:"resources"`
 }
 
 type AISpec struct {

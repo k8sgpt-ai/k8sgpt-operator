@@ -49,12 +49,23 @@ spec:
                       enabled:
                         default: false
                         type: boolean
+                      resources:
+                        default:
+                        - Pod
+                        - Deployment
+                        - Service
+                        - Ingress
+                        description: Support Pod, Deployment, Service and Ingress
+                        items:
+                          type: string
+                        type: array
                       riskThreshold:
                         default: "10"
                         description: Defaults to 10%
                         type: string
                     required:
                     - enabled
+                    - resources
                     - riskThreshold
                     type: object
                   backOff:
