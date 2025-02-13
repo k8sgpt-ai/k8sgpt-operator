@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.2.7](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.6...v0.2.7) (2025-02-13)
+
+
+### Features
+
+* auto remediation title ([#612](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/612)) ([e6661d9](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e6661d97b9d2ca5799c92c4e2e559b5d9f8d28b0))
+* renamed to similarity requirement for scoring ([#609](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/609)) ([b564264](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/b56426451947d39b7985bd0fb77faf34ad663593))
+
+
+### Other
+
+* **deps:** update actions/setup-go digest to f111f33 ([#604](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/604)) ([324e6cc](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/324e6ccc7f4228249b99585751fb3068cf642225))
+* **deps:** update actions/setup-python digest to 4237552 ([#605](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/605)) ([17e048c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/17e048cac2682d6412e0fea13077b13923166f8a))
+* **deps:** update docker/setup-buildx-action digest to f7ce87c ([#608](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/608)) ([a2068d7](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/a2068d7840c1283b6991ce1e5d25d6c509a88cc3))
+* fix readme ([#611](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/611)) ([9b37e4f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9b37e4ff64ab0cffd3deef17bd7755f59e09e6bf))
+
 ## [0.2.6](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.5...v0.2.6) (2025-01-27)
 
 
