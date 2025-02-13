@@ -80,7 +80,13 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 			if err := instance.R.Create(instance.Ctx, &mutation); err != nil {
 				return instance.R.FinishReconcile(err, false, eligibleResource.ResultRef.Name)
 			}
+		} else {
+			// keep track of it's status
 		}
+	}
+	mutationCounter := instance.R.MetricsBuilder.GetGaugeVec("k8sgpt_mutations_count")
+	if mutationCounter != nil {
+		mutationCounter.WithLabelValues("mutations", "pk8sgpt").Set(float64(len(eligibleResources)))
 	}
 	step.logger.Info("ending calculateRemediationStep")
 	return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name)

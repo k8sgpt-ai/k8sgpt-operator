@@ -27,9 +27,11 @@ import (
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/types"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/util"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/prompts"
+	metricspkg "github.com/k8sgpt-ai/k8sgpt-operator/pkg/metrics"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	"strconv"
 	"strings"
 )
@@ -41,6 +43,7 @@ type MutationReconciler struct {
 	Scheme            *runtime.Scheme
 	ServerQueryClient *rpc.ServerQueryServiceClient
 	Signal            chan types.InterControllerSignal
+	MetricsBuilder    *metricspkg.MetricBuilder
 	RemoteBackend     string
 	K8sGPT            *corev1alpha1.K8sGPT
 }
@@ -237,6 +240,14 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *MutationReconciler) SetupWithManager(mgr ctrl.Manager) error {
+
+	// Mutation count will be set in the k8sgpt_controller, but this controller owns the metric
+	mutationCount := r.MetricsBuilder.GetGaugeVec("k8sgpt_mutations_count")
+
+	// Register the metrics
+	metrics.Registry.MustRegister(
+		mutationCount,
+	)
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&corev1alpha1.Mutation{}).
 		Named("mutation").

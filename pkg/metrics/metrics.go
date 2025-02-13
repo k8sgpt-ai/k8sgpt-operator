@@ -120,6 +120,11 @@ func InitializeMetrics() *MetricBuilder {
 		Help:   "The total number of failed backend AI calls",
 		Labels: []string{"backend", "deployment", "namespace", "k8sgpt"},
 		Type:   Counter,
+	}).AddMetric(MetricConfig{
+		Name:   "k8sgpt_mutations_count",
+		Help:   "The total number of mutations",
+		Labels: []string{"mutations", "k8sgpt"},
+		Type:   Gauge,
 	})
 
 	builder.RegisterMetrics()

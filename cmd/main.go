@@ -129,9 +129,10 @@ func main() {
 	ready := make(chan types.InterControllerSignal, 10)
 
 	if err = (&mutation.MutationReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-		Signal: ready,
+		Client:         mgr.GetClient(),
+		Scheme:         mgr.GetScheme(),
+		MetricsBuilder: metricsBuilder,
+		Signal:         ready,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Mutation")
 		os.Exit(1)
