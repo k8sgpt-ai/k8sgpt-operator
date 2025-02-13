@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: missing-image-deployment
+  labels:
+    app: missing-image-deployment
+spec:
+  selector:
+    matchLabels:
+      app: missing-image-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: missing-image-deployment
+    spec:
+      containers:
+        - name: missing-image-container
+          image: nginxxx

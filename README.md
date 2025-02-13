@@ -7,6 +7,17 @@
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/k8sgpt)](https://artifacthub.io/packages/search?repo=k8sgpt)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fk8sgpt-ai%2Fk8sgpt-operator.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fk8sgpt-ai%2Fk8sgpt-operator?ref=badge_shield)
 
+#### Feature Status:
+
+[![stability-mature](https://img.shields.io/badge/stability-mature-008000.svg)](https://github.com/k8sgpt-ai/k8sgpt-operator/README.md#Installatiion)
+
+- Analysis & Results generation
+
+[![stability-alpha](https://img.shields.io/badge/stability-alpha-f4d03f.svg)](https://github.com/k8sgpt-ai/k8sgpt-operator/AUTO_REMEDIATION.md)
+
+- [Auto Remediation](./AUTO_REMEDIATION.MD)
+
+---
 This Operator is designed to enable [K8sGPT](https://github.com/k8sgpt-ai/k8sgpt/) within a Kubernetes cluster.
 It will allow you to create a custom resource that defines the behaviour and scope of a managed K8sGPT workload. Analysis and outputs will also be configurable to enable integration into existing workflows.
 
@@ -42,7 +53,7 @@ metadata:
 spec:
   ai:
     enabled: true
-    model: gpt-3.5-turbo
+    model: gpt-4o-mini
     backend: openai
     secret:
       name: k8sgpt-sample-secret
@@ -55,7 +66,7 @@ spec:
     # proxyEndpoint: https://10.255.30.150 # use proxyEndpoint to setup backend through an HTTP/HTTPS proxy
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.41
+  version: v0.3.48
   #integrations:
   # trivy:
   #  enabled: true
@@ -128,7 +139,7 @@ spec:
     anonymized: true
     backend: openai
     language: english
-    model: gpt-3.5-turbo
+    model: gpt-4o-mini
     secret:
       key: api_key
       name: my_openai_secret
@@ -184,7 +195,7 @@ kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key
   spec:
     ai:
       enabled: true
-      model: gpt-3.5-turbo
+      model: gpt-4o-mini
       backend: openai
       secret:
         name: k8sgpt-sample-secret
@@ -226,7 +237,7 @@ metadata:
   namespace: k8sgpt-operator-system
 spec:
   ai:
-    model: gpt-3.5-turbo
+    model: gpt-4o-mini
     backend: openai
     enabled: true
     secret:
@@ -234,7 +245,7 @@ spec:
       key: openai-api-key
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.41
+  version: v0.3.48
   remoteCache:
     credentials:
       name: k8sgpt-sample-cache-secret
@@ -271,7 +282,7 @@ metadata:
   namespace: k8sgpt-operator-system
 spec:
   ai:
-    model: gpt-3.5-turbo
+    model: gpt-4o-mini
     backend: openai
     enabled: true
     secret:
@@ -279,7 +290,7 @@ spec:
       key: openai-api-key
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.41
+  version: v0.3.48
   remoteCache:
     credentials:
       name: k8sgpt-sample-cache-secret
@@ -320,13 +331,13 @@ spec:
     secret:
       name: k8sgpt-sample-secret
       key: azure-api-key
-    model: gpt-35-turbo
+    model: gpt-4o-mini
     backend: azureopenai
     baseUrl: https://k8sgpt.openai.azure.com/
     engine: llm
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.41
+  version: v0.3.48
 EOF
 ```
 
@@ -420,7 +431,7 @@ spec:
     baseUrl: http://local-ai.local-ai.svc.cluster.local:8080/v1
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.41
+  version: v0.3.48
 EOF
 ```
 
@@ -448,7 +459,7 @@ metadata:
 spec:
   ai:
     enabled: true
-    model: gpt-3.5-turbo
+    model: gpt-4o-mini
     backend: openai
     secret:
       name: k8sgpt-sample-secret
@@ -478,7 +489,7 @@ metadata:
 spec:
   ai:
     enabled: true
-    model: gpt-3.5-turbo
+    model: gpt-4o-mini
     backend: openai
     secret:
       name: k8sgpt-sample-secret

@@ -28,11 +28,11 @@ import (
 
 // This is the client for communicating with the K8sGPT in cluster deployment
 type Client struct {
-	conn *grpc.ClientConn
+	Conn *grpc.ClientConn
 }
 
 func (c *Client) Close() error {
-	return c.conn.Close()
+	return c.Conn.Close()
 }
 
 func NewClient(address string) (*Client, error) {
@@ -41,7 +41,7 @@ func NewClient(address string) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create context: %v", err)
 	}
-	client := &Client{conn: conn}
+	client := &Client{Conn: conn}
 
 	return client, nil
 }

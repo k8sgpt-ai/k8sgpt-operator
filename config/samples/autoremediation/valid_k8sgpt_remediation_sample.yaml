@@ -1,13 +1,17 @@
 apiVersion: core.k8sgpt.ai/v1alpha1
 kind: K8sGPT
 metadata:
-  name: k8sgpt-sample
+  name: k8sgpt-auto-remediation-sample
   namespace: default
 spec:
   ai:
     autoRemediation:
-      enabled: false
-      riskThreshold: 90
+      enabled: true
+      riskThreshold: "90"
+      resources:
+        - Pod
+        - Service
+        - Deployment
     enabled: true
     model: gpt-4o-mini
     backend: openai

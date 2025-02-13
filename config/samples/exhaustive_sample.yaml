@@ -1,98 +1,92 @@
-#metadata: Specifies the name and namespace of the custom resource.
-#spec.ai: Defines AI-related configurations, including backend, models, and optional parameters like anonymized data and retries.
-#spec.customAnalyzers: Configures additional custom analyzers, with URLs and ports for connections.
-#spec.extraOptions: Includes extra configurations like enabling Backstage integration.
-#spec.filters: Sets up filters for resource analysis.
-#spec.imagePullSecrets: References secrets for pulling images from private registries.
-#spec.integrations: Configures integrations such as Trivy.
-#spec.kubeconfig: Specifies a custom kubeconfig secret, if needed.
-#spec.noCache: Indicates whether caching is disabled.
-#spec.nodeSelector: Allows pod scheduling constraints based on node labels.
-#spec.remoteCache: Configures remote caching options like Azure, GCS, or S3.
-#spec.repository: Specifies the container image repository.
-#spec.sink: Configures notification sinks, e.g., Slack, with webhook and authentication details.
-#spec.targetNamespace: Target namespace for the resource.
-#spec.version: Version of K8sGPT to use.
-#status: Placeholder for status, typically managed by the operator.
-apiVersion: core.k8sgpt.ai/v1alpha1
-kind: K8sGPT
+apiVersion: k8sgpt.ai/v1alpha1  # API version
+kind: K8sGPT                   # Resource kind
 metadata:
-  name: example-k8sgpt
-  namespace: default
+  name: <k8sgpt-instance-name> # Name of your K8sGPT instance
+  namespace: <namespace>        # Namespace where the instance is created
 spec:
-  ai:
-    anonymized: false
-    backOff:
-      enabled: true
-      maxRetries: 10
-    backend: openai
-    baseUrl: "https://api.openai.com"
-    enabled: true
-    engine: "davinci"
-    language: "english"
-    maxTokens: "4096"
-    model: "gpt-4"
-    providerId: "provider-123"
-    proxyEndpoint: "http://proxy.example.com"
-    region: "us-east-1"
-    secret:
-      name: openai-secret
-      key: api-key
-    topk: "100"
-  customAnalyzers:
-    - name: "custom-analyzer-1"
+  version: <k8sgpt-version>     # Version of K8sGPT (optional)
+  repository: <image-repository> # Image repository for K8sGPT (optional, default: ghcr.io/k8sgpt-ai/k8sgpt)
+  imagePullSecrets:             # Secrets for pulling images (optional)
+    - name: <secret-name>
+  resources:                   # Resource requests and limits for the K8sGPT deployment (optional)
+    requests:
+      cpu: <cpu-request>
+      memory: <memory-request>
+    limits:
+      cpu: <cpu-limit>
+      memory: <memory-limit>
+  noCache: <boolean>            # Disable caching (optional)
+  customAnalyzers:             # Define custom analyzers (optional)
+    - name: <analyzer-name>
       connection:
-        url: "http://analyzer-1.example.com"
-        port: 8080
-    - name: "custom-analyzer-2"
-      connection:
-        url: "http://analyzer-2.example.com"
-        port: 9090
-  extraOptions:
+        url: <analyzer-url>
+        port: <analyzer-port>
+  filters:                     # Filters for analysis (optional)
+    - <filter-expression>
+  extraOptions:                 # Extra options (optional)
     backstage:
-      enabled: true
-  filters:
-    - "PodNotReady"
-    - "MemoryPressure"
-  imagePullSecrets:
-    - name: my-image-pull-secret
-  integrations:
-    trivy:
-      enabled: true
-      namespace: "trivy-namespace"
-      skipInstall: false
-  kubeconfig:
-    name: kubeconfig-secret
-    key: config
-  noCache: true
-  nodeSelector:
-    disktype: ssd
-    env: production
-  remoteCache:
-    azure:
-      containerName: "azure-container"
-      storageAccount: "azure-storage-account"
-    credentials:
-      name: "azure-credentials"
-    gcs:
-      bucketName: "gcs-bucket"
-      projectId: "gcs-project-id"
-      region: "us-central1"
-    interplex:
-      endpoint: "http://interplex.example.com"
-    s3:
-      bucketName: "s3-bucket"
-      region: "us-west-2"
-  repository: ghcr.io/k8sgpt-ai/k8sgpt
-  sink:
-    type: slack
-    channel: "#alerts"
-    username: "k8sgpt-bot"
-    icon_url: "https://example.com/icon.png"
-    webhook: "https://hooks.slack.com/services/..."
+      enabled: <boolean>
+  sink:                        # Webhook for notifications (optional)
+    type: <webhook-type>        # (e.g., slack, mattermost)
+    endpoint: <webhook-endpoint>
+    channel: <channel-name>
+    username: <username>
+    icon_url: <icon-url>
     secret:
-      name: slack-webhook-secret
-      key: webhook-url
-  targetNamespace: "default"
-  version: "latest"
-status: {}
+      name: <secret-name>
+      key: <secret-key>
+  ai:                          # AI configuration (required)
+    autoRemediation:           # Automatic remediation settings
+      enabled: <boolean>        # Enable/disable auto-remediation
+      riskThreshold: <percentage> # Risk threshold (e.g., "90")
+      resources:                # Resource types for auto-remediation
+        - Pod
+        - Service
+        - Deployment
+        - Ingress  # Example
+    backend: <ai-backend>       # AI backend (e.g., openai, azureopenai, localai, etc.)
+    backOff:                   # Retry backoff settings (optional)
+      enabled: <boolean>
+      maxRetries: <integer>
+    baseUrl: <base-url>         # Base URL for the AI API (optional)
+    region: <region>            # Region for the AI service (optional)
+    model: <ai-model>          # AI model to use (e.g., gpt-3.5-turbo)
+    engine: <ai-engine>        # AI engine to use (optional)
+    secret:                    # Secret containing API keys (required)
+      name: <secret-name>
+      key: <secret-key>
+    enabled: <boolean>          # Enable/disable AI analysis (optional, default true)
+    anonymized: <boolean>       # Anonymize data sent to AI (optional, default true)
+    language: <language-code>     # Language for analysis (optional, default english)
+    proxyEndpoint: <proxy-url>  # Proxy endpoint for AI API (optional)
+    providerId: <provider-id>   # Provider ID for AI API (optional)
+    maxTokens: <integer>        # Maximum number of tokens for AI responses (optional, default 2048)
+    topk: <integer>             # Top K value for AI responses (optional, default 50)
+  remoteCache:                 # Remote cache configuration (optional)
+    credentials:
+      name: <secret-name>
+    gcs:                   # Google Cloud Storage backend
+      bucketName: <bucket-name>
+      region: <region>
+      projectId: <project-id>
+    s3:                    # AWS S3 backend
+      bucketName: <bucket-name>
+      region: <region>
+    azure:                 # Azure Blob Storage backend
+      storageAccount: <storage-account>
+      containerName: <container-name>
+    interplex:             # Interplex backend
+      endpoint: <endpoint>
+  integrations:                # Integrations with other tools (optional)
+    trivy:                     # Trivy vulnerability scanning integration
+      enabled: <boolean>
+      skipInstall: <boolean>
+      namespace: <namespace>
+  nodeSelector:                # Node selector for the K8sGPT pod (optional)
+    <label-key>: <label-value>
+  targetNamespace: <namespace>   # Target namespace for analysis (optional)
+  kubeconfig:                  # Kubeconfig secret for accessing the cluster (optional)
+    name: <secret-name>
+    key: <secret-key>
+status:                        # Observed status of the K8sGPT operator (read-only)
+#... (status information)

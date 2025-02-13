@@ -30,14 +30,35 @@ type Sensitive struct {
 	Masked   string `json:"masked,omitempty"`
 }
 
+// Enum for Phase
+type AutoRemediationPhase int
+
+// The auto remediation phase will begin in a not-started phase, after an evaluation has been made to remediate the resource
+// This is decoupled from the executor of the phase which will put it into in-progress.
+// Completion will be based on the resource stablising and the result being asked for deletion
+// Upon which the AutoRemediation will be checked. It is not expected Results with a completed phase will be kept, only in circumstances of DR or restart.
+const (
+	AutoRemediationPhaseNotStarted AutoRemediationPhase = iota
+	AutoRemediationPhaseInProgress
+	AutoRemediationPhaseCompleted
+	AutoRemediationPhaseSuccessful
+	AutoRemediationPending
+	AutoRemediationAborted = 5
+)
+
+type AutoRemediationStatus struct {
+	Phase AutoRemediationPhase `json:"phase,omitempty"`
+}
+
 // ResultSpec defines the desired state of Result
 type ResultSpec struct {
-	Backend      string    `json:"backend"`
-	Kind         string    `json:"kind"`
-	Name         string    `json:"name"`
-	Error        []Failure `json:"error"`
-	Details      string    `json:"details"`
-	ParentObject string    `json:"parentObject"`
+	Backend               string                `json:"backend"`
+	AutoRemediationStatus AutoRemediationStatus `json:"autoRemediationStatus"`
+	Kind                  string                `json:"kind"`
+	Name                  string                `json:"name"`
+	Error                 []Failure             `json:"error"`
+	Details               string                `json:"details"`
+	ParentObject          string                `json:"parentObject"`
 }
 
 // ResultStatus defines the observed state of Result
@@ -46,12 +67,11 @@ type ResultStatus struct {
 	Webhook   string `json:"webhook,omitempty"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-//+kubebuilder:printcolumn:name="Kind",type="string",JSONPath=".spec.kind",description="Kind"
-//+kubebuilder:printcolumn:name="Backend",type="string",JSONPath=".spec.backend",description="Backend"
-//+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",description="Age"
-
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Kind",type="string",JSONPath=".spec.kind",description="Kind"
+// +kubebuilder:printcolumn:name="Backend",type="string",JSONPath=".spec.backend",description="Backend"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",description="Age"
 // Result is the Schema for the results API
 type Result struct {
 	metav1.TypeMeta   `json:",inline"`
