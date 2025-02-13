@@ -35,8 +35,8 @@ spec:
 
 `enabled`: A boolean value. If true, enables automatic remediation.
 
-`riskThreshold`: A string representing the risk threshold (e.g., "90"). 
-Issues with a risk score above this threshold will be automatically remediated.
+`similarityRequirement`: A string representing the required similarity with the original manifest (e.g., "90"). 
+New proposed manifests with a requirement above this threshold will be automatically remediated.
 
 `resources`: A list of Kubernetes resource types to consider for automatic remediation (e.g., Pod, Service, Deployment, Ingress).
 

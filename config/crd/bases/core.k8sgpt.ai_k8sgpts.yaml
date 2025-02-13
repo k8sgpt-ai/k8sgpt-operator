@@ -59,14 +59,14 @@ spec:
                         items:
                           type: string
                         type: array
-                      riskThreshold:
+                      similarityRequirement:
                         default: "10"
                         description: Defaults to 10%
                         type: string
                     required:
                     - enabled
                     - resources
-                    - riskThreshold
+                    - similarityRequirement
                     type: object
                   backOff:
                     properties:
@@ -106,7 +106,7 @@ spec:
                     default: "2048"
                     type: string
                   model:
-                    default: gpt-3.5-turbo
+                    default: gpt-4o-mini
                     type: string
                   providerId:
                     type: string
