@@ -101,7 +101,7 @@ type AutoRemediation struct {
 	Enabled bool `json:"enabled"`
 	// Defaults to 10%
 	// +kubebuilder:default="10"
-	RiskThreshold string `json:"riskThreshold"`
+	SimilarityRequirement string `json:"similarityRequirement"`
 	// Support Pod, Deployment, Service and Ingress
 	// +kubebuilder:default:={"Pod","Deployment","Service","Ingress"}
 	Resources []string `json:"resources"`
@@ -115,7 +115,7 @@ type AISpec struct {
 	BackOff *BackOff `json:"backOff,omitempty"`
 	BaseUrl string   `json:"baseUrl,omitempty"`
 	Region  string   `json:"region,omitempty"`
-	// +kubebuilder:default:=gpt-3.5-turbo
+	// +kubebuilder:default:=gpt-4o-mini
 	Model   string     `json:"model,omitempty"`
 	Engine  string     `json:"engine,omitempty"`
 	Secret  *SecretRef `json:"secret,omitempty"`

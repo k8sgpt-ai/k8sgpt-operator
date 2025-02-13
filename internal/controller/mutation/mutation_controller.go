@@ -166,13 +166,13 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, nil
 		}
 		if r.K8sGPT != nil {
-			if r.K8sGPT.Spec.AI.AutoRemediation.RiskThreshold != "" {
+			if r.K8sGPT.Spec.AI.AutoRemediation.SimilarityRequirement != "" {
 				// If the current Similarity score is less than the riskThreshold, we should not apply the mutation
 				ss, err := strconv.ParseFloat(strings.TrimSpace(mutation.Spec.SimilarityScore), 64)
 				if err != nil {
 					mutationControllerLog.Error(err, "unable to parse similarity score", "mutation", mutation.Name)
 				} else {
-					rt, err := strconv.ParseFloat(r.K8sGPT.Spec.AI.AutoRemediation.RiskThreshold, 64)
+					rt, err := strconv.ParseFloat(r.K8sGPT.Spec.AI.AutoRemediation.SimilarityRequirement, 64)
 					if err != nil {
 						mutationControllerLog.Error(err, "unable to parse risk threshold", "mutation", mutation.Name)
 					} else {
