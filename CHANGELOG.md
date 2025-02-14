@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.9](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.8...v0.2.9) (2025-02-14)
+
+
+### Features
+
+* updated helm chart ([#616](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/616)) ([e710b67](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e710b67cc037e5d870f306f978e1ce147fd110d3))
+
 ## [0.2.8](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.7...v0.2.8) (2025-02-14)
 
 
