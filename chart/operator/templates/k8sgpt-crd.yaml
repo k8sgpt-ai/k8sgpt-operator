@@ -2,9 +2,9 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: k8sgpts.core.k8sgpt.ai
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
+  name: k8sgpts.core.k8sgpt.ai
   labels:
   {{- include "chart.labels" . | nindent 4 }}
 spec:
@@ -51,13 +51,24 @@ spec:
                         enabled:
                           default: false
                           type: boolean
-                        riskThreshold:
-                          default: "10"
+                        resources:
+                          default:
+                            - Pod
+                            - Deployment
+                            - Service
+                            - Ingress
+                          description: Support Pod, Deployment, Service and Ingress
+                          items:
+                            type: string
+                          type: array
+                        similarityRequirement:
+                          default: "90"
                           description: Defaults to 10%
                           type: string
                       required:
                         - enabled
-                        - riskThreshold
+                        - resources
+                        - similarityRequirement
                       type: object
                     backOff:
                       properties:
@@ -97,7 +108,7 @@ spec:
                       default: "2048"
                       type: string
                     model:
-                      default: gpt-3.5-turbo
+                      default: gpt-4o-mini
                       type: string
                     providerId:
                       type: string
