@@ -60,7 +60,7 @@ spec:
                           type: string
                         type: array
                       similarityRequirement:
-                        default: "10"
+                        default: "90"
                         description: Defaults to 10%
                         type: string
                     required:

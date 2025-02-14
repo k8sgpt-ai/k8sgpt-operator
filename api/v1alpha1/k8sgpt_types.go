@@ -100,7 +100,7 @@ type AutoRemediation struct {
 	// +kubebuilder:default:=false
 	Enabled bool `json:"enabled"`
 	// Defaults to 10%
-	// +kubebuilder:default="10"
+	// +kubebuilder:default="90"
 	SimilarityRequirement string `json:"similarityRequirement"`
 	// Support Pod, Deployment, Service and Ingress
 	// +kubebuilder:default:={"Pod","Deployment","Service","Ingress"}
