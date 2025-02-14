@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.8](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.7...v0.2.8) (2025-02-14)
+
+
+### Features
+
+* auto remediation ([#615](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/615)) ([4693cf6](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/4693cf69c32001dba8668cea6f143f9c6c2f4d3d))
+
+
+### Bug Fixes
+
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#597](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/597)) ([33b81ea](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/33b81ea238fba2ea3448439aa7caa9489e2cf6d0))
+
 ## [0.2.7](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.6...v0.2.7) (2025-02-13)
 
 
