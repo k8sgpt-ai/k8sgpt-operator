@@ -56,7 +56,7 @@ spec:
     # proxyEndpoint: https://10.255.30.150 # use proxyEndpoint to setup backend through an HTTP/HTTPS proxy
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.48
+  version: v0.4.1
   #integrations:
   # trivy:
   #  enabled: true
@@ -195,7 +195,7 @@ kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key
       interplex:
         endpoint: release-interplex-service:8084
     repository: ghcr.io/k8sgpt-ai/k8sgpt
-    version: v0.3.48
+    version: v0.4.1
   EOF
 ```
 
@@ -235,7 +235,7 @@ spec:
       key: openai-api-key
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.48
+  version: v0.4.1
   remoteCache:
     credentials:
       name: k8sgpt-sample-cache-secret
@@ -280,7 +280,7 @@ spec:
       key: openai-api-key
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.48
+  version: v0.4.1
   remoteCache:
     credentials:
       name: k8sgpt-sample-cache-secret
@@ -327,7 +327,7 @@ spec:
     engine: llm
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.48
+  version: v0.4.1
 EOF
 ```
 
@@ -390,7 +390,7 @@ spec:
     backend: amazonbedrock
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.48
+  version: v0.4.1
 EOF
 ```
 
@@ -421,7 +421,7 @@ spec:
     baseUrl: http://local-ai.local-ai.svc.cluster.local:8080/v1
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.48
+  version: v0.4.1
 EOF
 ```
 

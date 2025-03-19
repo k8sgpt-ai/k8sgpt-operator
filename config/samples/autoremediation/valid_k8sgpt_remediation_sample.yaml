@@ -22,4 +22,4 @@ spec:
     # language: english
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.3.48
+  version: v0.4.1
