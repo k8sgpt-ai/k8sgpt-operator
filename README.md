@@ -123,7 +123,7 @@ apiVersion: core.k8sgpt.ai/v1alpha1
 kind: K8sGPT
 metadata:
   name: capi-quickstart
-  namespace: default
+  namespace: k8sgpt-operator-system
 spec:
   ai:
     anonymized: true
@@ -412,7 +412,7 @@ apiVersion: core.k8sgpt.ai/v1alpha1
 kind: K8sGPT
 metadata:
   name: k8sgpt-local-ai
-  namespace: default
+  namespace: k8sgpt-operator-system
 spec:
   ai:
     enabled: true
