@@ -54,6 +54,7 @@ func (step *AnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, error)
 		}
 		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
 	}
+	step.logger.Info("AnalysisStep response", "count", len(response.Results))
 
 	// reset analysisRetryCount
 	analysisRetryCount = 0
