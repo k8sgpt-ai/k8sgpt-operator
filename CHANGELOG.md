@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.2.10](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.9...v0.2.10) (2025-03-20)
+
+
+### Features
+
+* moved to programmatic k8sgpt deployment role binding ([#633](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/633)) ([9a13580](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9a1358061c09cf26e102522cc3fdf8fce9c9ae8a))
+* updated to kubebuilder v4 to enable new kubebuilder resource creation ([#632](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/632)) ([9fd4711](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9fd471159b15cc7ecb22a987f484eb2bc3e1fdee))
+
+
+### Other
+
+* **deps:** update docker/login-action digest to 74a5d14 ([#625](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/625)) ([cb7230e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/cb7230e79ce64f7d0a2bcd31dc0a9bcced366292))
+* **deps:** update docker/setup-buildx-action digest to b5ca514 ([#620](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/620)) ([2930e2c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/2930e2c9ca5bdf88eabb516c90c8a08c2584f1b0))
+* readme update ([#630](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/630)) ([6877add](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/6877add8ee79de6c1ba64aabe1d18ba0081330a4))
+* small debug improvements ([#629](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/629)) ([620ee4b](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/620ee4bc0f923bafbce72b90139edd0d469108d1))
+
 ## [0.2.9](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.8...v0.2.9) (2025-02-14)
 
 
