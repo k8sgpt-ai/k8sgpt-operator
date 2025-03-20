@@ -18,6 +18,7 @@ import (
 	"context"
 	err "errors"
 	"fmt"
+	v1 "k8s.io/api/rbac/v1"
 
 	"github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/utils"
@@ -68,10 +69,10 @@ func addSecretAsEnvToDeployment(secretName string, secretKey string,
 }
 
 // GetServiceAccount Create ServiceAccount for K8sGPT
-func GetServiceAccount(config v1alpha1.K8sGPT) (*corev1.ServiceAccount, error) {
+func GetServiceAccount(config v1alpha1.K8sGPT, serviceAccountName string) (*corev1.ServiceAccount, error) {
 	serviceAccount := &corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "k8sgpt", // Name of the ServiceAccount
+			Name:      serviceAccountName,
 			Namespace: config.Namespace,
 			OwnerReferences: []metav1.OwnerReference{
 				{
@@ -121,8 +122,122 @@ func GetService(config v1alpha1.K8sGPT) (*corev1.Service, error) {
 	return &service, nil
 }
 
+func GetClusterRoleBinding(config v1alpha1.K8sGPT, serviceAccountName string,
+	crbName string, clusterRoleName string) (*v1.ClusterRoleBinding, error) {
+	clusterRoleBinding := &v1.ClusterRoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: crbName,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					Kind:               config.Kind,
+					Name:               config.Name,
+					UID:                config.UID,
+					APIVersion:         config.APIVersion,
+					BlockOwnerDeletion: utils.PtrBool(true),
+					Controller:         utils.PtrBool(true),
+				},
+			},
+		},
+		Subjects: []v1.Subject{
+			{
+				Kind:      "ServiceAccount",
+				Name:      serviceAccountName,
+				Namespace: config.Namespace,
+			},
+		},
+		RoleRef: v1.RoleRef{
+			Kind: "ClusterRole",
+			Name: clusterRoleName,
+		},
+	}
+	return clusterRoleBinding, nil
+}
+
+// GetClusterRole Create ClusterRole for K8sGPT
+func GetClusterRole(config v1alpha1.K8sGPT, serviceAccountName string) (*v1.ClusterRole, error) {
+	clusterRole := &v1.ClusterRole{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: fmt.Sprintf("%s-clusterrole", serviceAccountName),
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					Kind:               config.Kind,
+					Name:               config.Name,
+					UID:                config.UID,
+					APIVersion:         config.APIVersion,
+					BlockOwnerDeletion: utils.PtrBool(true),
+					Controller:         utils.PtrBool(true),
+				},
+			},
+		},
+		Rules: []v1.PolicyRule{
+			{
+				APIGroups: []string{""},
+				Resources: []string{"pods", "services", "secrets", "endpoints", "nodes"}, // Added "nodes"
+				Verbs:     []string{"get", "list", "watch"},
+			},
+			{
+				APIGroups: []string{""},
+				Resources: []string{"persistentvolumeclaims"},
+				Verbs:     []string{"list"},
+			},
+			{
+				APIGroups: []string{""},
+				Resources: []string{"events"},
+				Verbs:     []string{"list"},
+			},
+			{
+				APIGroups: []string{"apps"},
+				Resources: []string{"deployments", "replicasets", "statefulsets"},
+				Verbs:     []string{"get", "list", "watch"},
+			},
+			{
+				APIGroups: []string{"batch"},
+				Resources: []string{"cronjobs"},
+				Verbs:     []string{"get", "list", "watch"},
+			},
+			{
+				APIGroups: []string{"autoscaling"},
+				Resources: []string{"horizontalpodautoscalers"},
+				Verbs:     []string{"get", "list", "watch"},
+			},
+			{
+				APIGroups: []string{"networking.k8s.io"},
+				Resources: []string{"ingresses", "networkpolicies"},
+				Verbs:     []string{"get", "list", "watch"},
+			},
+			{
+				APIGroups: []string{"admissionregistration.k8s.io"},
+				Resources: []string{"validatingwebhookconfigurations", "mutatingwebhookconfigurations"},
+				Verbs:     []string{"get", "list", "watch"},
+			},
+			{
+				APIGroups: []string{"policy"},
+				Resources: []string{"poddisruptionbudgets"},
+				Verbs:     []string{"get", "list", "watch"},
+			},
+			{
+				APIGroups: []string{"storage.k8s.io"},
+				Resources: []string{"storageclasses"},
+				Verbs:     []string{"get", "list", "watch"},
+			},
+			{
+				APIGroups: []string{"gateway.networking.k8s.io"},
+				Resources: []string{"gatewayclasses", "gateways", "httproutes"},
+				Verbs:     []string{"get", "list", "watch"},
+			},
+			{
+				APIGroups: []string{""},
+				Resources: []string{"pods/log"},
+				Verbs:     []string{"get", "list", "watch"},
+			},
+		},
+	}
+	return clusterRole, nil
+}
+
 // GetDeployment Create deployment with the latest K8sGPT image
-func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Client) (*appsv1.Deployment, error) {
+func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Client,
+	serviceAccountName string) (*appsv1.Deployment, error) {
 
 	// Create deployment
 	image := config.Spec.Repository + ":" + config.Spec.Version
@@ -156,7 +271,7 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 					},
 				},
 				Spec: corev1.PodSpec{
-					ServiceAccountName: "k8sgpt",
+					ServiceAccountName: serviceAccountName,
 					Containers: []corev1.Container{
 						{
 							Name:            "k8sgpt",
@@ -387,10 +502,13 @@ func Sync(ctx context.Context, c client.Client,
 	config v1alpha1.K8sGPT, i SyncOrDestroy) error {
 
 	var objs []client.Object
-
 	outOfClusterMode := config.Spec.Kubeconfig != nil
+	// Build the names for the sa,cr,crd
+	serviceAccountName := fmt.Sprintf("k8sgpt-%s", config.Namespace)
+	clusterRoleName := fmt.Sprintf("%s-clusterrole", serviceAccountName)
+	clusterRoleNameBinding := fmt.Sprintf("%s-binding", clusterRoleName)
 
-	sa, er := GetServiceAccount(config)
+	sa, er := GetServiceAccount(config, serviceAccountName)
 	if er != nil {
 		return er
 	}
@@ -404,12 +522,25 @@ func Sync(ctx context.Context, c client.Client,
 
 	objs = append(objs, svc)
 
-	deployment, er := GetDeployment(config, outOfClusterMode, c)
+	deployment, er := GetDeployment(config, outOfClusterMode, c, serviceAccountName)
 	if er != nil {
 		return er
 	}
 
 	objs = append(objs, deployment)
+
+	clusterRole, er := GetClusterRole(config, serviceAccountName)
+	if er != nil {
+		return er
+	}
+
+	objs = append(objs, clusterRole)
+
+	clusterRoleBinding, err := GetClusterRoleBinding(config, serviceAccountName, clusterRoleNameBinding, clusterRoleName)
+	if err != nil {
+		return err
+	}
+	objs = append(objs, clusterRoleBinding)
 
 	// for each object, create or destroy
 	for _, obj := range objs {
@@ -423,7 +554,7 @@ func Sync(ctx context.Context, c client.Client,
 				er := c.Get(ctx, types.NamespacedName{Name: config.Spec.AI.Secret.Name,
 					Namespace: config.Namespace}, secret)
 				if er != nil {
-					return err.New("references secret does not exist, cannot create deployment")
+					return er
 				}
 			}
 
