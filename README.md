@@ -41,6 +41,7 @@ metadata:
   name: k8sgpt-sample
   namespace: k8sgpt-operator-system
 spec:
+  # serviceAccount: k8sgpt-openai # default to K8sgpt, should specify this if override serviceaccount name in helm value file
   ai:
     enabled: true
     model: gpt-4o-mini

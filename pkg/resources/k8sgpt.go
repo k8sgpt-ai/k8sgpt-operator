@@ -156,7 +156,12 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 					},
 				},
 				Spec: corev1.PodSpec{
-					ServiceAccountName: "k8sgpt",
+					ServiceAccountName: func() string {
+						if config.Spec.ServiceAccount != "" {
+							return config.Spec.ServiceAccount
+						}
+						return "k8sgpt"
+					}(),
 					Containers: []corev1.Container{
 						{
 							Name:            "k8sgpt",
