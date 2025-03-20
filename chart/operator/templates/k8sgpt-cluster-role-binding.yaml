@@ -10,5 +10,5 @@ roleRef:
   name: {{ include "chart.fullname" . }}-k8sgpt
 subjects:
   - kind: ServiceAccount
-    name: "k8sgpt"
+    name: {{ default "k8sgpt" .Values.serviceAccount.name }}
     namespace: {{ .Release.Namespace }}
