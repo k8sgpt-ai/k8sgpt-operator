@@ -2,7 +2,6 @@ apiVersion: core.k8sgpt.ai/v1alpha1
 kind: K8sGPT
 metadata:
   name: k8sgpt-auto-remediation-sample
-  namespace: k8sgpt-operator-system
 spec:
   ai:
     autoRemediation:
