@@ -313,18 +313,48 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 							},
 							Resources: corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("1"),
-									corev1.ResourceMemory: resource.MustParse("512Mi"),
+									corev1.ResourceCPU: func() resource.Quantity {
+										if config.Spec.Resources != nil {
+											if config.Spec.Resources.Limits != nil {
+												if cpuLimit, exists := config.Spec.Resources.Limits["cpu"]; exists {
+													return cpuLimit
+												}
+											}
+										}
+										return resource.MustParse("1")
+									}(),
+									corev1.ResourceMemory: func() resource.Quantity {
+										if config.Spec.Resources != nil {
+											if config.Spec.Resources.Limits != nil {
+												if memLimit, exists := config.Spec.Resources.Limits["memory"]; exists {
+													return memLimit
+												}
+											}
+										}
+										return resource.MustParse("512Mi")
+									}(),
 								},
 								Requests: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("0.2"),
-									corev1.ResourceMemory: resource.MustParse("156Mi"),
-								},
-							},
-							VolumeMounts: []corev1.VolumeMount{
-								{
-									MountPath: "/k8sgpt-data",
-									Name:      "k8sgpt-vol",
+									corev1.ResourceCPU: func() resource.Quantity {
+										if config.Spec.Resources != nil {
+											if config.Spec.Resources.Requests != nil {
+												if cpuRequest, exists := config.Spec.Resources.Requests["cpu"]; exists {
+													return cpuRequest
+												}
+											}
+										}
+										return resource.MustParse("0.2")
+									}(),
+									corev1.ResourceMemory: func() resource.Quantity {
+										if config.Spec.Resources != nil {
+											if config.Spec.Resources.Requests != nil {
+												if memRequest, exists := config.Spec.Resources.Requests["memory"]; exists {
+													return memRequest
+												}
+											}
+										}
+										return resource.MustParse("256Mi")
+									}(),
 								},
 							},
 						},
