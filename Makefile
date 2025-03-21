@@ -1,9 +1,12 @@
-
 # Image URL to use all building/pushing image targets
 IMG ?= ghcr.io/k8sgpt-ai/k8sgpt-operator:latest
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.26.0
 CHART_VERSION=v0.0.6 #x-release-please-version
+KIND_CLUSTER_NAME ?= k8sgpt-test
+HELM_RELEASE_NAME ?= release  # Consistent release name
+NAMESPACE ?= k8sgpt-operator-system   # Consistent namespace
+OPENAI_TOKEN ?= $(shell echo $$OPENAI_TOKEN)
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
 GOBIN=$(shell go env GOPATH)/bin
@@ -96,7 +99,7 @@ docker-buildx: test ## Build and push docker image for the manager for cross-pla
 ##@ Deployment
 
 ifndef ignore-not-found
-  ignore-not-found = false
+	ignore-not-found = false
 endif
 
 .PHONY: install
@@ -120,7 +123,7 @@ undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/confi
 helmify: $(HELMIFY) ## Download helmify locally if necessary.
 $(HELMIFY): $(LOCALBIN)
 	test -s $(LOCALBIN)/helmify || GOBIN=$(LOCALBIN) go install github.com/arttor/helmify/cmd/helmify@latest
-    
+
 OSARCH=$(shell ./hack/get-os.sh)
 HELM = $(shell pwd)/bin/$(OSARCH)/helm
 HELM_INSTALLER ?= "https://get.helm.sh/helm-v3.10.1-$(OSARCH).tar.gz"
@@ -135,11 +138,11 @@ $(HELM): $(LOCALBIN)
 helmify: $(HELMIFY) ## Download helmify locally if necessary.
 $(HELMIFY): $(LOCALBIN)
 	test -s $(LOCALBIN)/helmify || GOBIN=$(LOCALBIN) go install github.com/arttor/helmify/cmd/helmify@latest
-   
+
 .PHONY: helm-build
 helm-build: helm helmify manifests kustomize
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG) && cd ../../
-	$(KUSTOMIZE) build config/default | $(HELMIFY) 
+	$(KUSTOMIZE) build config/default | $(HELMIFY)
 
 helm-package: generate manifests
 	$(HELM) package --version $(CHART_VERSION) chart/operator/
@@ -199,3 +202,39 @@ ifndef LABEL
 endif
 	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" \
 	ginkgo --github-output -label-filter="$(LABEL)" -r -v
+
+.PHONY: local-setup
+local-setup: ## Setup local k8sgpt environment
+ifndef OPENAI_TOKEN
+	$(error OPENAI_TOKEN is not defined. Please set OPENAI_TOKEN variable before running the target. i.e. export OPENAI_TOKEN=<YOUR_TOKEN>)
+endif
+	@echo "Creating kind cluster..."
+	kind create cluster --name $(KIND_CLUSTER_NAME)
+	@echo "Adding k8sgpt helm repo..."
+	helm repo add k8sgpt https://charts.k8sgpt.ai/
+	helm repo update
+	@echo "Installing k8sgpt-operator helm chart..."
+	@if helm status $(HELM_RELEASE_NAME) -n $(NAMESPACE) &> /dev/null; then \
+		echo "k8sgpt-operator is already installed. Skipping installation."; \
+	else \
+		helm install $(HELM_RELEASE_NAME) k8sgpt/k8sgpt-operator -n $(NAMESPACE) --create-namespace --set interplex.enabled=true; \
+	fi
+	@echo "Creating secret..."
+	@if kubectl get secret k8sgpt-sample-secret -n $(NAMESPACE) -o jsonpath="{.data}" &> /dev/null; then \
+		echo "Secret k8sgpt-sample-secret already exists in namespace $(NAMESPACE). Skipping creation."; \
+	else \
+		kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key="$(OPENAI_TOKEN)" -n $(NAMESPACE); \
+	fi
+	@echo "Applying valid_k8sgpt_remediation_sample.yaml..."
+	kubectl apply -f config/samples/autoremediation/valid_k8sgpt_remediation_sample.yaml
+	@echo "Applying deployment_missing_image.yaml..."
+	kubectl apply -f config/samples/autoremediation/deployment_missing_image.yaml
+
+.PHONY: local-cleanup
+local-cleanup: ## Cleanup local k8sgpt environment
+	@echo "Cleaning up..."
+	kubectl delete -f config/samples/autoremediation/deployment_missing_image.yaml || true
+	kubectl delete -f config/samples/autoremediation/valid_k8sgpt_remediation_sample.yaml || true
+	kubectl delete secret k8sgpt-sample-secret -n $(NAMESPACE) || true
+	helm uninstall $(HELM_RELEASE_NAME) -n $(NAMESPACE) || true
+	kind delete cluster --name $(KIND_CLUSTER_NAME) || true

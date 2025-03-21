@@ -2,11 +2,6 @@
 interplex:
   enabled: false
 
-serviceAccount:
-  create: true
-  name: "k8sgpt"
-  # -- Annotations for the managed k8sgpt workload service account
-  annotations: {}
 serviceMonitor:
   enabled: false
   additionalLabels: {}
@@ -54,7 +49,7 @@ controllerManager:
         - ALL
     image:
       repository: ghcr.io/k8sgpt-ai/k8sgpt-operator
-      tag: v0.2.9  # x-release-please-version
+      tag: v0.2.10  # x-release-please-version
     resources:
       limits:
         cpu: 500m
