@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.2.11](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.10...v0.2.11) (2025-03-27)
+
+
+### Bug Fixes
+
+* **deps:** update k8s.io/utils digest to 1f6e0b7 ([#636](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/636)) ([86bbe1b](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/86bbe1b2f3bae11e550b8b400531b5e157a5bf97))
+
+
+### Other
+
+* demo-sh ([#641](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/641)) ([258d32e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/258d32eae9cddfda30ddbb8d31c41ed38ba11980))
+* **deps:** update actions/setup-go digest to 0aaccfd ([#628](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/628)) ([364439d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/364439d12c4e78ec983e571579e54f04e4aa6dd5))
+* **deps:** update actions/setup-python digest to 8d9ed9a ([#637](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/637)) ([c632e46](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c632e46ee2f9d1d07be072d942037254287d2dd5))
+* **deps:** update azure/setup-helm digest to b9e5190 ([#618](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/618)) ([d79f9ff](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d79f9ff1e9b9a4ce108788d07ecc0f76020b7dce))
+* **deps:** update docker/build-push-action digest to 471d1dc ([#601](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/601)) ([e15e7d0](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e15e7d0d45de2994b0275f995a6571bededc57ab))
+* **deps:** update softprops/action-gh-release digest to c95fe14 ([#598](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/598)) ([94dcdcb](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/94dcdcbed7019a6906b138ea59d372f72b899db7))
+* local example interplex ([#640](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/640)) ([178615e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/178615e6c252b01b5969c165a8907ac2979ab3c6))
+
 ## [0.2.10](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.9...v0.2.10) (2025-03-20)
 
 
