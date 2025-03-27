@@ -45,6 +45,14 @@ help: ## Display this help.
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
+.PHONY: list
+list:
+	@$(MAKE) -p | \
+	awk -F':' '/^[a-zA-Z0-9_-]+:([^=]|$$)/ {print $$1}' | \
+	grep -v '$(MAKEFILE_LIST)' | \
+	sort | \
+	uniq
+
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
@@ -226,15 +234,11 @@ endif
 		kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key="$(OPENAI_TOKEN)" -n $(NAMESPACE); \
 	fi
 	@echo "Applying valid_k8sgpt_remediation_sample.yaml..."
-	kubectl apply -f config/samples/autoremediation/valid_k8sgpt_remediation_sample.yaml
+	kubectl apply -f config/samples/autoremediation/valid_k8sgpt_remediation_with_interplex.yaml -n $(NAMESPACE)
 	@echo "Applying deployment_missing_image.yaml..."
 	kubectl apply -f config/samples/autoremediation/deployment_missing_image.yaml
 
 .PHONY: local-cleanup
 local-cleanup: ## Cleanup local k8sgpt environment
 	@echo "Cleaning up..."
-	kubectl delete -f config/samples/autoremediation/deployment_missing_image.yaml || true
-	kubectl delete -f config/samples/autoremediation/valid_k8sgpt_remediation_sample.yaml || true
-	kubectl delete secret k8sgpt-sample-secret -n $(NAMESPACE) || true
-	helm uninstall $(HELM_RELEASE_NAME) -n $(NAMESPACE) || true
 	kind delete cluster --name $(KIND_CLUSTER_NAME) || true
