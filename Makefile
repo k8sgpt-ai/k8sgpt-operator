@@ -234,7 +234,7 @@ endif
 		kubectl create secret generic k8sgpt-sample-secret --from-literal=openai-api-key="$(OPENAI_TOKEN)" -n $(NAMESPACE); \
 	fi
 	@echo "Applying valid_k8sgpt_remediation_sample.yaml..."
-	kubectl apply -f config/samples/autoremediation/valid_k8sgpt_remediation_sample.yaml -n $(NAMESPACE)
+	kubectl apply -f config/samples/autoremediation/valid_k8sgpt_remediation_with_interplex.yaml -n $(NAMESPACE)
 	@echo "Applying deployment_missing_image.yaml..."
 	kubectl apply -f config/samples/autoremediation/deployment_missing_image.yaml
 
