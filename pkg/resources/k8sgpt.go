@@ -356,11 +356,11 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 										return resource.MustParse("256Mi")
 									}(),
 								},
-								VolumeMounts: []corev1.VolumeMount{
-									{
-										MountPath: "/k8sgpt-data",
-										Name:      "k8sgpt-vol",
-									},
+							},
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									MountPath: "/k8sgpt-data",
+									Name:      "k8sgpt-vol",
 								},
 							},
 						},
