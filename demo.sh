@@ -63,7 +63,7 @@ spec:
       key: openai-api-key
   remoteCache:
     interplex:
-      endpoint: release-interplex-service.k8sgpt-operator-system.svc.cluster.local:8084
+      endpoint: k8sgpt-interplex-service.k8sgpt.svc.cluster.local:8084
   repository: ghcr.io/k8sgpt-ai/k8sgpt
   version: v0.4.1
 EOF
