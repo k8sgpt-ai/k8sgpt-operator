@@ -499,6 +499,25 @@ EOF
 </details>
 
 <details>
+<summary>IAM roles for service accounts (IRSA)</summary>
+For users of IRSA, it is possible to configure the K8sGPT Custom Resource to point to the current ARN for your in cluster Service Account.
+
+See example below
+```
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: K8sGPT
+metadata:
+  name: k8sgpt-sample
+  namespace: k8sgpt-operator-system
+spec:
+  extraOptions:
+    serviceAccountIRSA: <arn>
+...
+```
+
+</details>
+
+<details>
 <summary>sink (integrations) </summary>
 
 Optional parameters available for sink.  
