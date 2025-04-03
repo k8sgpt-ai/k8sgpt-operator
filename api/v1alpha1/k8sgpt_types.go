@@ -34,7 +34,8 @@ type SecretRef struct {
 }
 
 type ExtraOptionsRef struct {
-	Backstage *Backstage `json:"backstage,omitempty"`
+	Backstage          *Backstage `json:"backstage,omitempty"`
+	ServiceAccountIRSA string     `json:"serviceAccountIRSA,omitempty"`
 }
 
 type CredentialsRef struct {

@@ -86,6 +86,13 @@ func GetServiceAccount(config v1alpha1.K8sGPT, serviceAccountName string) (*core
 			},
 		},
 	}
+
+	if config.Spec.ExtraOptions != nil {
+		if config.Spec.ExtraOptions.ServiceAccountIRSA != "" {
+			serviceAccount.ObjectMeta.Annotations["eks.amazonaws.com/role-arn"] = config.Spec.ExtraOptions.ServiceAccountIRSA
+		}
+	}
+
 	return serviceAccount, nil
 }
 
