@@ -26,6 +26,7 @@ spec:
   extraOptions:                 # Extra options (optional)
     backstage:
       enabled: <boolean>
+    serviceAccountIRSA: <arn>
   sink:                        # Webhook for notifications (optional)
     type: <webhook-type>        # (e.g., slack, mattermost)
     endpoint: <webhook-endpoint>
