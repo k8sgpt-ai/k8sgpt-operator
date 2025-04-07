@@ -49,7 +49,7 @@ controllerManager:
         - ALL
     image:
       repository: ghcr.io/k8sgpt-ai/k8sgpt-operator
-      tag: v0.2.10  # x-release-please-version
+      tag: v0.2.11  # x-release-please-version
     resources:
       limits:
         cpu: 500m
