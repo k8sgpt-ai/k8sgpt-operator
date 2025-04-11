@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.12](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.11...v0.2.12) (2025-04-11)
+
+
+### Features
+
+* irsa missing from crd chart ([#657](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/657)) ([3b5ccd8](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/3b5ccd8fb74301329634fc89d8d69e4bd46b807e))
+
 ## [0.2.11](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.10...v0.2.11) (2025-04-07)
 
 
