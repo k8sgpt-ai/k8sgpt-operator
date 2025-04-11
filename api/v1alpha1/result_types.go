@@ -52,13 +52,12 @@ type AutoRemediationStatus struct {
 
 // ResultSpec defines the desired state of Result
 type ResultSpec struct {
-	Backend               string                `json:"backend"`
-	AutoRemediationStatus AutoRemediationStatus `json:"autoRemediationStatus"`
-	Kind                  string                `json:"kind"`
-	Name                  string                `json:"name"`
-	Error                 []Failure             `json:"error"`
-	Details               string                `json:"details"`
-	ParentObject          string                `json:"parentObject"`
+	Backend      string    `json:"backend"`
+	Kind         string    `json:"kind"`
+	Name         string    `json:"name"`
+	Error        []Failure `json:"error"`
+	Details      string    `json:"details"`
+	ParentObject string    `json:"parentObject"`
 }
 
 // ResultStatus defines the observed state of Result
