@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.13](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.12...v0.2.13) (2025-04-11)
+
+
+### Features
+
+* fix broken reconcile ([#659](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/659)) ([7046901](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/704690115e54f493500194405a268a1b28c23b31))
+
 ## [0.2.12](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.11...v0.2.12) (2025-04-11)
 
 
