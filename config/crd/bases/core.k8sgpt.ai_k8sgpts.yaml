@@ -190,6 +190,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              pullpolicy:
+                description: PullPolicy describes a policy for if/when to pull a container
+                  image
+                type: string
               remoteCache:
                 properties:
                   azure:

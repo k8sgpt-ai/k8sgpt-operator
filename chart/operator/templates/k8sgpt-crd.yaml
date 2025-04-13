@@ -134,7 +134,7 @@ spec:
                     properties:
                       connection:
                         properties:
-                          port:
+                          port:possible values
                             type: integer
                           url:
                             type: string
@@ -157,6 +157,9 @@ spec:
                   items:
                     type: string
                   type: array
+                imagePullPolicy:
+                  default: Always
+                  type: string
                 imagePullSecrets:
                   items:
                     properties:
