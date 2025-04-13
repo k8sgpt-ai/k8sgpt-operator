@@ -150,6 +150,8 @@ spec:
                         enabled:
                           type: boolean
                       type: object
+                    serviceAccountIRSA:
+                      type: string
                   type: object
                 filters:
                   items:

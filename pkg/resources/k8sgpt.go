@@ -496,8 +496,8 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 		return &appsv1.Deployment{}, err.New("engine is supported only by azureopenai provider")
 	}
 
-	// ProxyEndpoint is required only when azureopenai or openai is the ai backend
-	if config.Spec.AI.ProxyEndpoint != "" && (config.Spec.AI.Backend == v1alpha1.AzureOpenAI || config.Spec.AI.Backend == v1alpha1.OpenAI) {
+	// Configure ProxyEndpoint env variable
+	if config.Spec.AI.ProxyEndpoint != "" {
 		proxyEndpoint := corev1.EnvVar{
 			Name:  "K8SGPT_PROXY_ENDPOINT",
 			Value: config.Spec.AI.ProxyEndpoint,
@@ -505,9 +505,6 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 		deployment.Spec.Template.Spec.Containers[0].Env = append(
 			deployment.Spec.Template.Spec.Containers[0].Env, proxyEndpoint,
 		)
-	} else if config.Spec.AI.ProxyEndpoint != "" && config.Spec.AI.Backend != v1alpha1.AzureOpenAI && config.Spec.AI.Backend != v1alpha1.OpenAI {
-		return &appsv1.Deployment{}, err.New("proxyEndpoint is supported only by azureopenai and openai provider")
-
 	}
 
 	// Add checks for amazonbedrock
