@@ -155,6 +155,10 @@ spec:
                 items:
                   type: string
                 type: array
+              imagePullPolicy:
+                description: PullPolicy describes a policy for if/when to pull a container
+                  image
+                type: string
               imagePullSecrets:
                 items:
                   properties:
@@ -190,10 +194,6 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
-              pullpolicy:
-                description: PullPolicy describes a policy for if/when to pull a container
-                  image
-                type: string
               remoteCache:
                 properties:
                   azure:
