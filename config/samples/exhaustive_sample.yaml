@@ -28,7 +28,7 @@ spec:
       enabled: <boolean>
     serviceAccountIRSA: <arn>
   sink:                        # Webhook for notifications (optional)
-    type: <webhook-type>        # (e.g., slack, mattermost)
+    type: <webhook-type>        # (e.g., slack, mattermost, cloudevents)
     endpoint: <webhook-endpoint>
     channel: <channel-name>
     username: <username>

@@ -299,6 +299,7 @@ spec:
                     enum:
                     - slack
                     - mattermost
+                    - cloudevents
                     type: string
                   username:
                     type: string
