@@ -494,7 +494,8 @@ spec:
     secret:
       name: k8sgpt-sample-secret
       key: openai-api-key
-  noCache: false  repository: ghcr.io/k8sgpt-ai/k8sgpt
+  noCache: false
+  repository: ghcr.io/k8sgpt-ai/k8sgpt
   resources:
     limits:
       cpu: 10
