@@ -485,8 +485,16 @@ apiVersion: core.k8sgpt.ai/v1alpha1
 kind: K8sGPT
 metadata:
   name: k8sgpt-sample
-  namespace: k8sgpt-operator-syst 
-  repository: ghcr.io/k8sgpt-ai/k8sgpt
+  namespace: k8sgpt-operator-system
+spec:
+  ai:
+    enabled: true
+    model: gpt-4o-mini
+    backend: openai
+    secret:
+      name: k8sgpt-sample-secret
+      key: openai-api-key
+  noCache: false  repository: ghcr.io/k8sgpt-ai/k8sgpt
   resources:
     limits:
       cpu: 10
