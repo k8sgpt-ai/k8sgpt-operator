@@ -18,6 +18,7 @@ import (
 	"context"
 	err "errors"
 	"fmt"
+
 	v1 "k8s.io/api/rbac/v1"
 
 	"github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
@@ -282,7 +283,7 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 					Containers: []corev1.Container{
 						{
 							Name:            "k8sgpt",
-							ImagePullPolicy: corev1.PullAlways,
+							ImagePullPolicy: config.Spec.ImagePullPolicy,
 							Image:           image,
 							Args: []string{
 								"serve",

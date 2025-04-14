@@ -435,6 +435,16 @@ Note: ensure that the value of `baseUrl` is a properly constructed [DNS name](ht
 
 <details>
 
+<summary>ImagePullPolicy</summary>
+The imagePullPolicy for K8SGPT container and the tag of the image affect when the kubelet attempts to pull (download) the specified image.
+
+Refer to the official Kubernetes documentation for [more details](https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy). 
+
+Default: Always.
+</details>
+
+<details>
+
 <summary>ImagePullSecrets</summary>
 You can use custom k8sgpt image by modifying `repository`, `version`, `imagePullSecrets`.
 `version` actually works as image tag.
