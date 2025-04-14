@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.14](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.13...v0.2.14) (2025-04-14)
+
+
+### Features
+
+* Add imagePullPolicy for K8SGPT instances ([#664](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/664)) ([0480d10](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0480d10db9b9b131c2d23e2e2d612e1771383c99))
+
 ## [0.2.13](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.12...v0.2.13) (2025-04-11)
 
 
