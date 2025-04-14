@@ -92,6 +92,7 @@ spec:
                     - amazonsagemaker
                     - google
                     - googlevertexai
+                    - customrest
                     type: string
                   baseUrl:
                     type: string
