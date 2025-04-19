@@ -27,6 +27,11 @@ func Test_NewSink(t *testing.T) {
 			want:     &MattermostSink{},
 		},
 		{
+			name:     "cloudevents sink",
+			sinkType: "cloudevents",
+			want:     &CloudEventsSink{},
+		},
+		{
 			name:     "default sink",
 			sinkType: "unknown",
 			want:     &SlackSink{},
@@ -175,6 +180,75 @@ func Test_SlackSinkEmit(t *testing.T) {
 			}
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(tt.responseCode)
+			}))
+			defer server.Close()
+
+			sink.Endpoint = server.URL
+
+			err := sink.Emit(tt.results)
+
+			if tt.expectError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func Test_CloudEventsSinkConfigure(t *testing.T) {
+	sink := &CloudEventsSink{}
+	client := NewClient(2 * time.Second)
+	config := v1alpha1.K8sGPT{
+		Spec: v1alpha1.K8sGPTSpec{
+			Sink: &v1alpha1.WebhookRef{
+				Endpoint: "http://example.com",
+			},
+		},
+	}
+
+	sink.Configure(config, *client, "")
+
+	assert.Equal(t, "http://example.com", sink.Endpoint)
+	assert.Equal(t, client, &sink.Client)
+}
+
+func Test_CloudEventsSinkEmit(t *testing.T) {
+	tests := []struct {
+		name         string
+		results      v1alpha1.ResultSpec
+		responseCode int
+		expectError  bool
+	}{
+		{
+			name: "Successful response",
+			results: v1alpha1.ResultSpec{
+				Kind: "kind",
+				Name: "name",
+			},
+			responseCode: http.StatusOK,
+			expectError:  false,
+		},
+		{
+			name: "Failed response",
+			results: v1alpha1.ResultSpec{
+				Kind: "kind",
+				Name: "name",
+			},
+			responseCode: http.StatusInternalServerError,
+			expectError:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			sink := &CloudEventsSink{
+				Endpoint: "",
+				Client:   *NewClient(2 * time.Second),
+			}
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(tt.responseCode)
+
 			}))
 			defer server.Close()
 

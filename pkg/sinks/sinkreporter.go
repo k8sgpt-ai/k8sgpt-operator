@@ -19,6 +19,8 @@ func NewSink(sinkType string) ISink {
 	//Introduce more Sink Providers
 	case "mattermost":
 		return &MattermostSink{}
+	case "cloudevents":
+		return &CloudEventsSink{}
 	default:
 		return &SlackSink{}
 	}
