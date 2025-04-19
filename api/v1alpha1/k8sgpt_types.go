@@ -151,6 +151,7 @@ type K8sGPTSpec struct {
 	Version string `json:"version,omitempty"`
 	// +kubebuilder:default:=ghcr.io/k8sgpt-ai/k8sgpt
 	Repository       string                       `json:"repository,omitempty"`
+	ImagePullPolicy  corev1.PullPolicy            `json:"imagePullPolicy,omitempty"`
 	ImagePullSecrets []ImagePullSecrets           `json:"imagePullSecrets,omitempty"`
 	Resources        *corev1.ResourceRequirements `json:"resources,omitempty"`
 	NoCache          bool                         `json:"noCache,omitempty"`
