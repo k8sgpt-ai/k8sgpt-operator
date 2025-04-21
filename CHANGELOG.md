@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.14](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.13...v0.2.14) (2025-04-21)
+
+
+### Features
+
+* add 'customrest' to backend options in CRD ([#666](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/666)) ([506b609](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/506b609b6636dc5090f653bbf8d5f93f2161857e))
+* Add imagePullPolicy for K8SGPT instances ([#664](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/664)) ([0480d10](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0480d10db9b9b131c2d23e2e2d612e1771383c99))
+
+
+### Other
+
+* **deps:** update actions/upload-artifact digest to ea165f8 ([#587](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/587)) ([382ae07](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/382ae0723e54f4e83d88af4c094ba911f00f360a))
+* **deps:** update softprops/action-gh-release digest to da05d55 ([#668](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/668)) ([52bd4b8](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/52bd4b8f8ea753fb008177669dffe3947b803239))
+
 ## [0.2.13](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.12...v0.2.13) (2025-04-11)
 
 
