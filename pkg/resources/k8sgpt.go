@@ -180,7 +180,7 @@ func GetClusterRole(config v1alpha1.K8sGPT, serviceAccountName string) (*v1.Clus
 		Rules: []v1.PolicyRule{
 			{
 				APIGroups: []string{""},
-				Resources: []string{"pods", "services", "secrets", "endpoints", "nodes"}, // Added "nodes"
+				Resources: []string{"pods", "services", "secrets", "endpoints", "nodes", "configmaps", "namespaces"},
 				Verbs:     []string{"get", "list", "watch"},
 			},
 			{
@@ -195,12 +195,12 @@ func GetClusterRole(config v1alpha1.K8sGPT, serviceAccountName string) (*v1.Clus
 			},
 			{
 				APIGroups: []string{"apps"},
-				Resources: []string{"deployments", "replicasets", "statefulsets"},
+				Resources: []string{"deployments", "replicasets", "statefulsets", "daemonsets", "replicationcontrollers"},
 				Verbs:     []string{"get", "list", "watch"},
 			},
 			{
 				APIGroups: []string{"batch"},
-				Resources: []string{"cronjobs"},
+				Resources: []string{"cronjobs", "jobs"},
 				Verbs:     []string{"get", "list", "watch"},
 			},
 			{
