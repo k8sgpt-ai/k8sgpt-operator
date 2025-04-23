@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.15](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.14...v0.2.15) (2025-04-23)
+
+
+### Other
+
+* fixing issue with non-auto remediation loop failure ([#670](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/670)) ([155ebad](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/155ebad889e29e2ec817dca8bc34cb6c63b29263))
+
 ## [0.2.14](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.13...v0.2.14) (2025-04-21)
 
 
