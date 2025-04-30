@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.16](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.15...v0.2.16) (2025-04-30)
+
+
+### Features
+
+* adding new analyzer permissions ([#672](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/672)) ([a0ce777](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/a0ce7778cc4bb01a6e5168eebe3827c91d0f6e59))
+
+
+### Other
+
+* **deps:** update docker/build-push-action digest to 14487ce ([#675](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/675)) ([33be4f5](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/33be4f5c19e394d5a8bd321fcf8c20a111775d51))
+* fixed uninitialised annotations ([#679](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/679)) ([8833fc8](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8833fc8c80907e65bf9e1067d9bb53467c509f9a))
+
 ## [0.2.15](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.14...v0.2.15) (2025-04-23)
 
 
