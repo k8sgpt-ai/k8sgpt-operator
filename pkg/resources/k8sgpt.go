@@ -85,6 +85,7 @@ func GetServiceAccount(config v1alpha1.K8sGPT, serviceAccountName string) (*core
 					Controller:         utils.PtrBool(true),
 				},
 			},
+			Annotations: make(map[string]string),
 		},
 	}
 
