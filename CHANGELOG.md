@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.17](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.16...v0.2.17) (2025-05-01)
+
+
+### Features
+
+* add result object namespace to the k8sgpt_number_of_results and k8sgpt_number_of_results_by_type metrics ([#681](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/681)) ([ad791b4](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/ad791b437dbf986f16a1b872b661163532583773))
+* adding optional annotations to the controller manager ([#682](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/682)) ([0220b5f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0220b5f946d892dc2772abed092951236d392689))
+* enable result logging in a helm chart ([#676](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/676)) ([9b30529](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9b30529a7a4d9afcc23d6e46bdf5a94fdfb6764b))
+
+
+### Other
+
+* **deps:** update actions/setup-python digest to a26af69 ([#674](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/674)) ([3f41af7](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/3f41af7d1b02a5f4d6b64f1f1822d880473dfcdc))
+
 ## [0.2.16](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.15...v0.2.16) (2025-04-30)
 
 
