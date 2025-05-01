@@ -28,6 +28,7 @@ The following table lists the configurable parameters of the K8sgpt-operator cha
 | `controllerManager.kubeRbacProxy.resources.requests.cpu` |  | `"5m"`                                                                        |
 | `controllerManager.kubeRbacProxy.resources.requests.memory` |  | `"64Mi"`                                                                      |
 | `controllerManager.manager.sinkWebhookTimeout` |  | `"30s"`                                                                       |
+| `controllerManager.manager.enableResultLogging` |  | `false`                                                                       |
 | `controllerManager.manager.containerSecurityContext.allowPrivilegeEscalation` |  | `false`                                                                       |
 | `controllerManager.manager.containerSecurityContext.capabilities.drop` |  | `["ALL"]`                                                                     |
 | `controllerManager.manager.image.repository` |  | `"ghcr.io/k8sgpt-ai/k8sgpt-operator"`                                         |

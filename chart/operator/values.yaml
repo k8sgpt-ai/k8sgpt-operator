@@ -44,6 +44,7 @@ controllerManager:
         memory: 64Mi
   manager:
     sinkWebhookTimeout: 30s
+    enableResultLogging: false
     containerSecurityContext:
       allowPrivilegeEscalation: false
       capabilities:
