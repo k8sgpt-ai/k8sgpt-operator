@@ -24,6 +24,8 @@ grafanaDashboard:
     matchLabels:
       dashboards: "grafana"
 controllerManager:
+  # Additional annotations to add to the controller manager deployment
+  annotations: {}
   kubeRbacProxy:
     containerSecurityContext:
       allowPrivilegeEscalation: false
