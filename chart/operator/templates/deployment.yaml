@@ -21,6 +21,10 @@ metadata:
   {{- with .Values.controllerManager.labels }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  {{- with .Values.controllerManager.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.controllerManager.replicas }}
   selector:
