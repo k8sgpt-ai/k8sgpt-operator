@@ -21,6 +21,10 @@ metadata:
   {{- with .Values.controllerManager.labels }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  {{- with .Values.controllerManager.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.controllerManager.replicas }}
   selector:
@@ -78,6 +82,9 @@ spec:
         - --health-probe-bind-address=:8081
         - --metrics-bind-address=127.0.0.1:8080
         - --leader-elect
+      {{- if .Values.controllerManager.manager.enableResultLogging }}
+        - --enable-result-logging
+      {{- end }}
         command:
         - /manager
         env:

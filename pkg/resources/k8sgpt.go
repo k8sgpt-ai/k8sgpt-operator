@@ -18,6 +18,7 @@ import (
 	"context"
 	err "errors"
 	"fmt"
+
 	v1 "k8s.io/api/rbac/v1"
 
 	"github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
@@ -84,8 +85,16 @@ func GetServiceAccount(config v1alpha1.K8sGPT, serviceAccountName string) (*core
 					Controller:         utils.PtrBool(true),
 				},
 			},
+			Annotations: make(map[string]string),
 		},
 	}
+
+	if config.Spec.ExtraOptions != nil {
+		if config.Spec.ExtraOptions.ServiceAccountIRSA != "" {
+			serviceAccount.ObjectMeta.Annotations["eks.amazonaws.com/role-arn"] = config.Spec.ExtraOptions.ServiceAccountIRSA
+		}
+	}
+
 	return serviceAccount, nil
 }
 
@@ -172,7 +181,7 @@ func GetClusterRole(config v1alpha1.K8sGPT, serviceAccountName string) (*v1.Clus
 		Rules: []v1.PolicyRule{
 			{
 				APIGroups: []string{""},
-				Resources: []string{"pods", "services", "secrets", "endpoints", "nodes"}, // Added "nodes"
+				Resources: []string{"pods", "services", "secrets", "endpoints", "nodes", "configmaps", "namespaces"},
 				Verbs:     []string{"get", "list", "watch"},
 			},
 			{
@@ -187,12 +196,12 @@ func GetClusterRole(config v1alpha1.K8sGPT, serviceAccountName string) (*v1.Clus
 			},
 			{
 				APIGroups: []string{"apps"},
-				Resources: []string{"deployments", "replicasets", "statefulsets"},
+				Resources: []string{"deployments", "replicasets", "statefulsets", "daemonsets", "replicationcontrollers"},
 				Verbs:     []string{"get", "list", "watch"},
 			},
 			{
 				APIGroups: []string{"batch"},
-				Resources: []string{"cronjobs"},
+				Resources: []string{"cronjobs", "jobs"},
 				Verbs:     []string{"get", "list", "watch"},
 			},
 			{
@@ -275,7 +284,7 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 					Containers: []corev1.Container{
 						{
 							Name:            "k8sgpt",
-							ImagePullPolicy: corev1.PullAlways,
+							ImagePullPolicy: config.Spec.ImagePullPolicy,
 							Image:           image,
 							Args: []string{
 								"serve",
@@ -355,6 +364,12 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 										}
 										return resource.MustParse("256Mi")
 									}(),
+								},
+							},
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									MountPath: "/k8sgpt-data",
+									Name:      "k8sgpt-vol",
 								},
 							},
 						},
@@ -483,8 +498,8 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 		return &appsv1.Deployment{}, err.New("engine is supported only by azureopenai provider")
 	}
 
-	// ProxyEndpoint is required only when azureopenai or openai is the ai backend
-	if config.Spec.AI.ProxyEndpoint != "" && (config.Spec.AI.Backend == v1alpha1.AzureOpenAI || config.Spec.AI.Backend == v1alpha1.OpenAI) {
+	// Configure ProxyEndpoint env variable
+	if config.Spec.AI.ProxyEndpoint != "" {
 		proxyEndpoint := corev1.EnvVar{
 			Name:  "K8SGPT_PROXY_ENDPOINT",
 			Value: config.Spec.AI.ProxyEndpoint,
@@ -492,9 +507,6 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 		deployment.Spec.Template.Spec.Containers[0].Env = append(
 			deployment.Spec.Template.Spec.Containers[0].Env, proxyEndpoint,
 		)
-	} else if config.Spec.AI.ProxyEndpoint != "" && config.Spec.AI.Backend != v1alpha1.AzureOpenAI && config.Spec.AI.Backend != v1alpha1.OpenAI {
-		return &appsv1.Deployment{}, err.New("proxyEndpoint is supported only by azureopenai and openai provider")
-
 	}
 
 	// Add checks for amazonbedrock

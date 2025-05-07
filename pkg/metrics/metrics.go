@@ -103,12 +103,12 @@ func InitializeMetrics() *MetricBuilder {
 	}).AddMetric(MetricConfig{
 		Name:   "k8sgpt_number_of_results",
 		Help:   "The total number of results",
-		Labels: []string{"k8sgpt"},
+		Labels: []string{"object_namespace", "k8sgpt"},
 		Type:   Gauge,
 	}).AddMetric(MetricConfig{
 		Name:   "k8sgpt_number_of_results_by_type",
 		Help:   "The total number of results by type",
-		Labels: []string{"kind", "name", "k8sgpt"},
+		Labels: []string{"object_namespace", "kind", "name", "k8sgpt"},
 		Type:   Gauge,
 	}).AddMetric(MetricConfig{
 		Name:   "k8sgpt_number_of_backend_ai_calls",

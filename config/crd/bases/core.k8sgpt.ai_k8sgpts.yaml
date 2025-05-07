@@ -92,6 +92,7 @@ spec:
                     - amazonsagemaker
                     - google
                     - googlevertexai
+                    - customrest
                     type: string
                   baseUrl:
                     type: string
@@ -148,11 +149,17 @@ spec:
                       enabled:
                         type: boolean
                     type: object
+                  serviceAccountIRSA:
+                    type: string
                 type: object
               filters:
                 items:
                   type: string
                 type: array
+              imagePullPolicy:
+                description: PullPolicy describes a policy for if/when to pull a container
+                  image
+                type: string
               imagePullSecrets:
                 items:
                   properties:

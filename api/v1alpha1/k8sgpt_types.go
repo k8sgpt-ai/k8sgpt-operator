@@ -34,7 +34,8 @@ type SecretRef struct {
 }
 
 type ExtraOptionsRef struct {
-	Backstage *Backstage `json:"backstage,omitempty"`
+	Backstage          *Backstage `json:"backstage,omitempty"`
+	ServiceAccountIRSA string     `json:"serviceAccountIRSA,omitempty"`
 }
 
 type CredentialsRef struct {
@@ -110,7 +111,7 @@ type AutoRemediation struct {
 type AISpec struct {
 	AutoRemediation AutoRemediation `json:"autoRemediation,omitempty"`
 	// +kubebuilder:default:=openai
-	// +kubebuilder:validation:Enum=ibmwatsonxai;openai;localai;azureopenai;amazonbedrock;cohere;amazonsagemaker;google;googlevertexai
+	// +kubebuilder:validation:Enum=ibmwatsonxai;openai;localai;azureopenai;amazonbedrock;cohere;amazonsagemaker;google;googlevertexai;customrest
 	Backend string   `json:"backend"`
 	BackOff *BackOff `json:"backOff,omitempty"`
 	BaseUrl string   `json:"baseUrl,omitempty"`
@@ -150,6 +151,7 @@ type K8sGPTSpec struct {
 	Version string `json:"version,omitempty"`
 	// +kubebuilder:default:=ghcr.io/k8sgpt-ai/k8sgpt
 	Repository       string                       `json:"repository,omitempty"`
+	ImagePullPolicy  corev1.PullPolicy            `json:"imagePullPolicy,omitempty"`
 	ImagePullSecrets []ImagePullSecrets           `json:"imagePullSecrets,omitempty"`
 	Resources        *corev1.ResourceRequirements `json:"resources,omitempty"`
 	NoCache          bool                         `json:"noCache,omitempty"`

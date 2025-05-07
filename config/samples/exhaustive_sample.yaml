@@ -6,6 +6,7 @@ metadata:
 spec:
   version: <k8sgpt-version>     # Version of K8sGPT (optional)
   repository: <image-repository> # Image repository for K8sGPT (optional, default: ghcr.io/k8sgpt-ai/k8sgpt)
+  imagePullPolicy: <image-pull-policy> # Image Pull Policy for K8SGPT container (optional, default: Always)
   imagePullSecrets:             # Secrets for pulling images (optional)
     - name: <secret-name>
   resources:                   # Resource requests and limits for the K8sGPT deployment (optional)
@@ -26,6 +27,7 @@ spec:
   extraOptions:                 # Extra options (optional)
     backstage:
       enabled: <boolean>
+    serviceAccountIRSA: <arn>
   sink:                        # Webhook for notifications (optional)
     type: <webhook-type>        # (e.g., slack, mattermost)
     endpoint: <webhook-endpoint>

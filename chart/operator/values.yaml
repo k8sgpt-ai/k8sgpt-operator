@@ -24,6 +24,8 @@ grafanaDashboard:
     matchLabels:
       dashboards: "grafana"
 controllerManager:
+  # Additional annotations to add to the controller manager deployment
+  annotations: {}
   kubeRbacProxy:
     containerSecurityContext:
       allowPrivilegeEscalation: false
@@ -42,6 +44,7 @@ controllerManager:
         memory: 64Mi
   manager:
     sinkWebhookTimeout: 30s
+    enableResultLogging: false
     containerSecurityContext:
       allowPrivilegeEscalation: false
       capabilities:
@@ -49,7 +52,7 @@ controllerManager:
         - ALL
     image:
       repository: ghcr.io/k8sgpt-ai/k8sgpt-operator
-      tag: v0.2.10  # x-release-please-version
+      tag: v0.2.17  # x-release-please-version
     resources:
       limits:
         cpu: 500m
