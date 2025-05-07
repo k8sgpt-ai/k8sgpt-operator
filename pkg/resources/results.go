@@ -2,7 +2,6 @@ package resources
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 	"strings"
 
@@ -11,6 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 type ResultOperation string
@@ -63,6 +63,7 @@ func GetResult(resultSpec v1alpha1.ResultSpec, name, namespace, backend string, 
 	}
 }
 func CreateOrUpdateResult(ctx context.Context, c client.Client, res v1alpha1.Result) (*v1alpha1.Result, error) {
+	logger := log.FromContext(ctx)
 	var existing v1alpha1.Result
 	if err := c.Get(ctx, client.ObjectKey{Namespace: res.Namespace, Name: res.Name}, &existing); err != nil {
 		if !errors.IsNotFound(err) {
@@ -71,7 +72,7 @@ func CreateOrUpdateResult(ctx context.Context, c client.Client, res v1alpha1.Res
 		if err := c.Create(ctx, &res); err != nil {
 			return nil, err
 		}
-		fmt.Printf("Created result %s\n", res.Name)
+		logger.Info("Created result", "name", res.Name)
 		return &existing, nil
 	}
 	if len(existing.Spec.Error) == len(res.Spec.Error) && reflect.DeepEqual(res.Labels, existing.Labels) {
@@ -89,6 +90,6 @@ func CreateOrUpdateResult(ctx context.Context, c client.Client, res v1alpha1.Res
 	if err := c.Status().Update(ctx, &existing); err != nil {
 		return nil, err
 	}
-	fmt.Printf("Updated result %s\n", res.Name)
+	logger.Info("Updated result", "name", res.Name)
 	return &existing, nil
 }

@@ -2,9 +2,9 @@ package integrations
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
+	"github.com/go-logr/logr"
 	"github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -12,6 +12,7 @@ import (
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 const (
@@ -22,6 +23,7 @@ type Integrations struct {
 	restMapper meta.RESTMapper
 	client     client.Client
 	ctx        context.Context
+	logger     logr.Logger
 }
 
 func NewIntegrations(client client.Client, ctx context.Context) (*Integrations, error) {
@@ -33,6 +35,7 @@ func NewIntegrations(client client.Client, ctx context.Context) (*Integrations, 
 		restMapper: restMapper,
 		client:     client,
 		ctx:        ctx,
+		logger:     log.Log.WithName("Integrations"),
 	}, nil
 }
 
@@ -43,7 +46,7 @@ func (i *Integrations) BackstageLabel(result v1alpha1.ResultSpec) map[string]str
 		Resource: result.Kind,
 	})
 	if err != nil {
-		fmt.Printf("Unable to find Kind '%s'\n", result.Kind)
+		i.logger.Error(err, "Unable to find Kind", "kind", result.Kind)
 		return map[string]string{}
 	}
 
@@ -58,13 +61,13 @@ func (i *Integrations) BackstageLabel(result v1alpha1.ResultSpec) map[string]str
 	err = i.client.Get(i.ctx, client.ObjectKey{Name: resourceName, Namespace: namespace}, obj)
 	// if we don't find the K8s object we won't trigger a new reconciliation and just log a message
 	if err != nil {
-		fmt.Printf("Fail to retrieve resource %s for namespace %s\n", resourceName, namespace)
+		i.logger.Error(err, "Fail to retrieve resource", "resource", resourceName, "namespace", namespace)
 		return map[string]string{}
 	}
 	labels := obj.GetLabels()
 	value, exists := labels[backstageLabelKey]
 	if !exists {
-		fmt.Printf("Label key '%s' does not exist in %s resource: %s\n", backstageLabelKey, result.Kind, resourceName)
+		i.logger.Info("Label key does not exist in resource", "labelKey", backstageLabelKey, "kind", result.Kind, "resource", resourceName)
 	}
 	// Assign the same label key/value to result CR
 	return map[string]string{backstageLabelKey: value}

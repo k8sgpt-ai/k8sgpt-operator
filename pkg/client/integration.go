@@ -7,9 +7,11 @@ import (
 	rpc "buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go/schema/v1/schemav1grpc"
 	schemav1 "buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go/schema/v1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 func (c *Client) AddIntegration(config *v1alpha1.K8sGPT) error {
+	logger := log.Log.WithName("AddIntegration")
 
 	// Check if the integration is active already
 	client := rpc.NewServerConfigServiceClient(c.Conn)
@@ -22,7 +24,7 @@ func (c *Client) AddIntegration(config *v1alpha1.K8sGPT) error {
 	}
 
 	if resp.Trivy.Enabled == config.Spec.Integrations.Trivy.Enabled {
-		fmt.Println("Skipping trivy installation, already enabled")
+		logger.Info("Skipping trivy installation, already enabled")
 		return nil
 	}
 	// If the integration is inactive, make it active
