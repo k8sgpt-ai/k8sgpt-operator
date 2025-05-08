@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.2.18](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.17...v0.2.18) (2025-05-08)
+
+
+### Features
+
+* logger ext ([#687](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/687)) ([b3cb224](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/b3cb2244a5ef98743882226efb2a78f39a3b4315))
+
+
+### Bug Fixes
+
+* **deps:** update k8s.io/utils digest to 0f33e8f ([#684](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/684)) ([4388c22](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/4388c22b3e1a299781b8a527512bca9616d2b516))
+
+
+### Other
+
+* **deps:** update actions/setup-go digest to d35c59a ([#688](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/688)) ([9cc1170](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9cc1170b70276c26e80fcfc4715f6fef23ce8f7c))
+
 ## [0.2.17](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.16...v0.2.17) (2025-05-01)
 
 
