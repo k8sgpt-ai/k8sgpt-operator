@@ -34,7 +34,7 @@ controllerManager:
         - ALL
     image:
       repository: quay.io/brancz/kube-rbac-proxy
-      tag: v0.18.2
+      tag: v0.19.1
     resources:
       limits:
         cpu: 500m
