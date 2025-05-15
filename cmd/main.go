@@ -17,12 +17,13 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/k8sgpt"
-	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/mutation"
-	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/types"
 	"math/rand"
 	"os"
 	"time"
+
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/k8sgpt"
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/mutation"
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/types"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -38,6 +39,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -81,9 +84,13 @@ func main() {
 		setupLog.Info(fmt.Sprintf("Probe address: %s", probeAddr))
 	}
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme:                 scheme,
-		MetricsBindAddress:     metricsAddr,
-		Port:                   9443,
+		Scheme: scheme,
+		Metrics: metricsserver.Options{
+			BindAddress: metricsAddr,
+		},
+		WebhookServer: webhook.NewServer(webhook.Options{
+			Port: 9443,
+		}),
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "ea9c19f7.k8sgpt.ai",
