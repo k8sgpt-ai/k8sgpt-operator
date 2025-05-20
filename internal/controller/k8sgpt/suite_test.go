@@ -58,9 +58,21 @@ var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 
 	By("bootstrapping test environment")
+	useExistingCluster := false
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths:     []string{filepath.Join("..", "..", "..", "config", "crd", "bases")},
 		ErrorIfCRDPathMissing: true,
+		UseExistingCluster:    &useExistingCluster,
+	}
+
+	if os.Getenv("KUBEBUILDER_ASSETS") == "" {
+		localAssetsPath := filepath.Join("..", "..", "..", "bin", "k8s", "1.26.0-darwin-arm64")
+		if _, err := os.Stat(localAssetsPath); err == nil {
+			testEnv.BinaryAssetsDirectory = localAssetsPath
+			logf.Log.Info("Using local KUBEBUILDER_ASSETS", "path", localAssetsPath)
+		} else {
+			logf.Log.Info("KUBEBUILDER_ASSETS not set and local assets not found. envtest will attempt to download.")
+		}
 	}
 
 	var err error
