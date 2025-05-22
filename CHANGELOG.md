@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.2.18](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.17...v0.2.18) (2025-05-15)
+
+
+### Features
+
+* logger ext ([#687](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/687)) ([b3cb224](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/b3cb2244a5ef98743882226efb2a78f39a3b4315))
+
+
+### Bug Fixes
+
+* **deps:** update k8s.io/utils digest to 0f33e8f ([#684](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/684)) ([4388c22](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/4388c22b3e1a299781b8a527512bca9616d2b516))
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#646](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/646)) ([9f4d4a0](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9f4d4a034b0064fd4e4f7fd363c57432337f4b0f))
+
+
+### Other
+
+* **deps:** bump golang.org/x/net from 0.33.0 to 0.38.0 ([#667](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/667)) ([e29e47d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e29e47d5562116b3b69904990fa92be4fb471806))
+* **deps:** update actions/setup-go digest to d35c59a ([#688](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/688)) ([9cc1170](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9cc1170b70276c26e80fcfc4715f6fef23ce8f7c))
+* renovate all minor patch v2 ([#693](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/693)) ([bc98cab](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/bc98cabc26430b9910c5ad3279ee61335168dc0e))
+
 ## [0.2.17](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.16...v0.2.17) (2025-05-01)
 
 
