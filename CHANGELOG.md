@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.19](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.18...v0.2.19) (2025-05-23)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies to v0.33.1 ([#595](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/595)) ([5360bf0](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5360bf0116842cba882e1038403142d6caecfeb9))
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#692](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/692)) ([7b08ce4](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/7b08ce43778dacea55eff35c404242baa0ee61bf))
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#694](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/694)) ([bfd30c5](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/bfd30c558fa5c57f137788384e3a6c6dcca1343f))
+* **deps:** update module sigs.k8s.io/controller-runtime to v0.21.0 ([#701](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/701)) ([0beb2cf](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0beb2cfcaa6686be92ab3ca48f44ea4f6a892304))
+
+
+### Other
+
+* **deps:** update docker/build-push-action digest to 1dc7386 ([#697](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/697)) ([30eaf25](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/30eaf2533096092a4b904ca065d8ac3b108a621d))
+
 ## [0.2.18](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.17...v0.2.18) (2025-05-15)
 
 
