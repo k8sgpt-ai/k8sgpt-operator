@@ -9,6 +9,7 @@ import (
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
@@ -62,34 +63,47 @@ func GetResult(resultSpec v1alpha1.ResultSpec, name, namespace, backend string, 
 		},
 	}
 }
+
 func CreateOrUpdateResult(ctx context.Context, c client.Client, res v1alpha1.Result) (*v1alpha1.Result, error) {
 	logger := log.FromContext(ctx)
-	var existing v1alpha1.Result
-	if err := c.Get(ctx, client.ObjectKey{Namespace: res.Namespace, Name: res.Name}, &existing); err != nil {
-		if !errors.IsNotFound(err) {
-			return nil, err
-		}
-		if err := c.Create(ctx, &res); err != nil {
-			return nil, err
-		}
-		logger.Info("Created result", "name", res.Name)
-		return &existing, nil
-	}
-	if len(existing.Spec.Error) == len(res.Spec.Error) && reflect.DeepEqual(res.Labels, existing.Labels) {
-		existing.Status.LifeCycle = string(NoOpResult)
-		err := c.Status().Update(ctx, &existing)
-		return &existing, err
-	}
 
-	existing.Spec = res.Spec
-	existing.Labels = res.Labels
-	if err := c.Update(ctx, &existing); err != nil {
-		return nil, err
-	}
-	existing.Status.LifeCycle = string(UpdatedResult)
-	if err := c.Status().Update(ctx, &existing); err != nil {
-		return nil, err
-	}
-	logger.Info("Updated result", "name", res.Name)
-	return &existing, nil
+	var finalResult *v1alpha1.Result
+	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		var existing v1alpha1.Result
+		if err := c.Get(ctx, client.ObjectKey{Namespace: res.Namespace, Name: res.Name}, &existing); err != nil {
+			if errors.IsNotFound(err) {
+				if err := c.Create(ctx, &res); err != nil {
+					return err
+				}
+				logger.Info("Created result", "name", res.Name)
+				finalResult = &res
+				return nil
+			}
+			return err
+		}
+
+		if len(existing.Spec.Error) == len(res.Spec.Error) && reflect.DeepEqual(res.Labels, existing.Labels) {
+			existing.Status.LifeCycle = string(NoOpResult)
+			if err := c.Status().Update(ctx, &existing); err != nil {
+				return err
+			}
+			finalResult = &existing
+			return nil
+		}
+
+		existing.Spec = res.Spec
+		existing.Labels = res.Labels
+		if err := c.Update(ctx, &existing); err != nil {
+			return err
+		}
+		existing.Status.LifeCycle = string(UpdatedResult)
+		if err := c.Status().Update(ctx, &existing); err != nil {
+			return err
+		}
+		logger.Info("Updated result", "name", res.Name)
+		finalResult = &existing
+		return nil
+	})
+
+	return finalResult, err
 }
