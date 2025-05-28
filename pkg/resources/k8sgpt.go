@@ -387,10 +387,10 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 	}
 	if outOfClusterMode {
 		// Keep the service account if using Amazon Bedrock with IRSA
-		needsServiceAccount := config.Spec.AI.Backend == v1alpha1.AmazonBedrock && 
-			config.Spec.ExtraOptions != nil && 
+		needsServiceAccount := config.Spec.AI.Backend == v1alpha1.AmazonBedrock &&
+			config.Spec.ExtraOptions != nil &&
 			config.Spec.ExtraOptions.ServiceAccountIRSA != ""
-		
+
 		if !needsServiceAccount {
 			// No need of ServiceAccount since the Deployment will use
 			// a kubeconfig pointing to an external cluster.

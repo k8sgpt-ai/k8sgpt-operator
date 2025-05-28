@@ -128,6 +128,16 @@ spec:
                 required:
                 - backend
                 type: object
+              analysis:
+                properties:
+                  interval:
+                    default: 5m
+                    pattern: ^[0-9]+[mh]$
+                    type: string
+                  namespace:
+                    default: k8sgpt
+                    type: string
+                type: object
               customAnalyzers:
                 items:
                   properties:

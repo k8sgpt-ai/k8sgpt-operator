@@ -54,7 +54,6 @@ var _ = Describe("K8sGPT controller", func() {
 
 			It("Should create CR", func() {
 				Expect(k8sClient.Create(ctx, &k8sgpt)).Should(Succeed())
-
 			})
 
 			It("Should K8SGPT have a finalizer", func() {
@@ -70,7 +69,6 @@ var _ = Describe("K8sGPT controller", func() {
 					}
 
 					return nil
-
 				}).Should(BeNil())
 			})
 
@@ -87,11 +85,66 @@ var _ = Describe("K8sGPT controller", func() {
 					}
 
 					return nil
-
 				}).Should(BeNil())
 			})
 		})
 
+		Context("when configuring analysis interval", func() {
+			k8sgpt := corev1alpha1.GetValidProjectResource("interval-test", "default")
+			k8sgpt.Spec.Analysis = &corev1alpha1.AnalysisConfig{
+				Interval:  "1m",
+				Namespace: "default",
+			}
+			nn := types.NamespacedName{
+				Namespace: k8sgpt.Namespace,
+				Name:      k8sgpt.Name,
+			}
+
+			It("Should create CR with custom interval", func() {
+				Expect(k8sClient.Create(ctx, &k8sgpt)).Should(Succeed())
+			})
+
+			It("Should parse and use custom interval", func() {
+				Eventually(func() error {
+					k := corev1alpha1.K8sGPT{}
+					err := k8sClient.Get(ctx, nn, &k)
+					if err != nil {
+						return err
+					}
+
+					if k.Spec.Analysis == nil || k.Spec.Analysis.Interval != "1m" {
+						return errors.New("analysis interval not set correctly")
+					}
+
+					return nil
+				}).Should(BeNil())
+			})
+
+			It("Should handle invalid interval gracefully", func() {
+				Eventually(func() error {
+					k := corev1alpha1.K8sGPT{}
+					err := k8sClient.Get(ctx, nn, &k)
+					if err != nil {
+						return err
+					}
+
+					// Update with invalid interval
+					k.Spec.Analysis.Interval = "invalid"
+					err = k8sClient.Update(ctx, &k)
+					if err != nil {
+						return err
+					}
+
+					// Should still be able to get the resource
+					err = k8sClient.Get(ctx, nn, &k)
+					if err != nil {
+						return err
+					}
+
+					return nil
+				}).Should(BeNil())
+			})
+		})
 	})
 })
 

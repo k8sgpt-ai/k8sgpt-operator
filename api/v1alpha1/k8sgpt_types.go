@@ -146,6 +146,14 @@ type ImagePullSecrets struct {
 	Name string `json:"name,omitempty"`
 }
 
+type AnalysisConfig struct {
+	// +kubebuilder:default="5m"
+	// +kubebuilder:validation:Pattern="^[0-9]+[mh]$"
+	Interval string `json:"interval,omitempty"`
+	// +kubebuilder:default="k8sgpt"
+	Namespace string `json:"namespace,omitempty"`
+}
+
 // K8sGPTSpec defines the desired state of K8sGPT
 type K8sGPTSpec struct {
 	Version string `json:"version,omitempty"`
@@ -164,6 +172,7 @@ type K8sGPTSpec struct {
 	Integrations     *Integrations                `json:"integrations,omitempty"`
 	NodeSelector     map[string]string            `json:"nodeSelector,omitempty"`
 	TargetNamespace  string                       `json:"targetNamespace,omitempty"`
+	Analysis         *AnalysisConfig              `json:"analysis,omitempty"`
 	// Define the kubeconfig the Deployment must use.
 	// If empty, the Deployment will use the ServiceAccount provided by Kubernetes itself.
 	Kubeconfig *SecretRef `json:"kubeconfig,omitempty"`

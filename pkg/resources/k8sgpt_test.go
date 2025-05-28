@@ -120,7 +120,7 @@ func Test_GetDeploymentWithKubeconfigAndIRSA(t *testing.T) {
 	scheme := runtime.NewScheme()
 	require.NoError(t, appsv1.AddToScheme(scheme))
 	require.NoError(t, v1.AddToScheme(scheme))
-	
+
 	// Create a fake client with a secret for testing
 	secret := &v1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -131,7 +131,7 @@ func Test_GetDeploymentWithKubeconfigAndIRSA(t *testing.T) {
 			"kubeconfig": []byte("test-kubeconfig-content"),
 		},
 	}
-	
+
 	fakeClient := fake.NewClientBuilder().
 		WithScheme(scheme).
 		WithObjects(secret).
@@ -200,11 +200,11 @@ func Test_GetDeploymentWithKubeconfigAndIRSA(t *testing.T) {
 					Version:         "v0.4.1",
 					ImagePullPolicy: v1.PullAlways,
 					AI: &v1alpha1.AISpec{
-						Backend: tc.backend,
-						Model:   "gpt-4o-mini",
+						Backend:   tc.backend,
+						Model:     "gpt-4o-mini",
 						MaxTokens: "2048",
 						Topk:      "50",
-						Region:    func() string {
+						Region: func() string {
 							if tc.backend == "amazonbedrock" {
 								return "us-east-1"
 							}
