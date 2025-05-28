@@ -16,8 +16,9 @@ package k8sgpt
 
 import (
 	"context"
-	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/types"
 	"time"
+
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/types"
 
 	"github.com/go-logr/logr"
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
@@ -43,6 +44,14 @@ const (
 var (
 	k8sgptControllerLog = ctrl.Log.WithName("k8sgpt-controller")
 )
+
+// parseInterval parses the interval string into a time.Duration
+func parseInterval(interval string) (time.Duration, error) {
+	if interval == "" {
+		return ReconcileSuccessInterval, nil
+	}
+	return time.ParseDuration(interval)
+}
 
 // K8sGPTReconciler reconciles a K8sGPT object
 type K8sGPTReconciler struct {
@@ -153,10 +162,38 @@ func (r *K8sGPTReconciler) FinishReconcile(err error, requeueImmediate bool, nam
 		}
 		return ctrl.Result{Requeue: true, RequeueAfter: interval}, err
 	}
-	interval := ReconcileSuccessInterval
+
+	// Get the K8sGPT instance to check for custom interval
+	k8sgpt := &corev1alpha1.K8sGPT{}
+	if err := r.Get(context.Background(), client.ObjectKey{Name: name, Namespace: "k8sgpt"}, k8sgpt); err != nil {
+		if client.IgnoreNotFound(err) != nil {
+			return ctrl.Result{}, err
+		}
+		// If not found, use default interval
+		interval := ReconcileSuccessInterval
+		if requeueImmediate {
+			interval = 0
+		}
+		return ctrl.Result{Requeue: true, RequeueAfter: interval}, nil
+	}
+
+	// Parse the custom interval if specified
+	var interval time.Duration
+	if k8sgpt.Spec.Analysis != nil && k8sgpt.Spec.Analysis.Interval != "" {
+		var err error
+		interval, err = parseInterval(k8sgpt.Spec.Analysis.Interval)
+		if err != nil {
+			k8sgptControllerLog.Error(err, "Failed to parse analysis interval, using default")
+			interval = ReconcileSuccessInterval
+		}
+	} else {
+		interval = ReconcileSuccessInterval
+	}
+
 	if requeueImmediate {
 		interval = 0
 	}
+
 	k8sgptControllerLog.Info("Finished Reconciling k8sGPT")
 	return ctrl.Result{Requeue: true, RequeueAfter: interval}, nil
 }
