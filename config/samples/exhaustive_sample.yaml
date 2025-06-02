@@ -16,6 +16,8 @@ spec:
     limits:
       cpu: <cpu-limit>
       memory: <memory-limit>
+  analysisConfig:
+    interval: <interval>       # Interval between analysis runs (e.g. "30s","5m", "1h")
   noCache: <boolean>            # Disable caching (optional)
   customAnalyzers:             # Define custom analyzers (optional)
     - name: <analyzer-name>

@@ -137,8 +137,84 @@ var _ = Describe("K8sGPT controller", func() {
 					}
 
 					// Verify the error is a validation error
-					if !strings.Contains(err.Error(), "spec.analysis.interval in body should match '^[0-9]+[mh]$'") {
+					if !strings.Contains(err.Error(), "spec.analysis.interval in body should match '^[0-9]+[smh]$'") {
 						return fmt.Errorf("unexpected error: %v", err)
+					}
+
+					// Verify the original interval is still set
+					err = k8sClient.Get(ctx, nn, &k)
+					if err != nil {
+						return err
+					}
+					if k.Spec.Analysis.Interval != "5m" {
+						return fmt.Errorf("interval was changed to %s, expected 5m", k.Spec.Analysis.Interval)
+					}
+
+					return nil
+				}).Should(BeNil())
+			})
+
+			It("Should handle different interval formats", func() {
+				Eventually(func() error {
+					k := corev1alpha1.K8sGPT{}
+					err := k8sClient.Get(ctx, nn, &k)
+					if err != nil {
+						return err
+					}
+
+					// Test seconds
+					k.Spec.Analysis.Interval = "30s"
+					err = k8sClient.Update(ctx, &k)
+					if err != nil {
+						return err
+					}
+
+					// Test minutes
+					k.Spec.Analysis.Interval = "5m"
+					err = k8sClient.Update(ctx, &k)
+					if err != nil {
+						return err
+					}
+
+					// Test hours
+					k.Spec.Analysis.Interval = "1h"
+					err = k8sClient.Update(ctx, &k)
+					if err != nil {
+						return err
+					}
+
+					return nil
+				}).Should(BeNil())
+			})
+
+			It("Should reject invalid interval formats", func() {
+				Eventually(func() error {
+					k := corev1alpha1.K8sGPT{}
+					err := k8sClient.Get(ctx, nn, &k)
+					if err != nil {
+						return err
+					}
+
+					// Test invalid formats
+					invalidFormats := []string{
+						"invalid",
+						"5",     // missing unit
+						"5d",    // invalid unit
+						"abc",   // no numbers
+						"5m30s", // multiple units
+						"5.5m",  // decimal
+						"-5m",   // negative
+					}
+
+					for _, format := range invalidFormats {
+						k.Spec.Analysis.Interval = format
+						err = k8sClient.Update(ctx, &k)
+						if err == nil {
+							return fmt.Errorf("expected validation error for interval %s", format)
+						}
+						if !strings.Contains(err.Error(), "spec.analysis.interval in body should match '^[0-9]+[smh]$'") {
+							return fmt.Errorf("unexpected error for interval %s: %v", format, err)
+						}
 					}
 
 					return nil

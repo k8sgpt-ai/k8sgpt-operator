@@ -147,8 +147,8 @@ type ImagePullSecrets struct {
 }
 
 type AnalysisConfig struct {
-	// +kubebuilder:default="5m"
-	// +kubebuilder:validation:Pattern="^[0-9]+[mh]$"
+	// Interval is the time between analysis runs
+	// +kubebuilder:validation:Pattern=`^[0-9]+[smh]$`
 	Interval string `json:"interval,omitempty"`
 }
 

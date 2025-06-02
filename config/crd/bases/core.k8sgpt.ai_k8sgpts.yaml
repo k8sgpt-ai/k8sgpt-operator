@@ -131,11 +131,8 @@ spec:
               analysis:
                 properties:
                   interval:
-                    default: 5m
-                    pattern: ^[0-9]+[mh]$
-                    type: string
-                  namespace:
-                    default: k8sgpt
+                    description: Interval is the time between analysis runs
+                    pattern: ^[0-9]+[smh]$
                     type: string
                 type: object
               customAnalyzers:
