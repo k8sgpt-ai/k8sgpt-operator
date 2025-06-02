@@ -48,14 +48,14 @@ func (step *PreAnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, err
 	// If the deployment is active, we will query it directly for sis data
 	address, err := Kclient.GenerateAddress(instance.Ctx, instance.R.Client, instance.K8sgptConfig)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
 	instance.logger.Info("K8sGPT address: " + address)
 
 	instance.kclient, err = Kclient.NewClient(address)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
 	instance.logger.Info("K8sGPT client: " + fmt.Sprintf("%v", instance.kclient))
@@ -74,7 +74,7 @@ func (step *PreAnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, err
 	// This will need a refactor in future...
 	err = step.addRemoteCache(instance)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 	instance.logger.Info("Remote cache added")
 
@@ -82,7 +82,7 @@ func (step *PreAnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, err
 
 	err = step.addIntegrations(instance)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 	instance.logger.Info("Integrations added")
 
@@ -118,10 +118,10 @@ func (step *PreAnalysisStep) updateDeploymentImage(instance *K8sGPTInstance) (ct
 	)
 	err := instance.R.Update(instance.Ctx, instance.k8sgptDeployment)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
-	return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name)
+	return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 }
 
 // https://kubernetes.io/docs/concepts/containers/images/#image-names

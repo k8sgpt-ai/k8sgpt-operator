@@ -39,15 +39,15 @@ func (step *FinalizerStep) execute(instance *K8sGPTInstance) (ctrl.Result, error
 			// Delete any external resources associated with the instance
 			err := resources.Sync(instance.Ctx, instance.R.Client, *instance.K8sgptConfig, resources.DestroyOp)
 			if err != nil {
-				return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+				return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 			}
 			controllerutil.RemoveFinalizer(instance.K8sgptConfig, FinalizerName)
 			if err := instance.R.Update(instance.Ctx, instance.K8sgptConfig); err != nil {
-				return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+				return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 			}
 		}
 		// Stop reconciliation as the item is being deleted
-		return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
 	// The object is not being deleted, so if it does not have our finalizer,
@@ -56,7 +56,7 @@ func (step *FinalizerStep) execute(instance *K8sGPTInstance) (ctrl.Result, error
 	if !utils.ContainsString(instance.K8sgptConfig.GetFinalizers(), FinalizerName) {
 		controllerutil.AddFinalizer(instance.K8sgptConfig, FinalizerName)
 		if err := instance.R.Update(instance.Ctx, instance.K8sgptConfig); err != nil {
-			return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+			return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 		}
 	}
 	instance.logger.Info("ending FinalizerStep")

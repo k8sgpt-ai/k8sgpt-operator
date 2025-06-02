@@ -149,7 +149,7 @@ func (r *K8sGPTReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return c
 }
 
-func (r *K8sGPTReconciler) FinishReconcile(err error, requeueImmediate bool, name string) (ctrl.Result, error) {
+func (r *K8sGPTReconciler) FinishReconcile(err error, requeueImmediate bool, name string, k8sgpt *corev1alpha1.K8sGPT) (ctrl.Result, error) {
 	if err != nil {
 		interval := ReconcileErrorInterval
 		if requeueImmediate {
@@ -163,23 +163,9 @@ func (r *K8sGPTReconciler) FinishReconcile(err error, requeueImmediate bool, nam
 		return ctrl.Result{Requeue: true, RequeueAfter: interval}, err
 	}
 
-	// Get the K8sGPT instance to check for custom interval
-	k8sgpt := &corev1alpha1.K8sGPT{}
-	if err := r.Get(context.Background(), client.ObjectKey{Name: name, Namespace: "k8sgpt"}, k8sgpt); err != nil {
-		if client.IgnoreNotFound(err) != nil {
-			return ctrl.Result{}, err
-		}
-		// If not found, use default interval
-		interval := ReconcileSuccessInterval
-		if requeueImmediate {
-			interval = 0
-		}
-		return ctrl.Result{Requeue: true, RequeueAfter: interval}, nil
-	}
-
 	// Parse the custom interval if specified
 	var interval time.Duration
-	if k8sgpt.Spec.Analysis != nil && k8sgpt.Spec.Analysis.Interval != "" {
+	if k8sgpt != nil && k8sgpt.Spec.Analysis != nil && k8sgpt.Spec.Analysis.Interval != "" {
 		var err error
 		interval, err = parseInterval(k8sgpt.Spec.Analysis.Interval)
 		if err != nil {

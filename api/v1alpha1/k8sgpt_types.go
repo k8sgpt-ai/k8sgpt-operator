@@ -150,8 +150,6 @@ type AnalysisConfig struct {
 	// +kubebuilder:default="5m"
 	// +kubebuilder:validation:Pattern="^[0-9]+[mh]$"
 	Interval string `json:"interval,omitempty"`
-	// +kubebuilder:default="k8sgpt"
-	Namespace string `json:"namespace,omitempty"`
 }
 
 // K8sGPTSpec defines the desired state of K8sGPT

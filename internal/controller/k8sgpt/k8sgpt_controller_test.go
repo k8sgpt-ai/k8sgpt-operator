@@ -92,8 +92,7 @@ var _ = Describe("K8sGPT controller", func() {
 		Context("when configuring analysis interval", func() {
 			k8sgpt := corev1alpha1.GetValidProjectResource("interval-test", "default")
 			k8sgpt.Spec.Analysis = &corev1alpha1.AnalysisConfig{
-				Interval:  "1m",
-				Namespace: "default",
+				Interval: "5m",
 			}
 			nn := types.NamespacedName{
 				Namespace: k8sgpt.Namespace,
@@ -112,7 +111,7 @@ var _ = Describe("K8sGPT controller", func() {
 						return err
 					}
 
-					if k.Spec.Analysis == nil || k.Spec.Analysis.Interval != "1m" {
+					if k.Spec.Analysis == nil || k.Spec.Analysis.Interval != "5m" {
 						return errors.New("analysis interval not set correctly")
 					}
 
