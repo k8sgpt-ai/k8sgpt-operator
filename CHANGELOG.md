@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.2.20](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.19...v0.2.20) (2025-06-02)
+
+
+### Features
+
+* interval ([#706](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/706)) ([4f6d7f1](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/4f6d7f1f8a7b3b095dcd7a082fa5a86e1a3ef07f))
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/go-logr/logr to v1.4.3 ([#708](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/708)) ([160df4f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/160df4f80bbcf21d9fd371aca8f33b52987224f1))
+
+
+### Other
+
+* **deps:** update docker/build-push-action digest to 2634353 ([#705](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/705)) ([a7afbf1](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/a7afbf1deb08987207d532f083d000b052f40bc1))
+
 ## [0.2.19](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.18...v0.2.19) (2025-05-27)
 
 
