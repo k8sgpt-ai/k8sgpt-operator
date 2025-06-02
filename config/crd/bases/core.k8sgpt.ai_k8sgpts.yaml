@@ -128,6 +128,13 @@ spec:
                 required:
                 - backend
                 type: object
+              analysis:
+                properties:
+                  interval:
+                    description: Interval is the time between analysis runs
+                    pattern: ^[0-9]+[smh]$
+                    type: string
+                type: object
               customAnalyzers:
                 items:
                   properties:

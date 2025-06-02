@@ -2,8 +2,10 @@ apiVersion: core.k8sgpt.ai/v1alpha1
 kind: K8sGPT
 metadata:
   name: k8sgpt-sample
-  namespace: k8sgpt-operator-system
+  namespace: default
 spec:
+  analysis:
+    interval: 20s
   ai:
     enabled: true
     model: gpt-4o-mini

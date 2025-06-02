@@ -27,16 +27,16 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 	}
 	latestResultList, err := EmitIfNotHistorical(instance)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
 	if len(latestResultList.Items) == 0 {
-		return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 	for _, result := range latestResultList.Items {
 		var res corev1alpha1.Result
 		if err := instance.R.Get(instance.Ctx, client.ObjectKey{Namespace: result.Namespace, Name: result.Name}, &res); err != nil {
-			return instance.R.FinishReconcile(err, false, result.Name)
+			return instance.R.FinishReconcile(err, false, result.Name, instance.K8sgptConfig)
 		}
 	}
 	preEligibleResources := conversions.ResultsToEligibleResources(instance.K8sgptConfig,
@@ -75,10 +75,10 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 		var existingMutation corev1alpha1.Mutation
 		if err := instance.R.Get(instance.Ctx, mutationKey, &existingMutation); err != nil {
 			if client.IgnoreNotFound(err) != nil {
-				return instance.R.FinishReconcile(err, false, eligibleResource.ResultRef.Name)
+				return instance.R.FinishReconcile(err, false, eligibleResource.ResultRef.Name, instance.K8sgptConfig)
 			}
 			if err := instance.R.Create(instance.Ctx, &mutation); err != nil {
-				return instance.R.FinishReconcile(err, false, eligibleResource.ResultRef.Name)
+				return instance.R.FinishReconcile(err, false, eligibleResource.ResultRef.Name, instance.K8sgptConfig)
 			}
 		} else {
 			// keep track of it's status
@@ -89,7 +89,7 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 		mutationCounter.WithLabelValues("mutations", "pk8sgpt").Set(float64(len(eligibleResources)))
 	}
 	step.logger.Info("ending calculateRemediationStep")
-	return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name)
+	return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 }
 
 func (step *calculateRemediationStep) setNext(next K8sGPT) {

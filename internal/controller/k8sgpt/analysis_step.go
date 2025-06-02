@@ -55,7 +55,7 @@ func (step *AnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, error)
 			step.incK8sgptNumberOfFailedBackendAICalls(instance)
 			step.handleAIFailureBackoff(instance)
 		}
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 	step.logger.Info("AnalysisStep response", "count", len(response.Results))
 
@@ -72,7 +72,7 @@ func (step *AnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, error)
 
 	rawResults, err := resources.MapResults(*instance.R.Integrations, response.Results, *instance.K8sgptConfig)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
 	// Prior to creating or updating any results we will delete any stale results that
@@ -80,14 +80,14 @@ func (step *AnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, error)
 	// the custom resource name
 	err = step.cleanUpStaleResults(rawResults, instance)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
 	// At this point we are able to loop through our rawResults and create them or update
 	// them as needed
 	err = step.processRawResults(rawResults, instance)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
 	instance.logger.Info("ending AnalysisStep")

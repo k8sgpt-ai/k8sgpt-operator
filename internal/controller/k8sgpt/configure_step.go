@@ -35,21 +35,21 @@ func (step *ConfigureStep) execute(instance *K8sGPTInstance) (ctrl.Result, error
 	if instance.K8sgptConfig.Spec.AI.BackOff == nil {
 		err := step.configureBackoff(instance)
 		if err != nil {
-			return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+			return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 		}
 	}
 
 	// Check and see if the instance is new or has a K8sGPT deployment in flight
 	instance.k8sgptDeployment, err = step.getDeployment(instance)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
 	instance.hasReadyReplicas = instance.k8sgptDeployment.Status.AvailableReplicas != 0
 
 	if !instance.hasReadyReplicas && os.Getenv("LOCAL_MODE") == "" {
 		instance.logger.Info("k8sgpt server not running, waiting next sync")
-		return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
 	instance.logger.Info("ending ConfigureStep")

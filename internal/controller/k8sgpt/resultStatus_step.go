@@ -16,6 +16,7 @@ package k8sgpt
 
 import (
 	"fmt"
+
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/sinks"
@@ -36,21 +37,21 @@ func (step *ResultStatusStep) execute(instance *K8sGPTInstance) (ctrl.Result, er
 	// and when user configures a sink for the first time
 	latestResultList, err := EmitIfNotHistorical(instance)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
 	if len(latestResultList.Items) == 0 {
-		return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
 	sinkEnabled, sinkType, err := step.initSinkType(instance)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
 	err = step.processLatestResults(instance, sinkEnabled, sinkType, latestResultList)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
 	instance.logger.Info("ending ResultStatusStep")

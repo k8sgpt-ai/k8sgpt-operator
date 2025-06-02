@@ -16,6 +16,8 @@ spec:
     limits:
       cpu: <cpu-limit>
       memory: <memory-limit>
+  analysisConfig:
+    interval: <interval>       # Interval between analysis runs (e.g. "30s","5m", "1h")
   noCache: <boolean>            # Disable caching (optional)
   customAnalyzers:             # Define custom analyzers (optional)
     - name: <analyzer-name>
@@ -37,6 +39,9 @@ spec:
     secret:
       name: <secret-name>
       key: <secret-key>
+  analysis:                    # Analysis configuration (optional)
+    interval: <interval>        # Interval between analysis runs (e.g. "5m", "1h")
+    namespace: <namespace>      # Namespace to run analysis in (optional, default: k8sgpt)
   ai:                          # AI configuration (required)
     autoRemediation:           # Automatic remediation settings
       enabled: <boolean>        # Enable/disable auto-remediation

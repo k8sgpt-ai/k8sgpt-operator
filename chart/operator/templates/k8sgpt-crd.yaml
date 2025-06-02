@@ -16,315 +16,328 @@ spec:
     singular: k8sgpt
   scope: Namespaced
   versions:
-    - name: v1alpha1
-      schema:
-        openAPIV3Schema:
-          description: K8sGPT is the Schema for the k8sgpts API
-          properties:
-            apiVersion:
-              description: |-
-                APIVersion defines the versioned schema of this representation of an object.
-                Servers should convert recognized schemas to the latest internal value, and
-                may reject unrecognized values.
-                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
-              type: string
-            kind:
-              description: |-
-                Kind is a string value representing the REST resource this object represents.
-                Servers may infer this from the endpoint the client submits requests to.
-                Cannot be updated.
-                In CamelCase.
-                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
-              type: string
-            metadata:
-              type: object
-            spec:
-              description: K8sGPTSpec defines the desired state of K8sGPT
-              properties:
-                ai:
-                  properties:
-                    anonymized:
-                      default: true
-                      type: boolean
-                    autoRemediation:
-                      properties:
-                        enabled:
-                          default: false
-                          type: boolean
-                        resources:
-                          default:
-                            - Pod
-                            - Deployment
-                            - Service
-                            - Ingress
-                          description: Support Pod, Deployment, Service and Ingress
-                          items:
-                            type: string
-                          type: array
-                        similarityRequirement:
-                          default: "90"
-                          description: Defaults to 10%
-                          type: string
-                      required:
-                        - enabled
-                        - resources
-                        - similarityRequirement
-                      type: object
-                    backOff:
-                      properties:
-                        enabled:
-                          default: false
-                          type: boolean
-                        maxRetries:
-                          default: 5
-                          type: integer
-                      required:
-                        - enabled
-                        - maxRetries
-                      type: object
-                    backend:
-                      default: openai
-                      enum:
-                        - ibmwatsonxai
-                        - openai
-                        - localai
-                        - azureopenai
-                        - amazonbedrock
-                        - cohere
-                        - amazonsagemaker
-                        - google
-                        - googlevertexai
-                        - customrest
-                      type: string
-                    baseUrl:
-                      type: string
-                    enabled:
-                      type: boolean
-                    engine:
-                      type: string
-                    language:
-                      default: english
-                      type: string
-                    maxTokens:
-                      default: "2048"
-                      type: string
-                    model:
-                      default: gpt-4o-mini
-                      type: string
-                    providerId:
-                      type: string
-                    proxyEndpoint:
-                      type: string
-                    region:
-                      type: string
-                    secret:
-                      properties:
-                        key:
-                          type: string
-                        name:
-                          type: string
-                      type: object
-                    topk:
-                      default: "50"
-                      type: string
-                  required:
-                    - backend
-                  type: object
-                customAnalyzers:
-                  items:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: K8sGPT is the Schema for the k8sgpts API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: K8sGPTSpec defines the desired state of K8sGPT
+            properties:
+              ai:
+                properties:
+                  anonymized:
+                    default: true
+                    type: boolean
+                  autoRemediation:
                     properties:
-                      connection:
-                        properties:
-                          port:
-                            type: integer
-                          url:
-                            type: string
-                        type: object
-                      name:
+                      enabled:
+                        default: false
+                        type: boolean
+                      resources:
+                        default:
+                        - Pod
+                        - Deployment
+                        - Service
+                        - Ingress
+                        description: Support Pod, Deployment, Service and Ingress
+                        items:
+                          type: string
+                        type: array
+                      similarityRequirement:
+                        default: "90"
+                        description: Defaults to 10%
                         type: string
+                    required:
+                    - enabled
+                    - resources
+                    - similarityRequirement
                     type: object
-                  type: array
-                extraOptions:
-                  properties:
-                    backstage:
-                      properties:
-                        enabled:
-                          type: boolean
-                      type: object
-                    serviceAccountIRSA:
-                      type: string
-                  type: object
-                filters:
-                  items:
+                  backOff:
+                    properties:
+                      enabled:
+                        default: false
+                        type: boolean
+                      maxRetries:
+                        default: 5
+                        type: integer
+                    required:
+                    - enabled
+                    - maxRetries
+                    type: object
+                  backend:
+                    default: openai
+                    enum:
+                    - ibmwatsonxai
+                    - openai
+                    - localai
+                    - azureopenai
+                    - amazonbedrock
+                    - cohere
+                    - amazonsagemaker
+                    - google
+                    - googlevertexai
+                    - customrest
                     type: string
-                  type: array
-                imagePullPolicy:
-                  default: Always
-                  type: string
-                imagePullSecrets:
-                  items:
+                  baseUrl:
+                    type: string
+                  enabled:
+                    type: boolean
+                  engine:
+                    type: string
+                  language:
+                    default: english
+                    type: string
+                  maxTokens:
+                    default: "2048"
+                    type: string
+                  model:
+                    default: gpt-4o-mini
+                    type: string
+                  providerId:
+                    type: string
+                  proxyEndpoint:
+                    type: string
+                  region:
+                    type: string
+                  secret:
                     properties:
+                      key:
+                        type: string
                       name:
                         type: string
                     type: object
-                  type: array
-                integrations:
+                  topk:
+                    default: "50"
+                    type: string
+                required:
+                - backend
+                type: object
+              analysis:
+                properties:
+                  interval:
+                    description: Interval is the time between analysis runs
+                    pattern: ^[0-9]+[smh]$
+                    type: string
+                type: object
+              customAnalyzers:
+                items:
                   properties:
-                    trivy:
+                    connection:
                       properties:
-                        enabled:
-                          type: boolean
-                        namespace:
+                        port:
+                          type: integer
+                        url:
                           type: string
-                        skipInstall:
-                          type: boolean
                       type: object
-                  type: object
-                kubeconfig:
-                  description: |-
-                    Define the kubeconfig the Deployment must use.
-                    If empty, the Deployment will use the ServiceAccount provided by Kubernetes itself.
-                  properties:
-                    key:
-                      type: string
                     name:
                       type: string
                   type: object
-                noCache:
-                  type: boolean
-                nodeSelector:
-                  additionalProperties:
+                type: array
+              extraOptions:
+                properties:
+                  backstage:
+                    properties:
+                      enabled:
+                        type: boolean
+                    type: object
+                  serviceAccountIRSA:
                     type: string
-                  type: object
-                remoteCache:
+                type: object
+              filters:
+                items:
+                  type: string
+                type: array
+              imagePullPolicy:
+                description: PullPolicy describes a policy for if/when to pull a container
+                  image
+                type: string
+              imagePullSecrets:
+                items:
                   properties:
-                    azure:
-                      properties:
-                        containerName:
-                          type: string
-                        storageAccount:
-                          type: string
-                      type: object
-                    credentials:
+                    name:
+                      type: string
+                  type: object
+                type: array
+              integrations:
+                properties:
+                  trivy:
+                    properties:
+                      enabled:
+                        type: boolean
+                      namespace:
+                        type: string
+                      skipInstall:
+                        type: boolean
+                    type: object
+                type: object
+              kubeconfig:
+                description: |-
+                  Define the kubeconfig the Deployment must use.
+                  If empty, the Deployment will use the ServiceAccount provided by Kubernetes itself.
+                properties:
+                  key:
+                    type: string
+                  name:
+                    type: string
+                type: object
+              noCache:
+                type: boolean
+              nodeSelector:
+                additionalProperties:
+                  type: string
+                type: object
+              remoteCache:
+                properties:
+                  azure:
+                    properties:
+                      containerName:
+                        type: string
+                      storageAccount:
+                        type: string
+                    type: object
+                  credentials:
+                    properties:
+                      name:
+                        type: string
+                    type: object
+                  gcs:
+                    properties:
+                      bucketName:
+                        type: string
+                      projectId:
+                        type: string
+                      region:
+                        type: string
+                    type: object
+                  interplex:
+                    properties:
+                      endpoint:
+                        type: string
+                    type: object
+                  s3:
+                    properties:
+                      bucketName:
+                        type: string
+                      region:
+                        type: string
+                    type: object
+                type: object
+              repository:
+                default: ghcr.io/k8sgpt-ai/k8sgpt
+                type: string
+              resources:
+                description: ResourceRequirements describes the compute resource requirements.
+                properties:
+                  claims:
+                    description: |-
+                      Claims lists the names of resources, defined in spec.resourceClaims,
+                      that are used by this container.
+
+                      This is an alpha field and requires enabling the
+                      DynamicResourceAllocation feature gate.
+
+                      This field is immutable. It can only be set for containers.
+                    items:
+                      description: ResourceClaim references one entry in PodSpec.ResourceClaims.
                       properties:
                         name:
+                          description: |-
+                            Name must match the name of one entry in pod.spec.resourceClaims of
+                            the Pod where this field is used. It makes that resource available
+                            inside a container.
                           type: string
+                        request:
+                          description: |-
+                            Request is the name chosen for a request in the referenced claim.
+                            If empty, everything from the claim is made available, otherwise
+                            only the result of this request.
+                          type: string
+                      required:
+                      - name
                       type: object
-                    gcs:
-                      properties:
-                        bucketName:
-                          type: string
-                        projectId:
-                          type: string
-                        region:
-                          type: string
-                      type: object
-                    interplex:
-                      properties:
-                        endpoint:
-                          type: string
-                      type: object
-                    s3:
-                      properties:
-                        bucketName:
-                          type: string
-                        region:
-                          type: string
-                      type: object
-                  type: object
-                repository:
-                  default: ghcr.io/k8sgpt-ai/k8sgpt
-                  type: string
-                resources:
-                  description: ResourceRequirements describes the compute resource requirements.
-                  properties:
-                    claims:
-                      description: |-
-                        Claims lists the names of resources, defined in spec.resourceClaims,
-                        that are used by this container.
+                    type: array
+                    x-kubernetes-list-map-keys:
+                    - name
+                    x-kubernetes-list-type: map
+                  limits:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: |-
+                      Limits describes the maximum amount of compute resources allowed.
+                      More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    type: object
+                  requests:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: |-
+                      Requests describes the minimum amount of compute resources required.
+                      If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                      otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                      More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    type: object
+                type: object
+              sink:
+                properties:
+                  channel:
+                    type: string
+                  icon_url:
+                    type: string
+                  secret:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                    type: object
+                  type:
+                    enum:
+                    - slack
+                    - mattermost
+                    type: string
+                  username:
+                    type: string
+                  webhook:
+                    type: string
+                type: object
+              targetNamespace:
+                type: string
+              version:
+                type: string
+            type: object
+          status:
+            description: |-
+              K8sGPTStatus defines the observed state of K8sGPT
+              show the current backend used
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
 
-
-                        This is an alpha field and requires enabling the
-                        DynamicResourceAllocation feature gate.
-
-
-                        This field is immutable. It can only be set for containers.
-                      items:
-                        description: ResourceClaim references one entry in PodSpec.ResourceClaims.
-                        properties:
-                          name:
-                            description: |-
-                              Name must match the name of one entry in pod.spec.resourceClaims of
-                              the Pod where this field is used. It makes that resource available
-                              inside a container.
-                            type: string
-                        required:
-                          - name
-                        type: object
-                      type: array
-                      x-kubernetes-list-map-keys:
-                        - name
-                      x-kubernetes-list-type: map
-                    limits:
-                      additionalProperties:
-                        anyOf:
-                          - type: integer
-                          - type: string
-                        pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                        x-kubernetes-int-or-string: true
-                      description: |-
-                        Limits describes the maximum amount of compute resources allowed.
-                        More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-                      type: object
-                    requests:
-                      additionalProperties:
-                        anyOf:
-                          - type: integer
-                          - type: string
-                        pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                        x-kubernetes-int-or-string: true
-                      description: |-
-                        Requests describes the minimum amount of compute resources required.
-                        If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
-                        otherwise to an implementation-defined value. Requests cannot exceed Limits.
-                        More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-                      type: object
-                  type: object
-                sink:
-                  properties:
-                    channel:
-                      type: string
-                    icon_url:
-                      type: string
-                    secret:
-                      properties:
-                        key:
-                          type: string
-                        name:
-                          type: string
-                      type: object
-                    type:
-                      enum:
-                        - slack
-                        - mattermost
-                      type: string
-                    username:
-                      type: string
-                    webhook:
-                      type: string
-                  type: object
-                targetNamespace:
-                  type: string
-                version:
-                  type: string
-              type: object
-            status:
-              description: |-
-                K8sGPTStatus defines the observed state of K8sGPT
-                show the current backend used
-              type: object
-          type: object
-      served: true
-      storage: true
-      subresources:
-        status: {}
