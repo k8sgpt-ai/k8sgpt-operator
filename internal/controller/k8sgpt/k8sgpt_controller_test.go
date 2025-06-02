@@ -15,6 +15,8 @@ package k8sgpt
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
@@ -130,14 +132,13 @@ var _ = Describe("K8sGPT controller", func() {
 					// Update with invalid interval
 					k.Spec.Analysis.Interval = "invalid"
 					err = k8sClient.Update(ctx, &k)
-					if err != nil {
-						return err
+					if err == nil {
+						return errors.New("expected validation error for invalid interval")
 					}
 
-					// Should still be able to get the resource
-					err = k8sClient.Get(ctx, nn, &k)
-					if err != nil {
-						return err
+					// Verify the error is a validation error
+					if !strings.Contains(err.Error(), "spec.analysis.interval in body should match '^[0-9]+[mh]$'") {
+						return fmt.Errorf("unexpected error: %v", err)
 					}
 
 					return nil
