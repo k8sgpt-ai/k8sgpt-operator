@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.21](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.20...v0.2.21) (2025-06-06)
+
+
+### Features
+
+* displaying the requeue time ([#714](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/714)) ([73921bc](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/73921bcf342356852a0f084174e94fa86f2953b3))
+
+
+### Bug Fixes
+
+* **deps:** update k8s.io/utils digest to 4c0f3b2 ([#712](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/712)) ([90cc10c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/90cc10c6c5f6ea3171e10d35370685fdd5ab8aa8))
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#694](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/694)) ([c362bea](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c362bead476489a8da7534728f8fed142b505d7d))
+
 ## [0.2.20](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.19...v0.2.20) (2025-06-02)
 
 
