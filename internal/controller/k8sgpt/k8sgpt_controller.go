@@ -180,6 +180,6 @@ func (r *K8sGPTReconciler) FinishReconcile(err error, requeueImmediate bool, nam
 		interval = 0
 	}
 
-	k8sgptControllerLog.Info("Finished Reconciling k8sGPT")
+	k8sgptControllerLog.Info("Finished Reconciling k8sGPT", "RequeueTime", interval)
 	return ctrl.Result{Requeue: true, RequeueAfter: interval}, nil
 }
