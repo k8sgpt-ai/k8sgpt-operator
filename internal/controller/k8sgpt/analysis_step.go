@@ -61,12 +61,6 @@ func (step *AnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, error)
 
 	// reset analysisRetryCount
 	analysisRetryCount = 0
-
-	// Update metrics count
-	if instance.K8sgptConfig.Spec.AI.Enabled && len(response.Results) > 0 {
-		step.incK8sgptNumberOfFailedBackendAICalls(instance)
-	}
-
 	// Parse the k8sgpt-deployment response into a list of results
 	step.setk8sgptNumberOfResults(instance, response.Results)
 
