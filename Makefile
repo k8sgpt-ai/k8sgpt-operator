@@ -242,3 +242,24 @@ endif
 local-cleanup: ## Cleanup local k8sgpt environment
 	@echo "Cleaning up..."
 	kind delete cluster --name $(KIND_CLUSTER_NAME) || true
+
+.PHONY: update-crd
+update-crd:
+	@echo "Updating CRD in Helm chart..."
+	@# Create a temporary file with the Helm template header
+	@echo "---" > /tmp/crd-header.yaml
+	@echo "apiVersion: apiextensions.k8s.io/v1" >> /tmp/crd-header.yaml
+	@echo "kind: CustomResourceDefinition" >> /tmp/crd-header.yaml
+	@echo "metadata:" >> /tmp/crd-header.yaml
+	@echo "  annotations:" >> /tmp/crd-header.yaml
+	@echo "    controller-gen.kubebuilder.io/version: v0.16.0" >> /tmp/crd-header.yaml
+	@echo "  name: k8sgpts.core.k8sgpt.ai" >> /tmp/crd-header.yaml
+	@echo "  labels:" >> /tmp/crd-header.yaml
+	@echo "  {{- include \"chart.labels\" . | nindent 4 }}" >> /tmp/crd-header.yaml
+	@# Extract the spec section from the source CRD
+	@sed -n '/^spec:/,/^---/p' config/crd/bases/core.k8sgpt.ai_k8sgpts.yaml > /tmp/crd-spec.yaml
+	@# Combine the files
+	@cat /tmp/crd-header.yaml /tmp/crd-spec.yaml > chart/operator/templates/k8sgpt-crd.yaml
+	@# Clean up temporary files
+	@rm /tmp/crd-header.yaml /tmp/crd-spec.yaml
+	@echo "CRD updated successfully in chart/operator/templates/k8sgpt-crd.yaml"

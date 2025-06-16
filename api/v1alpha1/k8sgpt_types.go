@@ -97,9 +97,15 @@ type BackOff struct {
 	MaxRetries int `json:"maxRetries"`
 }
 
+type GitOpsOriginDefinition struct {
+	LabelSelector metav1.LabelSelector `json:"labelSelector"`
+}
+
 type AutoRemediation struct {
 	// +kubebuilder:default:=false
 	Enabled bool `json:"enabled"`
+
+	GitOpsOriginDefinition *GitOpsOriginDefinition `json:"gitOpsOriginDefinition, omitempty"`
 	// Defaults to 10%
 	// +kubebuilder:default="90"
 	SimilarityRequirement string `json:"similarityRequirement"`
