@@ -435,6 +435,40 @@ Note: ensure that the value of `baseUrl` is a properly constructed [DNS name](ht
 
 <details>
 
+<summary>Analysis Interval</summary>
+You can configure the interval between K8sGPT operator reconciliations by setting the `analysis.interval` field in the K8sGPT custom resource. This allows you to control how frequently the operator performs analysis of your cluster.
+
+The interval should be specified in a format that can be parsed by Go's time.ParseDuration function (e.g., "30s", "1m", "2h"). If not specified, the default interval is 30 seconds.
+
+Example configuration:
+
+```sh
+kubectl apply -f - << EOF
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: K8sGPT
+metadata:
+  name: k8sgpt-sample
+  namespace: k8sgpt-operator-system
+spec:
+  ai:
+    enabled: true
+    model: gpt-4o-mini
+    backend: openai
+    secret:
+      name: k8sgpt-sample-secret
+      key: openai-api-key
+  analysis:
+    interval: "5m"  # Set analysis interval to 5 minutes
+  noCache: false
+  repository: ghcr.io/k8sgpt-ai/k8sgpt
+  version: v0.4.1
+EOF
+```
+
+</details>
+
+<details>
+
 <summary>ImagePullPolicy</summary>
 The imagePullPolicy for K8SGPT container and the tag of the image affect when the kubelet attempts to pull (download) the specified image.
 
