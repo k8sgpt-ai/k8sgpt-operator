@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.2.21](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.20...v0.2.21) (2025-06-16)
+
+
+### Features
+
+* displaying the requeue time ([#714](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/714)) ([73921bc](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/73921bcf342356852a0f084174e94fa86f2953b3))
+* fixes bad increment of errors ([#721](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/721)) ([30a8e98](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/30a8e98ccb5075d62f6030864e47de033d760276))
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#713](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/713)) ([4fafd2a](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/4fafd2a232b83706c6122dedb082e155b365d4ec))
+* **deps:** update k8s.io/utils digest to 4c0f3b2 ([#712](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/712)) ([90cc10c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/90cc10c6c5f6ea3171e10d35370685fdd5ab8aa8))
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#694](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/694)) ([c362bea](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c362bead476489a8da7534728f8fed142b505d7d))
+
+
+### Other
+
+* added analysis interval ([#722](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/722)) ([91be089](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/91be0892ed5dede19763bebe1574bd1c834ece7a))
+* **deps:** update softprops/action-gh-release digest to 72f2c25 ([#718](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/718)) ([4cb1c8d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/4cb1c8df10fe7957fc40863055749e6928a2bead))
+* **deps:** update softprops/action-gh-release digest to d5382d3 ([#716](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/716)) ([275a756](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/275a7568a277a03e5643b645df0ed48b595bca02))
+
 ## [0.2.20](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.19...v0.2.20) (2025-06-02)
 
 
