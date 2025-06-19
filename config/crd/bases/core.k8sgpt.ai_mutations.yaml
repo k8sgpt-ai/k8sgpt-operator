@@ -23,6 +23,10 @@ spec:
       jsonPath: .spec.similarityScore
       name: Similarity Score
       type: string
+    - description: Describes whether GitOps is enabled
+      jsonPath: .spec.gitOpsEnabled
+      name: Remote Mutation
+      type: boolean
     name: v1alpha1
     schema:
       openAPIV3Schema:
@@ -50,6 +54,9 @@ spec:
           spec:
             description: MutationSpec defines the desired state of Mutation.
             properties:
+              gitOpsEnabled:
+                description: Gitops specific implementation detail
+                type: boolean
               originConfiguration:
                 type: string
               resource:

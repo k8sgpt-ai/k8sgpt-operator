@@ -34,6 +34,8 @@ type MutationSpec struct {
 	ResultRef           corev1.ObjectReference `json:"result,omitempty"`
 	OriginConfiguration string                 `json:"originConfiguration,omitempty"`
 	TargetConfiguration string                 `json:"targetConfiguration,omitempty"`
+	// Gitops specific implementation detail
+	GitOpsEnabled bool `json:"gitOpsEnabled,omitempty"`
 }
 
 // MutationStatus defines the observed state of Mutation.
@@ -49,6 +51,7 @@ type MutationStatus struct {
 // Display in wide format the autoremediationphase status and similarity score
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.message",description="Updates of the autoremediation phase"
 // +kubebuilder:printcolumn:name="Similarity Score",type="string",JSONPath=".spec.similarityScore",description="The similarity score of the autoremediation"
+// +kubebuilder:printcolumn:name="Remote Mutation", type="boolean", JSONPath=".spec.gitOpsEnabled", description="Describes whether GitOps is enabled"
 // Mutation is the Schema for the mutations API.
 type Mutation struct {
 	metav1.TypeMeta   `json:",inline"`
