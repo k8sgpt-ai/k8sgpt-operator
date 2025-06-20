@@ -17,14 +17,17 @@ limitations under the License.
 package mutation
 
 import (
-	rpc "buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go/schema/v1/schemav1grpc"
-	schemav1 "buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go/schema/v1"
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
+
+	rpc "buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go/schema/v1/schemav1grpc"
+	schemav1 "buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go/schema/v1"
 	"github.com/go-logr/logr"
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/conversions"
-	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/types"
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/shared"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/util"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/prompts"
 	metricspkg "github.com/k8sgpt-ai/k8sgpt-operator/pkg/metrics"
@@ -32,8 +35,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
-	"strconv"
-	"strings"
 )
 
 // MutationReconciler reconciles a Mutation object
@@ -42,7 +43,6 @@ type MutationReconciler struct {
 	logger            logr.Logger
 	Scheme            *runtime.Scheme
 	ServerQueryClient *rpc.ServerQueryServiceClient
-	Signal            chan types.InterControllerSignal
 	MetricsBuilder    *metricspkg.MetricBuilder
 	RemoteBackend     string
 	K8sGPT            *corev1alpha1.K8sGPT
@@ -81,13 +81,11 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	mutationControllerLog.Info("Reconciling mutation", "mutation", mutation.Name)
 
 	if r.ServerQueryClient == nil {
-		mutationControllerLog.Info("Awaiting signal for K8sGPT connection")
-		signal := <-r.Signal
-		c := rpc.NewServerQueryServiceClient(signal.K8sGPTClient.Conn)
-		r.ServerQueryClient = &c
-		r.RemoteBackend = signal.Backend
-		r.K8sGPT = signal.K8sGPT
-		mutationControllerLog.Info("Received signal for K8sGPT connection")
+		r.ServerQueryClient = shared.GetServerQueryClient()
+	}
+	if r.ServerQueryClient == nil {
+		mutationControllerLog.Info("K8sGPT client not ready, requeuing")
+		return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, nil
 	}
 	// check if the object is being deleted
 
@@ -205,12 +203,11 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		}
 		//This horrible code also needs to go here in case we reconcile before the signal is received
 		if r.ServerQueryClient == nil {
-			mutationControllerLog.Info("Awaiting signal for K8sGPT connection")
-			signal := <-r.Signal
-			c := rpc.NewServerQueryServiceClient(signal.K8sGPTClient.Conn)
-			r.ServerQueryClient = &c
-			r.RemoteBackend = signal.Backend
-			mutationControllerLog.Info("Received signal for K8sGPT connection")
+			r.ServerQueryClient = shared.GetServerQueryClient()
+		}
+		if r.ServerQueryClient == nil {
+			mutationControllerLog.Info("K8sGPT client not ready, requeuing")
+			return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, nil
 		}
 		return conversions.ResourceToExecution(conversions.ObjectExecutionConfig{
 			Ctx:         ctx,
