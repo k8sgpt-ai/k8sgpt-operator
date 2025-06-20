@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.22](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.21...v0.2.22) (2025-06-20)
+
+
+### Features
+
+* fixing the reconciliation mechanism ([#725](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/725)) ([573fac4](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/573fac498c107f8a0be82671b0e64fa687905958))
+
 ## [0.2.21](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.20...v0.2.21) (2025-06-16)
 
 
