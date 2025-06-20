@@ -385,12 +385,12 @@ spec:
     enabled: true
     secret:
      name: bedrock-sample-secret
-    model: anthropic.claude-3-5-sonnet-20241022-v2:0
-    region: eu-central-1
+    model: anthropic.claude-3-sonnet-20240229-v1:0
+    region: eu-west-2
     backend: amazonbedrock
   noCache: false
   repository: ghcr.io/k8sgpt-ai/k8sgpt
-  version: v0.4.1
+  version: v0.4.17
 EOF
 ```
 
