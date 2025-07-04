@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.23](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.22...v0.2.23) (2025-07-04)
+
+
+### Features
+
+* reconcile update p2 ([#727](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/727)) ([f743316](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/f7433161e5b98780d3d9b5ec5a0a14fe3aca5c5d))
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#719](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/719)) ([fb5903d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/fb5903df87e424e127efa99f694eed1f4dc5827d))
+
 ## [0.2.22](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.21...v0.2.22) (2025-06-20)
 
 
