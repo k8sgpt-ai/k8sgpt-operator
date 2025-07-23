@@ -40,6 +40,8 @@ kind: K8sGPT
 metadata:
   name: k8sgpt-sample
   namespace: k8sgpt-operator-system
+  labels:
+    mylabel: mylabel
 spec:
   ai:
     enabled: true
