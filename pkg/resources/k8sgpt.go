@@ -650,7 +650,9 @@ func doSync(ctx context.Context, clt client.Client, obj client.Object) error {
 			return err
 		} else if err == nil {
 			mutateFn = func() error {
-				exist.Spec = expect.Spec
+				// Only need update fields specify in GetService func,avoid update other immutable fields.
+				exist.Spec.Selector = expect.Spec.Selector
+				exist.Spec.Ports = expect.Spec.Ports
 				return nil
 			}
 			obj = exist
