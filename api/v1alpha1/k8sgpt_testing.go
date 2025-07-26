@@ -17,7 +17,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"runtime"
@@ -40,7 +39,7 @@ func (r *K8sGPT) LoadResource(path string) *K8sGPT {
 		log.Fatalf("Unmarshal: %v", err)
 	}
 
-	fmt.Println(r.Name)
+	log.Println(r.Name)
 
 	return r
 }

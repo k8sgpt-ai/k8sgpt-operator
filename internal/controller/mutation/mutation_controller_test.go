@@ -17,11 +17,10 @@ limitations under the License.
 package mutation
 
 import (
-	rpc "buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go/schema/v1/schemav1grpc"
 	"context"
-	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/types"
-	v1 "k8s.io/api/core/v1"
 	"time"
+
+	v1 "k8s.io/api/core/v1"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -95,30 +94,17 @@ spec:
 			controllerReconciler := &MutationReconciler{
 				Client:            reconciler.Client,
 				Scheme:            reconciler.Client.Scheme(),
-				ServerQueryClient: nil,
-				Signal:            make(chan types.InterControllerSignal),
+				ServerQueryClient: nil, // Simulate client not ready
 				RemoteBackend:     "test-backend",
 			}
-			controllerReconciler.Signal <- types.InterControllerSignal{
-				K8sGPTClient: nil,
-				Backend:      "test-backend",
-			}
-			go func() {
-				controllerReconciler.Signal <- types.InterControllerSignal{
-					K8sGPTClient: nil,
-					Backend:      "test-backend",
-				}
-			}()
-			*controllerReconciler.ServerQueryClient = rpc.NewServerQueryServiceClient(nil)
-
+			// The controller should now requeue if ServerQueryClient is nil, without blocking or using a signal.
 			result, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 			Expect(err).NotTo(HaveOccurred())
 
 			// Assertions
-			Expect(result.Requeue).To(BeTrue())                     // Expect requeue
-			Expect(result.RequeueAfter).To(Equal(60 * time.Second)) // Expect requeue after 60 seconds
+			Expect(result.RequeueAfter).To(Equal(30 * time.Second)) // util.ErrorRequeueTime
 
 			// Fetch the updated Mutation object
 			updatedMutation := &corev1alpha1.Mutation{}

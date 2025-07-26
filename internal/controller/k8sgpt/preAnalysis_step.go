@@ -16,10 +16,11 @@ package k8sgpt
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/types"
 	Kclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"strings"
 )
 
 type PreAnalysisStep struct {
@@ -47,31 +48,43 @@ func (step *PreAnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, err
 	// If the deployment is active, we will query it directly for sis data
 	address, err := Kclient.GenerateAddress(instance.Ctx, instance.R.Client, instance.K8sgptConfig)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
-	instance.logger.Info(fmt.Sprintf("K8sGPT address: %s\n", address))
+	instance.logger.Info("K8sGPT address: " + address)
 
 	instance.kclient, err = Kclient.NewClient(address)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
-	step.Signal <- types.InterControllerSignal{
-		K8sGPTClient: instance.kclient,
-		Backend:      instance.K8sgptConfig.Spec.AI.Backend,
-		K8sGPT:       instance.K8sgptConfig,
+	instance.logger.Info("K8sGPT client: " + fmt.Sprintf("%v", instance.kclient))
+	instance.logger.Info("Sending signal to configure step")
+
+	if instance.K8sgptConfig.Spec.AI.AutoRemediation.Enabled {
+		step.Signal <- types.InterControllerSignal{
+			K8sGPTClient: instance.kclient,
+			Backend:      instance.K8sgptConfig.Spec.AI.Backend,
+			K8sGPT:       instance.K8sgptConfig,
+		}
 	}
+	instance.logger.Info("Signal sent to configure step")
+
+	instance.logger.Info("Adding remote cache")
 	// This will need a refactor in future...
 	err = step.addRemoteCache(instance)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
+	instance.logger.Info("Remote cache added")
+
+	instance.logger.Info("Adding integrations")
 
 	err = step.addIntegrations(instance)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
+	instance.logger.Info("Integrations added")
 
 	instance.logger.Info("ending PreAnalysisStep")
 
@@ -105,10 +118,10 @@ func (step *PreAnalysisStep) updateDeploymentImage(instance *K8sGPTInstance) (ct
 	)
 	err := instance.R.Update(instance.Ctx, instance.k8sgptDeployment)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
-	return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name)
+	return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 }
 
 // https://kubernetes.io/docs/concepts/containers/images/#image-names

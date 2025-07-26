@@ -111,7 +111,7 @@ type AutoRemediation struct {
 type AISpec struct {
 	AutoRemediation AutoRemediation `json:"autoRemediation,omitempty"`
 	// +kubebuilder:default:=openai
-	// +kubebuilder:validation:Enum=ibmwatsonxai;openai;localai;azureopenai;amazonbedrock;cohere;amazonsagemaker;google;googlevertexai
+	// +kubebuilder:validation:Enum=ibmwatsonxai;openai;localai;azureopenai;amazonbedrock;cohere;amazonsagemaker;google;googlevertexai;customrest
 	Backend string   `json:"backend"`
 	BackOff *BackOff `json:"backOff,omitempty"`
 	BaseUrl string   `json:"baseUrl,omitempty"`
@@ -146,6 +146,12 @@ type ImagePullSecrets struct {
 	Name string `json:"name,omitempty"`
 }
 
+type AnalysisConfig struct {
+	// Interval is the time between analysis runs
+	// +kubebuilder:validation:Pattern=`^[0-9]+[smh]$`
+	Interval string `json:"interval,omitempty"`
+}
+
 // K8sGPTSpec defines the desired state of K8sGPT
 type K8sGPTSpec struct {
 	Version string `json:"version,omitempty"`
@@ -164,6 +170,7 @@ type K8sGPTSpec struct {
 	Integrations     *Integrations                `json:"integrations,omitempty"`
 	NodeSelector     map[string]string            `json:"nodeSelector,omitempty"`
 	TargetNamespace  string                       `json:"targetNamespace,omitempty"`
+	Analysis         *AnalysisConfig              `json:"analysis,omitempty"`
 	// Define the kubeconfig the Deployment must use.
 	// If empty, the Deployment will use the ServiceAccount provided by Kubernetes itself.
 	Kubeconfig *SecretRef `json:"kubeconfig,omitempty"`

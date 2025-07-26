@@ -1,5 +1,136 @@
 # Changelog
 
+## [0.2.22](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.21...v0.2.22) (2025-06-20)
+
+
+### Features
+
+* fixing the reconciliation mechanism ([#725](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/725)) ([573fac4](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/573fac498c107f8a0be82671b0e64fa687905958))
+
+## [0.2.21](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.20...v0.2.21) (2025-06-16)
+
+
+### Features
+
+* displaying the requeue time ([#714](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/714)) ([73921bc](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/73921bcf342356852a0f084174e94fa86f2953b3))
+* fixes bad increment of errors ([#721](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/721)) ([30a8e98](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/30a8e98ccb5075d62f6030864e47de033d760276))
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#713](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/713)) ([4fafd2a](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/4fafd2a232b83706c6122dedb082e155b365d4ec))
+* **deps:** update k8s.io/utils digest to 4c0f3b2 ([#712](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/712)) ([90cc10c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/90cc10c6c5f6ea3171e10d35370685fdd5ab8aa8))
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#694](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/694)) ([c362bea](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c362bead476489a8da7534728f8fed142b505d7d))
+
+
+### Other
+
+* added analysis interval ([#722](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/722)) ([91be089](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/91be0892ed5dede19763bebe1574bd1c834ece7a))
+* **deps:** update softprops/action-gh-release digest to 72f2c25 ([#718](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/718)) ([4cb1c8d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/4cb1c8df10fe7957fc40863055749e6928a2bead))
+* **deps:** update softprops/action-gh-release digest to d5382d3 ([#716](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/716)) ([275a756](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/275a7568a277a03e5643b645df0ed48b595bca02))
+
+## [0.2.20](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.19...v0.2.20) (2025-06-02)
+
+
+### Features
+
+* interval ([#706](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/706)) ([4f6d7f1](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/4f6d7f1f8a7b3b095dcd7a082fa5a86e1a3ef07f))
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/go-logr/logr to v1.4.3 ([#708](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/708)) ([160df4f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/160df4f80bbcf21d9fd371aca8f33b52987224f1))
+
+
+### Other
+
+* **deps:** update docker/build-push-action digest to 2634353 ([#705](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/705)) ([a7afbf1](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/a7afbf1deb08987207d532f083d000b052f40bc1))
+
+## [0.2.19](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.18...v0.2.19) (2025-05-27)
+
+
+### Bug Fixes
+
+* **controller:** add retry logic to CreateOrUpdateResult ([#704](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/704)) ([05f87ca](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/05f87ca1ec0663d240752c793c5166eed05453c9))
+* **deps:** update all non-major dependencies to v0.33.1 ([#595](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/595)) ([5360bf0](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5360bf0116842cba882e1038403142d6caecfeb9))
+* **deps:** update module google.golang.org/grpc to v1.72.2 ([#702](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/702)) ([7eb9276](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/7eb9276f5e90753acdb2b5ee669bf9413dda67c8))
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#692](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/692)) ([7b08ce4](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/7b08ce43778dacea55eff35c404242baa0ee61bf))
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#694](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/694)) ([bfd30c5](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/bfd30c558fa5c57f137788384e3a6c6dcca1343f))
+* **deps:** update module sigs.k8s.io/controller-runtime to v0.21.0 ([#701](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/701)) ([0beb2cf](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0beb2cfcaa6686be92ab3ca48f44ea4f6a892304))
+
+
+### Other
+
+* **deps:** update docker/build-push-action digest to 1dc7386 ([#697](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/697)) ([30eaf25](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/30eaf2533096092a4b904ca065d8ac3b108a621d))
+
+## [0.2.18](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.17...v0.2.18) (2025-05-15)
+
+
+### Features
+
+* logger ext ([#687](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/687)) ([b3cb224](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/b3cb2244a5ef98743882226efb2a78f39a3b4315))
+
+
+### Bug Fixes
+
+* **deps:** update k8s.io/utils digest to 0f33e8f ([#684](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/684)) ([4388c22](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/4388c22b3e1a299781b8a527512bca9616d2b516))
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#646](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/646)) ([9f4d4a0](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9f4d4a034b0064fd4e4f7fd363c57432337f4b0f))
+
+
+### Other
+
+* **deps:** bump golang.org/x/net from 0.33.0 to 0.38.0 ([#667](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/667)) ([e29e47d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e29e47d5562116b3b69904990fa92be4fb471806))
+* **deps:** update actions/setup-go digest to d35c59a ([#688](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/688)) ([9cc1170](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9cc1170b70276c26e80fcfc4715f6fef23ce8f7c))
+* renovate all minor patch v2 ([#693](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/693)) ([bc98cab](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/bc98cabc26430b9910c5ad3279ee61335168dc0e))
+
+## [0.2.17](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.16...v0.2.17) (2025-05-01)
+
+
+### Features
+
+* add result object namespace to the k8sgpt_number_of_results and k8sgpt_number_of_results_by_type metrics ([#681](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/681)) ([ad791b4](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/ad791b437dbf986f16a1b872b661163532583773))
+* adding optional annotations to the controller manager ([#682](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/682)) ([0220b5f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0220b5f946d892dc2772abed092951236d392689))
+* enable result logging in a helm chart ([#676](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/676)) ([9b30529](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/9b30529a7a4d9afcc23d6e46bdf5a94fdfb6764b))
+
+
+### Other
+
+* **deps:** update actions/setup-python digest to a26af69 ([#674](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/674)) ([3f41af7](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/3f41af7d1b02a5f4d6b64f1f1822d880473dfcdc))
+
+## [0.2.16](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.15...v0.2.16) (2025-04-30)
+
+
+### Features
+
+* adding new analyzer permissions ([#672](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/672)) ([a0ce777](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/a0ce7778cc4bb01a6e5168eebe3827c91d0f6e59))
+
+
+### Other
+
+* **deps:** update docker/build-push-action digest to 14487ce ([#675](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/675)) ([33be4f5](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/33be4f5c19e394d5a8bd321fcf8c20a111775d51))
+* fixed uninitialised annotations ([#679](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/679)) ([8833fc8](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8833fc8c80907e65bf9e1067d9bb53467c509f9a))
+
+## [0.2.15](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.14...v0.2.15) (2025-04-23)
+
+
+### Other
+
+* fixing issue with non-auto remediation loop failure ([#670](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/670)) ([155ebad](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/155ebad889e29e2ec817dca8bc34cb6c63b29263))
+
+## [0.2.14](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.13...v0.2.14) (2025-04-21)
+
+
+### Features
+
+* add 'customrest' to backend options in CRD ([#666](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/666)) ([506b609](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/506b609b6636dc5090f653bbf8d5f93f2161857e))
+* Add imagePullPolicy for K8SGPT instances ([#664](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/664)) ([0480d10](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0480d10db9b9b131c2d23e2e2d612e1771383c99))
+
+
+### Other
+
+* **deps:** update actions/upload-artifact digest to ea165f8 ([#587](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/587)) ([382ae07](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/382ae0723e54f4e83d88af4c094ba911f00f360a))
+* **deps:** update softprops/action-gh-release digest to da05d55 ([#668](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/668)) ([52bd4b8](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/52bd4b8f8ea753fb008177669dffe3947b803239))
+
 ## [0.2.13](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.12...v0.2.13) (2025-04-11)
 
 

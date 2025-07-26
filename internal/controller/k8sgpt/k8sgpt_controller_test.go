@@ -15,6 +15,8 @@ package k8sgpt
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
@@ -54,7 +56,6 @@ var _ = Describe("K8sGPT controller", func() {
 
 			It("Should create CR", func() {
 				Expect(k8sClient.Create(ctx, &k8sgpt)).Should(Succeed())
-
 			})
 
 			It("Should K8SGPT have a finalizer", func() {
@@ -70,7 +71,6 @@ var _ = Describe("K8sGPT controller", func() {
 					}
 
 					return nil
-
 				}).Should(BeNil())
 			})
 
@@ -87,11 +87,140 @@ var _ = Describe("K8sGPT controller", func() {
 					}
 
 					return nil
-
 				}).Should(BeNil())
 			})
 		})
 
+		Context("when configuring analysis interval", func() {
+			k8sgpt := corev1alpha1.GetValidProjectResource("interval-test", "default")
+			k8sgpt.Spec.Analysis = &corev1alpha1.AnalysisConfig{
+				Interval: "5m",
+			}
+			nn := types.NamespacedName{
+				Namespace: k8sgpt.Namespace,
+				Name:      k8sgpt.Name,
+			}
+
+			It("Should create CR with custom interval", func() {
+				Expect(k8sClient.Create(ctx, &k8sgpt)).Should(Succeed())
+			})
+
+			It("Should parse and use custom interval", func() {
+				Eventually(func() error {
+					k := corev1alpha1.K8sGPT{}
+					err := k8sClient.Get(ctx, nn, &k)
+					if err != nil {
+						return err
+					}
+
+					if k.Spec.Analysis == nil || k.Spec.Analysis.Interval != "5m" {
+						return errors.New("analysis interval not set correctly")
+					}
+
+					return nil
+				}).Should(BeNil())
+			})
+
+			It("Should handle invalid interval gracefully", func() {
+				Eventually(func() error {
+					k := corev1alpha1.K8sGPT{}
+					err := k8sClient.Get(ctx, nn, &k)
+					if err != nil {
+						return err
+					}
+
+					// Update with invalid interval
+					k.Spec.Analysis.Interval = "invalid"
+					err = k8sClient.Update(ctx, &k)
+					if err == nil {
+						return errors.New("expected validation error for invalid interval")
+					}
+
+					// Verify the error is a validation error
+					if !strings.Contains(err.Error(), "spec.analysis.interval in body should match '^[0-9]+[smh]$'") {
+						return fmt.Errorf("unexpected error: %v", err)
+					}
+
+					// Verify the original interval is still set
+					err = k8sClient.Get(ctx, nn, &k)
+					if err != nil {
+						return err
+					}
+					if k.Spec.Analysis.Interval != "5m" {
+						return fmt.Errorf("interval was changed to %s, expected 5m", k.Spec.Analysis.Interval)
+					}
+
+					return nil
+				}).Should(BeNil())
+			})
+
+			It("Should handle different interval formats", func() {
+				Eventually(func() error {
+					k := corev1alpha1.K8sGPT{}
+					err := k8sClient.Get(ctx, nn, &k)
+					if err != nil {
+						return err
+					}
+
+					// Test seconds
+					k.Spec.Analysis.Interval = "30s"
+					err = k8sClient.Update(ctx, &k)
+					if err != nil {
+						return err
+					}
+
+					// Test minutes
+					k.Spec.Analysis.Interval = "5m"
+					err = k8sClient.Update(ctx, &k)
+					if err != nil {
+						return err
+					}
+
+					// Test hours
+					k.Spec.Analysis.Interval = "1h"
+					err = k8sClient.Update(ctx, &k)
+					if err != nil {
+						return err
+					}
+
+					return nil
+				}).Should(BeNil())
+			})
+
+			It("Should reject invalid interval formats", func() {
+				Eventually(func() error {
+					k := corev1alpha1.K8sGPT{}
+					err := k8sClient.Get(ctx, nn, &k)
+					if err != nil {
+						return err
+					}
+
+					// Test invalid formats
+					invalidFormats := []string{
+						"invalid",
+						"5",     // missing unit
+						"5d",    // invalid unit
+						"abc",   // no numbers
+						"5m30s", // multiple units
+						"5.5m",  // decimal
+						"-5m",   // negative
+					}
+
+					for _, format := range invalidFormats {
+						k.Spec.Analysis.Interval = format
+						err = k8sClient.Update(ctx, &k)
+						if err == nil {
+							return fmt.Errorf("expected validation error for interval %s", format)
+						}
+						if !strings.Contains(err.Error(), "spec.analysis.interval in body should match '^[0-9]+[smh]$'") {
+							return fmt.Errorf("unexpected error for interval %s: %v", format, err)
+						}
+					}
+
+					return nil
+				}).Should(BeNil())
+			})
+		})
 	})
 })
 

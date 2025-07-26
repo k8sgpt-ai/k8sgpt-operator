@@ -85,6 +85,7 @@ func GetServiceAccount(config v1alpha1.K8sGPT, serviceAccountName string) (*core
 					Controller:         utils.PtrBool(true),
 				},
 			},
+			Annotations: make(map[string]string),
 		},
 	}
 
@@ -180,7 +181,7 @@ func GetClusterRole(config v1alpha1.K8sGPT, serviceAccountName string) (*v1.Clus
 		Rules: []v1.PolicyRule{
 			{
 				APIGroups: []string{""},
-				Resources: []string{"pods", "services", "secrets", "endpoints", "nodes"}, // Added "nodes"
+				Resources: []string{"pods", "services", "secrets", "endpoints", "nodes", "configmaps", "namespaces"},
 				Verbs:     []string{"get", "list", "watch"},
 			},
 			{
@@ -195,12 +196,12 @@ func GetClusterRole(config v1alpha1.K8sGPT, serviceAccountName string) (*v1.Clus
 			},
 			{
 				APIGroups: []string{"apps"},
-				Resources: []string{"deployments", "replicasets", "statefulsets"},
+				Resources: []string{"deployments", "replicasets", "statefulsets", "daemonsets", "replicationcontrollers"},
 				Verbs:     []string{"get", "list", "watch"},
 			},
 			{
 				APIGroups: []string{"batch"},
-				Resources: []string{"cronjobs"},
+				Resources: []string{"cronjobs", "jobs"},
 				Verbs:     []string{"get", "list", "watch"},
 			},
 			{
@@ -385,10 +386,17 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 		},
 	}
 	if outOfClusterMode {
-		// No need of ServiceAccount since the Deployment will use
-		// a kubeconfig pointing to an external cluster.
-		deployment.Spec.Template.Spec.ServiceAccountName = ""
-		deployment.Spec.Template.Spec.AutomountServiceAccountToken = ptr.To(false)
+		// Keep the service account if using Amazon Bedrock with IRSA
+		needsServiceAccount := config.Spec.AI.Backend == v1alpha1.AmazonBedrock &&
+			config.Spec.ExtraOptions != nil &&
+			config.Spec.ExtraOptions.ServiceAccountIRSA != ""
+
+		if !needsServiceAccount {
+			// No need of ServiceAccount since the Deployment will use
+			// a kubeconfig pointing to an external cluster.
+			deployment.Spec.Template.Spec.ServiceAccountName = ""
+			deployment.Spec.Template.Spec.AutomountServiceAccountToken = ptr.To(false)
+		}
 
 		kubeconfigPath := fmt.Sprintf("/tmp/%s", config.Name)
 

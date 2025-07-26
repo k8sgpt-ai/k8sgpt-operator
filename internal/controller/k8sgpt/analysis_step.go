@@ -17,6 +17,8 @@ package k8sgpt
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/go-logr/logr"
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
@@ -39,6 +41,7 @@ type AnalysisStep struct {
 
 type AnalysisLogStatement struct {
 	Name    string
+	Kind    string
 	Error   string
 	Details string
 }
@@ -52,24 +55,18 @@ func (step *AnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, error)
 			step.incK8sgptNumberOfFailedBackendAICalls(instance)
 			step.handleAIFailureBackoff(instance)
 		}
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 	step.logger.Info("AnalysisStep response", "count", len(response.Results))
 
 	// reset analysisRetryCount
 	analysisRetryCount = 0
-
-	// Update metrics count
-	if instance.K8sgptConfig.Spec.AI.Enabled && len(response.Results) > 0 {
-		step.incK8sgptNumberOfFailedBackendAICalls(instance)
-	}
-
 	// Parse the k8sgpt-deployment response into a list of results
-	step.setk8sgptNumberOfResults(instance, float64(len(response.Results)))
+	step.setk8sgptNumberOfResults(instance, response.Results)
 
 	rawResults, err := resources.MapResults(*instance.R.Integrations, response.Results, *instance.K8sgptConfig)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
 	// Prior to creating or updating any results we will delete any stale results that
@@ -77,14 +74,14 @@ func (step *AnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, error)
 	// the custom resource name
 	err = step.cleanUpStaleResults(rawResults, instance)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
 	// At this point we are able to loop through our rawResults and create them or update
 	// them as needed
 	err = step.processRawResults(rawResults, instance)
 	if err != nil {
-		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name)
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
 	instance.logger.Info("ending AnalysisStep")
@@ -115,12 +112,36 @@ func (step *AnalysisStep) incK8sgptNumberOfFailedBackendAICalls(instance *K8sGPT
 	}
 }
 
-func (step *AnalysisStep) setk8sgptNumberOfResults(instance *K8sGPTInstance, result float64) {
+func (step *AnalysisStep) setk8sgptNumberOfResults(instance *K8sGPTInstance, results []corev1alpha1.ResultSpec) {
+	groupedResults := step.getResultsPerNamespace(results)
 	numberOfResultsGauge := instance.R.MetricsBuilder.GetGaugeVec("k8sgpt_number_of_results")
 	if numberOfResultsGauge != nil {
-		numberOfResultsGauge.WithLabelValues(instance.K8sgptConfig.Name).Set(result)
+		for namespace, count := range groupedResults {
+			numberOfResultsGauge.WithLabelValues(namespace, instance.K8sgptConfig.Name).Set(float64(count))
+		}
+	}
+}
+
+func (step *AnalysisStep) getResultsPerNamespace(results []corev1alpha1.ResultSpec) map[string]int {
+	namespaceCounts := make(map[string]int)
+
+	for _, result := range results {
+		namespace := step.getResultObjectNamespace(result)
+		namespaceCounts[namespace]++
 	}
 
+	return namespaceCounts
+}
+
+func (step *AnalysisStep) getResultObjectNamespace(result corev1alpha1.ResultSpec) string {
+	// Extract namespace from the resource name (format: namespace/name)
+	// For cluster-scoped resources or when namespace information is not present,
+	// an empty string will be returned
+	substrings := strings.Split(result.Name, "/")
+	if len(substrings) > 1 {
+		return substrings[0]
+	}
+	return ""
 }
 
 func (step *AnalysisStep) cleanUpStaleResults(rawResults map[string]corev1alpha1.Result, instance *K8sGPTInstance) error {
@@ -143,7 +164,8 @@ func (step *AnalysisStep) cleanUpStaleResults(rawResults map[string]corev1alpha1
 				}
 				numberOfResultsByType := instance.R.MetricsBuilder.GetGaugeVec("k8sgpt_number_of_results_by_type")
 				if numberOfResultsByType != nil {
-					numberOfResultsByType.WithLabelValues(result.Spec.Kind, result.Spec.Name, instance.K8sgptConfig.Name).Desc()
+					resultObjectNamespace := step.getResultObjectNamespace(result.Spec)
+					numberOfResultsByType.WithLabelValues(resultObjectNamespace, result.Spec.Kind, result.Spec.Name, instance.K8sgptConfig.Name).Desc()
 				}
 
 			}
@@ -173,6 +195,7 @@ func (step *AnalysisStep) processRawResults(rawResults map[string]corev1alpha1.R
 			}
 			logStatement := AnalysisLogStatement{
 				Name:    result.Spec.Name,
+				Kind:    result.Spec.Kind,
 				Details: result.Spec.Details,
 				Error:   errorString,
 			}
@@ -183,7 +206,8 @@ func (step *AnalysisStep) processRawResults(rawResults map[string]corev1alpha1.R
 			}
 			step.logger.Info(string(jsonBytes))
 		}
-		numberOfResultsByType.WithLabelValues(result.Spec.Kind, result.Spec.Name, instance.K8sgptConfig.Name).Inc()
+		resultObjectNamespace := step.getResultObjectNamespace(result.Spec)
+		numberOfResultsByType.WithLabelValues(resultObjectNamespace, result.Spec.Kind, result.Spec.Name, instance.K8sgptConfig.Name).Inc()
 	}
 
 	return nil
