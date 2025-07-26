@@ -1,6 +1,6 @@
 dependencies:
 - name: interplex
   repository: https://charts.k8sgpt.ai/
-  version: 1.0.0
-digest: sha256:e016c60a51aef03abc09da3fc8a4dc9c7305f3524c156cb88c123d942647e6a7
-generated: "2024-12-10T10:01:00.236182483Z"
+  version: 1.1.0
+digest: sha256:c43a0d6db8cd620e65b13b1544ad5c59158e5d1ce8a3ad09957f8143334e97a8
+generated: "2025-07-26T12:59:01.701451654Z"
