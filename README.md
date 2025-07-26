@@ -567,10 +567,11 @@ spec:
 Optional parameters available for sink.  
 ('type', 'webhook' are required parameters.)
 
-| tool       | channel | icon_url | username |
-| ---------- | ------- | -------- | -------- |
-| Slack      |         |          |          |
-| Mattermost | ✔️      | ✔️       | ✔️       |
+| tool        | channel | icon_url | username |
+| ----------- | ------- | -------- | -------- |
+| Slack       |         |          |          |
+| Mattermost  | ✔️      | ✔️       | ✔️       |
+| CloudEvents |         |          |          |
 
 </details>
 
