@@ -1,4 +1,4 @@
-apiVersion: k8sgpt.ai/v1alpha1  # API version
+apiVersion: core.k8sgpt.ai/v1alpha1 # API version
 kind: K8sGPT                   # Resource kind
 metadata:
   name: <k8sgpt-instance-name> # Name of your K8sGPT instance
@@ -16,8 +16,6 @@ spec:
     limits:
       cpu: <cpu-limit>
       memory: <memory-limit>
-  analysisConfig:
-    interval: <interval>       # Interval between analysis runs (e.g. "30s","5m", "1h")
   noCache: <boolean>            # Disable caching (optional)
   customAnalyzers:             # Define custom analyzers (optional)
     - name: <analyzer-name>
@@ -32,20 +30,19 @@ spec:
     serviceAccountIRSA: <arn>
   sink:                        # Webhook for notifications (optional)
     type: <webhook-type>        # (e.g., slack, mattermost, cloudevents)
-    endpoint: <webhook-endpoint>
+    webhook: <webhook-endpoint>
     channel: <channel-name>
     username: <username>
     icon_url: <icon-url>
     secret:
       name: <secret-name>
       key: <secret-key>
-  analysis:                    # Analysis configuration (optional)
+  analysis:                    # Analysis schedule configuration (optional)
     interval: <interval>        # Interval between analysis runs (e.g. "5m", "1h")
-    namespace: <namespace>      # Namespace to run analysis in (optional, default: k8sgpt)
   ai:                          # AI configuration (required)
     autoRemediation:           # Automatic remediation settings
       enabled: <boolean>        # Enable/disable auto-remediation
-      riskThreshold: <percentage> # Risk threshold (e.g., "90")
+      similarityRequirement: <percentage> # similarityRequirement (e.g., "90")
       resources:                # Resource types for auto-remediation
         - Pod
         - Service
