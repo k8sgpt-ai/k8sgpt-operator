@@ -56,6 +56,9 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      eligibleResource.ResultRef.Name,
 				Namespace: instance.K8sgptConfig.Namespace,
+				OwnerReferences: []metav1.OwnerReference{
+					*metav1.NewControllerRef(instance.K8sgptConfig, instance.K8sgptConfig.GetObjectKind().GroupVersionKind()),
+				},
 			},
 			Spec: corev1alpha1.MutationSpec{
 				ResourceRef:         eligibleResource.ObjectRef,
