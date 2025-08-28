@@ -244,6 +244,25 @@ func GetClusterRole(config v1alpha1.K8sGPT, serviceAccountName string) (*v1.Clus
 	return clusterRole, nil
 }
 
+// MergeLabelMaps merges multiple maps of string labels into a single map.
+// In case of overlapping keys, the value from the last map in the list will be used.
+//
+// Parameters:
+// - maps: A variadic list of maps to be merged.
+//
+// Returns:
+// - A single map containing all the merged key-value pairs from the provided maps.
+func MergeLabelMaps(maps ...map[string]string) map[string]string {
+	outputmap := make(map[string]string)
+	for _, x := range maps {
+		for k, v := range x {
+			outputmap[k] = v
+		}
+	}
+
+	return outputmap
+}
+
 // GetDeployment Create deployment with the latest K8sGPT image
 func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Client,
 	serviceAccountName string) (*appsv1.Deployment, error) {
@@ -251,6 +270,10 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 	// Create deployment
 	image := config.Spec.Repository + ":" + config.Spec.Version
 	replicas := int32(1)
+	labels := map[string]string{
+		"app": config.Name,
+	}
+	labels = MergeLabelMaps(labels, config.Labels)
 	deployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.Name,
@@ -265,6 +288,7 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 					Controller:         utils.PtrBool(true),
 				},
 			},
+			Labels: config.Labels,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: &replicas,
@@ -275,9 +299,7 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: map[string]string{
-						"app": config.Name,
-					},
+					Labels: labels,
 				},
 				Spec: corev1.PodSpec{
 					ServiceAccountName: serviceAccountName,
