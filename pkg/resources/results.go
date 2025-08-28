@@ -30,7 +30,7 @@ func MapResults(i integrations.Integrations, resultsSpec []v1alpha1.ResultSpec, 
 	for _, resultSpec := range resultsSpec {
 		name := strings.ReplaceAll(resultSpec.Name, "-", "")
 		name = strings.ReplaceAll(name, "/", "")
-		result := GetResult(resultSpec, name, namespace, backend, resultSpec.Details)
+		result := GetResult(resultSpec, name, namespace, backend, resultSpec.Details, &config)
 		labels := map[string]string{
 			"k8sgpts.k8sgpt.ai/name":      config.Name,
 			"k8sgpts.k8sgpt.ai/namespace": config.Namespace,
@@ -52,7 +52,7 @@ func MapResults(i integrations.Integrations, resultsSpec []v1alpha1.ResultSpec, 
 	return rawResults, nil
 }
 
-func GetResult(resultSpec v1alpha1.ResultSpec, name, namespace, backend string, detail string) v1alpha1.Result {
+func GetResult(resultSpec v1alpha1.ResultSpec, name, namespace, backend string, detail string, owner *v1alpha1.K8sGPT) v1alpha1.Result {
 	resultSpec.Backend = backend
 	resultSpec.Details = detail
 	return v1alpha1.Result{
@@ -60,6 +60,9 @@ func GetResult(resultSpec v1alpha1.ResultSpec, name, namespace, backend string, 
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				*metav1.NewControllerRef(owner, owner.GetObjectKind().GroupVersionKind()),
+			},
 		},
 	}
 }
