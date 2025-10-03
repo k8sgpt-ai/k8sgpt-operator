@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.24](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.23...v0.2.24) (2025-10-03)
+
+
+### Other
+
+* missing labels ([#758](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/758)) ([0683b98](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0683b985cdf8095a64054a322407df85cadc11fd))
+
 ## [0.2.23](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.22...v0.2.23) (2025-10-03)
 
 
