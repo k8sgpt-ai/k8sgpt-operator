@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.2.23](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.22...v0.2.23) (2025-10-03)
+
+
+### Features
+
+* add CloudEvents Sink ([#662](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/662)) ([dc619e9](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/dc619e924f5d0b5b673d844f4798da84361376f7))
+* reconcile update p2 ([#727](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/727)) ([f743316](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/f7433161e5b98780d3d9b5ec5a0a14fe3aca5c5d))
+* sneaky little bug fix ([#757](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/757)) ([320d607](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/320d6073978c51ca2450f844c6aac415b9c9dbc2))
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#719](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/719)) ([fb5903d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/fb5903df87e424e127efa99f694eed1f4dc5827d))
+* **deps:** update all non-major dependencies ([#729](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/729)) ([7526608](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/75266085615c6a75da9b3a9c26b163d4821a4851))
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#711](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/711)) ([a229d1c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/a229d1cb8239985d69fbf036065d56aecbbd253c))
+* service only sync necessary fields to avoid conflicts ([#731](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/731)) ([20d0332](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/20d0332d7578ca616fac7093ea5d8092f4b1c075))
+
+
+### Other
+
+* **deps:** update docker/login-action digest to 184bdaa ([#733](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/733)) ([830bffe](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/830bffe70ed0ccccd8942bc091d35233095bb69a))
+* **deps:** update docker/setup-buildx-action digest to e468171 ([#723](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/723)) ([e93f87b](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e93f87b3be25f6579ce290eeb30954177859fb20))
+
+
+### Docs
+
+* Improve and correct exhaustive_sample.yaml ([#738](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/738)) ([7ce3e5d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/7ce3e5d9659c185e02d30fa1b8e0515e731bfb82))
+
 ## [0.2.22](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.21...v0.2.22) (2025-06-20)
 
 
