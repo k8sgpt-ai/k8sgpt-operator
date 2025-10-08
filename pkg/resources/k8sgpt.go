@@ -244,6 +244,20 @@ func GetClusterRole(config v1alpha1.K8sGPT, serviceAccountName string) (*v1.Clus
 	return clusterRole, nil
 }
 
+// buildK8sGPTArgs builds the command-line arguments for the k8sgpt serve command
+func buildK8sGPTArgs(config v1alpha1.K8sGPT) []string {
+	args := []string{"serve"}
+	
+	// Add filters if specified
+	if len(config.Spec.Filters) > 0 {
+		for _, filter := range config.Spec.Filters {
+			args = append(args, "--filter", filter)
+		}
+	}
+	
+	return args
+}
+
 // GetDeployment Create deployment with the latest K8sGPT image
 func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Client,
 	serviceAccountName string) (*appsv1.Deployment, error) {
@@ -286,9 +300,7 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 							Name:            "k8sgpt",
 							ImagePullPolicy: config.Spec.ImagePullPolicy,
 							Image:           image,
-							Args: []string{
-								"serve",
-							},
+							Args:            buildK8sGPTArgs(config),
 							Env: []corev1.EnvVar{
 								{
 									Name:  "K8SGPT_MODEL",
