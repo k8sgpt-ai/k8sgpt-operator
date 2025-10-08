@@ -247,14 +247,14 @@ func GetClusterRole(config v1alpha1.K8sGPT, serviceAccountName string) (*v1.Clus
 // buildK8sGPTArgs builds the command-line arguments for the k8sgpt serve command
 func buildK8sGPTArgs(config v1alpha1.K8sGPT) []string {
 	args := []string{"serve"}
-	
+
 	// Add filters if specified
 	if len(config.Spec.Filters) > 0 {
 		for _, filter := range config.Spec.Filters {
 			args = append(args, "--filter", filter)
 		}
 	}
-	
+
 	return args
 }
 

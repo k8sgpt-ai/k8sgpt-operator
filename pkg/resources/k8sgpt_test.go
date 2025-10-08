@@ -280,28 +280,28 @@ func Test_GetDeploymentWithFilters(t *testing.T) {
 	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
 
 	testCases := []struct {
-		name            string
-		filters         []string
-		expectedArgs    []string
+		name         string
+		filters      []string
+		expectedArgs []string
 	}{
 		{
-			name:    "No filters specified",
-			filters: []string{},
+			name:         "No filters specified",
+			filters:      []string{},
 			expectedArgs: []string{"serve"},
 		},
 		{
-			name:    "Single filter",
-			filters: []string{"Pod"},
+			name:         "Single filter",
+			filters:      []string{"Pod"},
 			expectedArgs: []string{"serve", "--filter", "Pod"},
 		},
 		{
-			name:    "Multiple filters including Deployment",
-			filters: []string{"Pod", "Deployment", "Service"},
+			name:         "Multiple filters including Deployment",
+			filters:      []string{"Pod", "Deployment", "Service"},
 			expectedArgs: []string{"serve", "--filter", "Pod", "--filter", "Deployment", "--filter", "Service"},
 		},
 		{
-			name:    "All common filters",
-			filters: []string{"Pod", "Deployment", "StatefulSet", "DaemonSet", "Service", "Ingress"},
+			name:         "All common filters",
+			filters:      []string{"Pod", "Deployment", "StatefulSet", "DaemonSet", "Service", "Ingress"},
 			expectedArgs: []string{"serve", "--filter", "Pod", "--filter", "Deployment", "--filter", "StatefulSet", "--filter", "DaemonSet", "--filter", "Service", "--filter", "Ingress"},
 		},
 	}
@@ -336,9 +336,8 @@ func Test_GetDeploymentWithFilters(t *testing.T) {
 			require.NoError(t, err)
 
 			// Verify the args contain the expected values
-			assert.Equal(t, tc.expectedArgs, deployment.Spec.Template.Spec.Containers[0].Args, 
+			assert.Equal(t, tc.expectedArgs, deployment.Spec.Template.Spec.Containers[0].Args,
 				"Expected args to match for filter configuration: %v", tc.filters)
 		})
 	}
 }
-
