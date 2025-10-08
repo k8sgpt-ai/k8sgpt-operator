@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.24](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.23...v0.2.24) (2025-10-08)
+
+
+### Bug Fixes
+
+* Log correct oldHash value when updating results ([#761](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/761)) ([db6d7cd](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/db6d7cd73dc66b7899f6826697b92cf4f39cc084))
+
+
+### Other
+
+* **deps:** update actions/checkout action to v5 ([#735](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/735)) ([a2e73d2](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/a2e73d2520f125eb5205a8013eb04073cb0bbe9a))
+* **deps:** update softprops/action-gh-release digest to aec2ec5 ([#751](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/751)) ([90a5064](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/90a50646b8b6ed5e68e7a9735a36bb44db01075a))
+* missing labels ([#758](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/758)) ([0683b98](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0683b985cdf8095a64054a322407df85cadc11fd))
+
 ## [0.2.23](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.22...v0.2.23) (2025-10-03)
 
 
