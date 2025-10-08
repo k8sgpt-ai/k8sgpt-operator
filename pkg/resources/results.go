@@ -144,6 +144,8 @@ func CreateOrUpdateResult(ctx context.Context, c client.Client, res v1alpha1.Res
 		}
 
 		// Content has changed - update the result
+		// Capture the old hash before updating
+		oldHash := existing.Status.ContentHash
 		existing.Spec = res.Spec
 		existing.Labels = res.Labels
 		if err := c.Update(ctx, &existing); err != nil {
@@ -154,7 +156,7 @@ func CreateOrUpdateResult(ctx context.Context, c client.Client, res v1alpha1.Res
 		if err := c.Status().Update(ctx, &existing); err != nil {
 			return err
 		}
-		logger.Info("Updated result", "name", res.Name, "oldHash", existing.Status.ContentHash, "newHash", newHash)
+		logger.Info("Updated result", "name", res.Name, "oldHash", oldHash, "newHash", newHash)
 		finalResult = &existing
 		return nil
 	})
