@@ -20,6 +20,7 @@ import (
 	"os"
 	"time"
 
+	rpc "buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go/schema/v1/schemav1grpc"
 	"github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"google.golang.org/grpc"
 	corev1 "k8s.io/api/core/v1"
@@ -34,6 +35,11 @@ type Client struct {
 
 func (c *Client) Close() error {
 	return c.Conn.Close()
+}
+
+// GetServerQueryServiceClient returns a new ServerQueryServiceClient
+func (c *Client) GetServerQueryServiceClient() rpc.ServerQueryServiceClient {
+	return rpc.NewServerQueryServiceClient(c.Conn)
 }
 
 func NewClient(address string) (*Client, error) {

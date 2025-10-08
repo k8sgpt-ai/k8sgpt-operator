@@ -87,6 +87,11 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		mutationControllerLog.Info("K8sGPT client not ready, requeuing")
 		return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, nil
 	}
+
+	// Get the shared backend and K8sGPT config
+	backend := shared.GetRemoteBackend()
+	k8sgptConfig := shared.GetK8sGPTConfig()
+
 	// check if the object is being deleted
 
 	// check if object has a finalizer
@@ -120,7 +125,7 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		}
 
 		queryResponse, err := (*r.ServerQueryClient).Query(context.Background(), &schemav1.QueryRequest{
-			Backend: r.RemoteBackend,
+			Backend: backend,
 			Query: fmt.Sprintf(prompts.Mutation_prompt, result.Spec.Details,
 				mutation.Spec.OriginConfiguration),
 		})
@@ -163,14 +168,14 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			mutationControllerLog.Info("Target configuration is not set, this shouldn't occur at this phase", "mutation", mutation.Name)
 			return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, nil
 		}
-		if r.K8sGPT != nil {
-			if r.K8sGPT.Spec.AI.AutoRemediation.SimilarityRequirement != "" {
+		if k8sgptConfig != nil {
+			if k8sgptConfig.Spec.AI.AutoRemediation.SimilarityRequirement != "" {
 				// If the current Similarity score is less than the riskThreshold, we should not apply the mutation
 				ss, err := strconv.ParseFloat(strings.TrimSpace(mutation.Spec.SimilarityScore), 64)
 				if err != nil {
 					mutationControllerLog.Error(err, "unable to parse similarity score", "mutation", mutation.Name)
 				} else {
-					rt, err := strconv.ParseFloat(r.K8sGPT.Spec.AI.AutoRemediation.SimilarityRequirement, 64)
+					rt, err := strconv.ParseFloat(k8sgptConfig.Spec.AI.AutoRemediation.SimilarityRequirement, 64)
 					if err != nil {
 						mutationControllerLog.Error(err, "unable to parse risk threshold", "mutation", mutation.Name)
 					} else {
@@ -214,7 +219,7 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			Rc:          r.Client,
 			Log:         mutationControllerLog,
 			Obj:         obj,
-			Backend:     r.RemoteBackend,
+			Backend:     backend,
 			Mutation:    mutation,
 			QueryClient: *r.ServerQueryClient,
 		})
