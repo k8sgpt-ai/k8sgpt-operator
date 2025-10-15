@@ -248,12 +248,9 @@ func GetClusterRole(config v1alpha1.K8sGPT, serviceAccountName string) (*v1.Clus
 func buildK8sGPTArgs(config v1alpha1.K8sGPT) []string {
 	args := []string{"serve"}
 
-	// Add filters if specified
-	if len(config.Spec.Filters) > 0 {
-		for _, filter := range config.Spec.Filters {
-			args = append(args, "--filter", filter)
-		}
-	}
+	// Note: Filters are passed via the gRPC API when analysis is requested,
+	// not as command-line arguments to the serve command.
+	// See pkg/client/analysis.go where filters are included in the AnalyzeRequest.
 
 	return args
 }
