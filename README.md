@@ -63,6 +63,7 @@ spec:
   #  namespace: trivy-system
   # filters:
   #   - Ingress
+  # http: false
   # sink:
   #   type: slack
   #   webhook: <webhook-url> # use the sink secret if you want to keep your webhook url private
