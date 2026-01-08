@@ -575,6 +575,100 @@ Optional parameters available for sink.
 
 </details>
 
+<details>
+<summary>Filters (Analyzers)</summary>
+
+The `filters` field allows you to specify which analyzers K8sGPT should use when scanning your cluster. By default, K8sGPT enables a set of core analyzers. You can use filters to enable additional optional analyzers or to restrict analysis to specific resource types.
+
+**Core Analyzers** (enabled by default):
+- Pod
+- Deployment
+- ReplicaSet
+- PersistentVolumeClaim
+- Service
+- Ingress
+- StatefulSet
+- Job
+- CronJob
+- Node
+- ValidatingWebhookConfiguration
+- MutatingWebhookConfiguration
+- ConfigMap
+
+**Optional Analyzers** (disabled by default):
+- HorizontalPodAutoscaler
+- PodDisruptionBudget
+- NetworkPolicy
+- Log
+- GatewayClass
+- Gateway
+- HTTPRoute
+
+**Important**: When you specify the `filters` field, it replaces the default analyzer list. To enable optional analyzers while keeping the defaults, you must explicitly list all the analyzers you want to use.
+
+Example - Enable Log and HPA analyzers along with some core analyzers:
+
+```sh
+kubectl apply -f - << EOF
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: K8sGPT
+metadata:
+  name: k8sgpt-sample
+  namespace: k8sgpt-operator-system
+spec:
+  ai:
+    enabled: true
+    model: gpt-4o-mini
+    backend: openai
+    secret:
+      name: k8sgpt-sample-secret
+      key: openai-api-key
+  noCache: false
+  repository: ghcr.io/k8sgpt-ai/k8sgpt
+  version: v0.4.1
+  filters:
+    - Pod
+    - Deployment
+    - Service
+    - ReplicaSet
+    - Ingress
+    - StatefulSet
+    - Job
+    - CronJob
+    - Node
+    - Log
+    - HorizontalPodAutoscaler
+EOF
+```
+
+Example - Analyze only Pods and Deployments:
+
+```sh
+kubectl apply -f - << EOF
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: K8sGPT
+metadata:
+  name: k8sgpt-sample
+  namespace: k8sgpt-operator-system
+spec:
+  ai:
+    enabled: true
+    model: gpt-4o-mini
+    backend: openai
+    secret:
+      name: k8sgpt-sample-secret
+      key: openai-api-key
+  noCache: false
+  repository: ghcr.io/k8sgpt-ai/k8sgpt
+  version: v0.4.1
+  filters:
+    - Pod
+    - Deployment
+EOF
+```
+
+</details>
+
 ## Helm values
 
 For details please see [here](chart/operator/values.yaml)
