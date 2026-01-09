@@ -255,6 +255,11 @@ func buildK8sGPTArgs(config v1alpha1.K8sGPT) []string {
 		}
 	}
 
+	// Enable REST/http using gppc-gateway if specified in the configuration
+	if config.Spec.HTTP {
+		args = append(args, "--http")
+	}
+
 	return args
 }
 
