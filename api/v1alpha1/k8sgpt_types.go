@@ -174,6 +174,18 @@ type K8sGPTSpec struct {
 	// Define the kubeconfig the Deployment must use.
 	// If empty, the Deployment will use the ServiceAccount provided by Kubernetes itself.
 	Kubeconfig *SecretRef `json:"kubeconfig,omitempty"`
+	// PodLabels allows adding custom labels to the K8sGPT pods for organizational tracking,
+	// service mesh integration, and monitoring purposes.
+	PodLabels map[string]string `json:"podLabels,omitempty"`
+	// PodAnnotations allows adding custom annotations to the K8sGPT pods for integration
+	// with service meshes, monitoring systems, and other infrastructure components.
+	PodAnnotations map[string]string `json:"podAnnotations,omitempty"`
+	// SecurityContext defines the security options the pod should run with.
+	// This allows compliance with organizational security policies and pod security standards.
+	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty"`
+	// ContainerSecurityContext defines the security options the container should run with.
+	// This allows setting security constraints like runAsNonRoot, readOnlyRootFilesystem, etc.
+	ContainerSecurityContext *corev1.SecurityContext `json:"containerSecurityContext,omitempty"`
 }
 
 const (
