@@ -292,17 +292,17 @@ func Test_GetDeploymentWithFilters(t *testing.T) {
 		{
 			name:         "Single filter",
 			filters:      []string{"Pod"},
-			expectedArgs: []string{"serve", "--filter", "Pod"},
+			expectedArgs: []string{"serve"},
 		},
 		{
 			name:         "Multiple filters including Deployment",
 			filters:      []string{"Pod", "Deployment", "Service"},
-			expectedArgs: []string{"serve", "--filter", "Pod", "--filter", "Deployment", "--filter", "Service"},
+			expectedArgs: []string{"serve"},
 		},
 		{
 			name:         "All common filters",
 			filters:      []string{"Pod", "Deployment", "StatefulSet", "DaemonSet", "Service", "Ingress"},
-			expectedArgs: []string{"serve", "--filter", "Pod", "--filter", "Deployment", "--filter", "StatefulSet", "--filter", "DaemonSet", "--filter", "Service", "--filter", "Ingress"},
+			expectedArgs: []string{"serve"},
 		},
 	}
 
@@ -336,6 +336,8 @@ func Test_GetDeploymentWithFilters(t *testing.T) {
 			require.NoError(t, err)
 
 			// Verify the args contain the expected values
+			// Note: Filters are now passed via the gRPC API when analysis is requested,
+			// not as command-line arguments to the serve command.
 			assert.Equal(t, tc.expectedArgs, deployment.Spec.Template.Spec.Containers[0].Args,
 				"Expected args to match for filter configuration: %v", tc.filters)
 		})
