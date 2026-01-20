@@ -10,6 +10,7 @@ env:
   # Default minimum version of Go to support.
   DEFAULT_GO_VERSION: 1.19
   REGISTRY: ghcr.io
+  REGISTRY_IMAGE: ghcr.io/${{ toLower(github.repository) }}
   GITHUB_PAGES_BRANCH: gh_pages
 
 defaults:
@@ -51,8 +52,8 @@ jobs:
           token: ${{ secrets.K8SGPT_BOT_SECRET }}
           charts_dir: chart
           charts_url: https://charts.k8sgpt.ai
-          owner: k8sgpt-ai
-          repository: charts
+          owner: ${{ github.repository_owner }}
+          repository: ${{ vars.CHARTS_REPOSITORY || 'charts' }}
           branch: main
           commit_username: k8sgpt-ai-bot
           commit_email: bot@noreply.k8sgpt.ai
@@ -67,7 +68,7 @@ jobs:
       packages: write
       id-token: write
     env:
-      IMAGE_TAG: ghcr.io/albe83/k8sgpt-operator:${{ needs.release-please.outputs.tag_name }}
+      IMAGE_TAG: ${{ env.REGISTRY_IMAGE }}:${{ needs.release-please.outputs.tag_name }}
       IMAGE_NAME: k8sgpt-operator
     steps:
       - name: Checkout

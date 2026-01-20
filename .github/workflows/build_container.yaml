@@ -11,12 +11,11 @@ on:
       - '[0-9]+.[1-9][0-9]*.x'
     paths-ignore:
       - "**.md"
-  workflow_dispatch:
 
 env:
   GO_VERSION: "~1.21"
   IMAGE_NAME: "k8sgpt-operator"
-  REGISTRY_IMAGE: "ghcr.io/albe83/k8sgpt-operator"
+  REGISTRY_IMAGE: "ghcr.io/${{ toLower(github.repository) }}"
 defaults:
   run:
     shell: bash
@@ -109,7 +108,6 @@ jobs:
     if: github.event_name == 'push' && needs.prepare_ci_run.outputs.NON_FORKED_AND_NON_ROBOT_RUN == 'true' # only run on push to main/maintenance branches
     runs-on: ubuntu-24.04
     env:
-      BRANCH_SLUG: ${{ needs.prepare_ci_run.outputs.BRANCH_SLUG }}
       DATETIME: ${{ needs.prepare_ci_run.outputs.DATETIME }}
       BUILD_TIME: ${{ needs.prepare_ci_run.outputs.BUILD_TIME }}
       GIT_SHA: ${{ needs.prepare_ci_run.outputs.GIT_SHA }}
@@ -140,7 +138,6 @@ jobs:
           target: production
           tags: |
             ${{ env.REGISTRY_IMAGE }}:dev-${{ env.DATETIME }}
-            ${{ env.REGISTRY_IMAGE }}:${{ env.BRANCH_SLUG }}
           build-args: |
             GIT_HASH=${{ env.GIT_SHA }}
             RELEASE_VERSION=dev-${{ env.DATETIME }}
