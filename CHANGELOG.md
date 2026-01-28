@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.25](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.24...v0.2.25) (2026-01-09)
+
+
+### Features
+
+* Add support for custom pod labels, annotations, and security contexts ([#777](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/777)) ([249dd7f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/249dd7f4fb59b4799a76064023b28a524edcf8eb)), closes [#776](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/776)
+
+
+### Docs
+
+* add documentation for filters and optional analyzers ([#775](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/775)) ([b58dc1e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/b58dc1e6111ce79efe014c71f0c52a82cf9c27d8)), closes [#685](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/685)
+
 ## [0.2.24](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.23...v0.2.24) (2025-10-12)
 
 
