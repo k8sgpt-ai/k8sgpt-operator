@@ -22,6 +22,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -139,6 +140,75 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 
 		// We can get the k8sGPT CRDs by the name and namespace.
 		It("Should get the K8sGPT CRDs by the name and namespace", func() {
+			By("Ensuring K8sGPT CRDs exist")
+			// Create fresh copies of k8sGPT objects
+			k8sGPTCopy := K8sGPT{
+				TypeMeta: metav1.TypeMeta{
+					APIVersion: GroupVersion.String(),
+					Kind:       kind,
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "k8s-gpt",
+					Namespace: Namespace,
+				},
+				Spec: K8sGPTSpec{
+					AI: &AISpec{
+						Backend:   OpenAI,
+						BackOff:   &backOff,
+						BaseUrl:   baseUrl,
+						Model:     model,
+						Enabled:   true,
+						Secret:    &secretRef,
+						Anonymize: &anonymize,
+						Language:  language,
+					},
+					Version:    version,
+					Repository: repository,
+					NoCache:    true,
+					NodeSelector: map[string]string{
+						"nodepool": "management",
+					},
+					Resources: &resource,
+				},
+			}
+			k8sGPT2Copy := K8sGPT{
+				TypeMeta: metav1.TypeMeta{
+					APIVersion: GroupVersion.String(),
+					Kind:       kind,
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "k8s-gpt-2",
+					Namespace: Namespace,
+				},
+				Spec: K8sGPTSpec{
+					AI: &AISpec{
+						Backend:   OpenAI,
+						BackOff:   &backOff,
+						BaseUrl:   baseUrl,
+						Model:     model,
+						Secret:    &secretRef,
+						Enabled:   false,
+						Anonymize: &dontAnonymize,
+						Language:  language,
+					},
+					Repository: repository,
+					Version:    version,
+					NoCache:    false,
+					NodeSelector: map[string]string{
+						"nodepool": "management",
+					},
+				},
+			}
+			// Create objects if they don't exist
+			err := fakeClient.Create(ctx, &k8sGPTCopy)
+			if err != nil && !errors.IsAlreadyExists(err) {
+				Fail("Failed to create k8sGPT: " + err.Error())
+			}
+			err = fakeClient.Create(ctx, &k8sGPT2Copy)
+			if err != nil && !errors.IsAlreadyExists(err) {
+				Fail("Failed to create k8sGPT2: " + err.Error())
+			}
+
 			By("Getting the K8sGPT CRDs by the name and namespace")
 			// Define the K8sGPT CRDs object.
 			k8sGPTObject := K8sGPT{}
