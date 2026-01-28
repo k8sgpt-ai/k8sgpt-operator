@@ -23,7 +23,7 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 	instance.logger.Info("starting RemediationStep")
 	if !instance.K8sgptConfig.Spec.AI.AutoRemediation.Enabled {
 		instance.logger.Info("calculateRemediationStep skipped because auto-remediation disabled")
-		return ctrl.Result{Requeue: true, RequeueAfter: ReconcileSuccessInterval}, nil
+		return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 	latestResultList, err := EmitIfNotHistorical(instance)
 	if err != nil {
