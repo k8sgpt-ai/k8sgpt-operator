@@ -146,16 +146,12 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			k8sGPTCopy.ResourceVersion = "" // Clear resource version for create
 			k8sGPT2Copy := k8sGPT2.DeepCopy()
 			k8sGPT2Copy.ResourceVersion = "" // Clear resource version for create
-			
-			// Create objects if they don't exist
+
+			// Create objects if they don't exist (ignore if they already exist)
 			err := fakeClient.Create(ctx, k8sGPTCopy)
-			if err != nil && !errors.IsAlreadyExists(err) {
-				Fail("Failed to create k8sGPT: " + err.Error())
-			}
+			Expect(err == nil || errors.IsAlreadyExists(err)).To(BeTrue(), "Failed to create k8sGPT")
 			err = fakeClient.Create(ctx, k8sGPT2Copy)
-			if err != nil && !errors.IsAlreadyExists(err) {
-				Fail("Failed to create k8sGPT2: " + err.Error())
-			}
+			Expect(err == nil || errors.IsAlreadyExists(err)).To(BeTrue(), "Failed to create k8sGPT2")
 
 			By("Getting the K8sGPT CRDs by the name and namespace")
 			// Define the K8sGPT CRDs object.
