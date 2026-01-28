@@ -1,0 +1,65 @@
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: K8sGPT
+metadata:
+  name: k8sgpt-secure-instance
+  namespace: default
+spec:
+  version: v0.3.41
+  repository: ghcr.io/k8sgpt-ai/k8sgpt
+  
+  # Custom labels for pod organization and tracking
+  podLabels:
+    app.kubernetes.io/component: ai-analysis
+    environment: production
+    team: platform-engineering
+  
+  # Custom annotations for integration with monitoring and service mesh
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+    sidecar.istio.io/inject: "false"
+  
+  # Pod-level security context for compliance with security policies
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  
+  # Container-level security context for strict security compliance
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    capabilities:
+      drop:
+        - ALL
+  
+  # AI backend configuration
+  ai:
+    enabled: true
+    backend: openai
+    model: gpt-4o-mini
+    secret:
+      name: k8sgpt-openai-secret
+      key: openai-api-key
+  
+  # Resource limits and requests
+  resources:
+    limits:
+      cpu: "1"
+      memory: "512Mi"
+      ephemeral-storage: "1Gi"
+    requests:
+      cpu: "0.2"
+      memory: "256Mi"
+      ephemeral-storage: "100Mi"
+  
+  # Filters for specific analyzers
+  filters:
+    - Pod
+    - Deployment
+    - Service
+    - Ingress
