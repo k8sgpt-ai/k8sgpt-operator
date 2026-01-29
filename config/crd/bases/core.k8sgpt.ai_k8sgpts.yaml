@@ -355,6 +355,9 @@ spec:
                 items:
                   type: string
                 type: array
+              http:
+                default: false
+                type: boolean
               imagePullPolicy:
                 description: PullPolicy describes a policy for if/when to pull a container
                   image
