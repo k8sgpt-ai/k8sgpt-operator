@@ -87,6 +87,7 @@ spec:
                     enum:
                     - ibmwatsonxai
                     - openai
+                    - openairesponses
                     - localai
                     - azureopenai
                     - amazonbedrock
