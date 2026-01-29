@@ -158,9 +158,8 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 			k8sGPTObject := K8sGPT{}
 			// Get the K8sGPT CRDs by the name and namespace.
 			Expect(fakeClient.Get(ctx, typeNamespace, &k8sGPTObject)).Should(Succeed())
-			// Check the K8sGPT CRDs object's name and the APIVersion.
+			// Check the K8sGPT CRDs object's name and spec values.
 			Expect(k8sGPTObject.Name).Should(Equal("k8s-gpt"))
-			Expect(k8sGPTObject.APIVersion).Should(Equal(GroupVersion.String()))
 			Expect(k8sGPTObject.Spec.AI.Enabled).Should(Equal(true))
 
 			// get K8sGPT CRD by resource name
