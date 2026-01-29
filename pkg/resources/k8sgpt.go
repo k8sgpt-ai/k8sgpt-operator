@@ -262,6 +262,25 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 	// Create deployment
 	image := config.Spec.Repository + ":" + config.Spec.Version
 	replicas := int32(1)
+
+	// Merge default labels with custom pod labels
+	podLabels := map[string]string{
+		"app": config.Name,
+	}
+	if config.Spec.PodLabels != nil {
+		for k, v := range config.Spec.PodLabels {
+			podLabels[k] = v
+		}
+	}
+
+	// Create pod annotations if specified
+	podAnnotations := make(map[string]string)
+	if config.Spec.PodAnnotations != nil {
+		for k, v := range config.Spec.PodAnnotations {
+			podAnnotations[k] = v
+		}
+	}
+
 	deployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.Name,
@@ -286,9 +305,8 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: map[string]string{
-						"app": config.Name,
-					},
+					Labels:      podLabels,
+					Annotations: podAnnotations,
 				},
 				Spec: corev1.PodSpec{
 					ServiceAccountName: serviceAccountName,
@@ -381,6 +399,7 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 									Name:      "k8sgpt-vol",
 								},
 							},
+							SecurityContext: config.Spec.ContainerSecurityContext,
 						},
 					},
 					Volumes: []corev1.Volume{
@@ -389,7 +408,8 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 							Name:         "k8sgpt-vol",
 						},
 					},
-					NodeSelector: config.Spec.NodeSelector,
+					NodeSelector:    config.Spec.NodeSelector,
+					SecurityContext: config.Spec.SecurityContext,
 				},
 			},
 		},

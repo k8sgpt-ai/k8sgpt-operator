@@ -23,7 +23,13 @@ spec:
         url: <analyzer-url>
         port: <analyzer-port>
   filters:                     # Filters for analysis (optional)
-    - <filter-expression>
+    # When specified, replaces the default analyzer list.
+    # Core analyzers (enabled by default): Pod, Deployment, ReplicaSet,
+    # PersistentVolumeClaim, Service, Ingress, StatefulSet, Job, CronJob,
+    # Node, ValidatingWebhookConfiguration, MutatingWebhookConfiguration, ConfigMap
+    # Optional analyzers: HorizontalPodAutoscaler, PodDisruptionBudget,
+    # NetworkPolicy, Log, GatewayClass, Gateway, HTTPRoute
+    - <analyzer-name>
   extraOptions:                 # Extra options (optional)
     backstage:
       enabled: <boolean>
