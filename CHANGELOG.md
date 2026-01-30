@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.26](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.25...v0.2.26) (2026-01-30)
+
+
+### Bug Fixes
+
+* Remove --filter flags from k8sgpt serve command to resolve crashloop ([#766](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/766)) ([8315155](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8315155aa6f5d43af0fc2c66c2a5ae76ca824b2a))
+
+
+### Other
+
+* **deps:** update actions/checkout action to v6 ([#774](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/774)) ([60cb67d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/60cb67d242bf6589d04c2c281b094b000ec06630))
+
 ## [0.2.25](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.24...v0.2.25) (2026-01-09)
 
 
