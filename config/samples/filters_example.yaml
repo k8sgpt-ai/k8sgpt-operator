@@ -1,0 +1,46 @@
+# Example: Using filters to enable optional analyzers
+#
+# This example shows how to enable optional analyzers (Log, HorizontalPodAutoscaler)
+# along with a subset of core analyzers.
+#
+# Note: When you specify the filters field, it replaces the default analyzer list.
+# You must explicitly list all analyzers you want to use.
+#
+# Core Analyzers (enabled by default when filters is not specified):
+#   Pod, Deployment, ReplicaSet, PersistentVolumeClaim, Service, Ingress,
+#   StatefulSet, Job, CronJob, Node, ValidatingWebhookConfiguration,
+#   MutatingWebhookConfiguration, ConfigMap
+#
+# Optional Analyzers (disabled by default):
+#   HorizontalPodAutoscaler, PodDisruptionBudget, NetworkPolicy, Log,
+#   GatewayClass, Gateway, HTTPRoute
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: K8sGPT
+metadata:
+  name: k8sgpt-with-filters
+  namespace: k8sgpt-operator-system
+spec:
+  ai:
+    enabled: true
+    model: gpt-4o-mini
+    backend: openai
+    secret:
+      name: k8sgpt-sample-secret
+      key: openai-api-key
+  noCache: false
+  repository: ghcr.io/k8sgpt-ai/k8sgpt
+  version: v0.3.48
+  # Specify which analyzers to use
+  # This enables core analyzers plus Log and HPA optional analyzers
+  filters:
+    - Pod
+    - Deployment
+    - Service
+    - ReplicaSet
+    - StatefulSet
+    - Job
+    - CronJob
+    - Node
+    - Ingress
+    - Log
+    - HorizontalPodAutoscaler

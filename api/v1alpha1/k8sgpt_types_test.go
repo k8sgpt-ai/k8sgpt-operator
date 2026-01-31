@@ -22,6 +22,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -139,6 +140,19 @@ var _ = Describe("The test cases for the K8sGPT CRDs", func() {
 
 		// We can get the k8sGPT CRDs by the name and namespace.
 		It("Should get the K8sGPT CRDs by the name and namespace", func() {
+			By("Ensuring K8sGPT CRDs exist")
+			// Create fresh copies of k8sGPT objects to avoid resource version conflicts
+			k8sGPTCopy := k8sGPT.DeepCopy()
+			k8sGPTCopy.ResourceVersion = "" // Clear resource version for create
+			k8sGPT2Copy := k8sGPT2.DeepCopy()
+			k8sGPT2Copy.ResourceVersion = "" // Clear resource version for create
+
+			// Create objects if they don't exist (ignore if they already exist)
+			err := fakeClient.Create(ctx, k8sGPTCopy)
+			Expect(err == nil || errors.IsAlreadyExists(err)).To(BeTrue(), "Failed to create k8sGPT")
+			err = fakeClient.Create(ctx, k8sGPT2Copy)
+			Expect(err == nil || errors.IsAlreadyExists(err)).To(BeTrue(), "Failed to create k8sGPT2")
+
 			By("Getting the K8sGPT CRDs by the name and namespace")
 			// Define the K8sGPT CRDs object.
 			k8sGPTObject := K8sGPT{}

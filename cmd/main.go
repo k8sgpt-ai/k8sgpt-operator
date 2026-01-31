@@ -23,6 +23,7 @@ import (
 
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/k8sgpt"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/mutation"
+	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/shared"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/types"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
@@ -134,6 +135,20 @@ func main() {
 	// This channel allows us to indicate when K8sGPT deployment is ready for active comms
 	// This is a necessity for the mutation system to work
 	ready := make(chan types.InterControllerSignal, 10)
+
+	// Start a goroutine to listen for signals and set the shared ServerQueryClient
+	go func() {
+		for signal := range ready {
+			setupLog.Info("Received signal from K8sGPT controller, setting shared client")
+			if signal.K8sGPTClient != nil {
+				client := signal.K8sGPTClient.GetServerQueryServiceClient()
+				shared.SetServerQueryClient(&client)
+				shared.SetRemoteBackend(signal.Backend)
+				shared.SetK8sGPTConfig(signal.K8sGPT)
+				setupLog.Info("Shared ServerQueryClient set successfully", "backend", signal.Backend)
+			}
+		}
+	}()
 
 	if err = (&mutation.MutationReconciler{
 		Client:         mgr.GetClient(),

@@ -1,5 +1,62 @@
 # Changelog
 
+## [0.2.25](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.24...v0.2.25) (2026-01-09)
+
+
+### Features
+
+* Add support for custom pod labels, annotations, and security contexts ([#777](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/777)) ([249dd7f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/249dd7f4fb59b4799a76064023b28a524edcf8eb)), closes [#776](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/776)
+
+
+### Docs
+
+* add documentation for filters and optional analyzers ([#775](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/775)) ([b58dc1e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/b58dc1e6111ce79efe014c71f0c52a82cf9c27d8)), closes [#685](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/685)
+
+## [0.2.24](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.23...v0.2.24) (2025-10-12)
+
+
+### Bug Fixes
+
+* Consume ready channel to set shared ServerQueryClient for mutation controller ([#763](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/763)) ([59b230e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/59b230ee99b86db26595f5c747e1471f566c44e8))
+* Log correct oldHash value when updating results ([#761](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/761)) ([db6d7cd](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/db6d7cd73dc66b7899f6826697b92cf4f39cc084))
+* Pass filters as command-line arguments to k8sgpt serve command ([#762](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/762)) ([697220a](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/697220a7f902bcf29bfcad18edb5934430c0dd32))
+
+
+### Other
+
+* **deps:** update actions/checkout action to v5 ([#735](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/735)) ([a2e73d2](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/a2e73d2520f125eb5205a8013eb04073cb0bbe9a))
+* **deps:** update actions/setup-python action to v6 ([#750](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/750)) ([cd89976](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/cd8997644613aab83a5373f57310ec782abf8b10))
+* **deps:** update softprops/action-gh-release digest to aec2ec5 ([#751](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/751)) ([90a5064](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/90a50646b8b6ed5e68e7a9735a36bb44db01075a))
+* missing labels ([#758](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/758)) ([0683b98](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/0683b985cdf8095a64054a322407df85cadc11fd))
+
+## [0.2.23](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.22...v0.2.23) (2025-10-03)
+
+
+### Features
+
+* add CloudEvents Sink ([#662](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/662)) ([dc619e9](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/dc619e924f5d0b5b673d844f4798da84361376f7))
+* reconcile update p2 ([#727](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/727)) ([f743316](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/f7433161e5b98780d3d9b5ec5a0a14fe3aca5c5d))
+* sneaky little bug fix ([#757](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/757)) ([320d607](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/320d6073978c51ca2450f844c6aac415b9c9dbc2))
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#719](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/719)) ([fb5903d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/fb5903df87e424e127efa99f694eed1f4dc5827d))
+* **deps:** update all non-major dependencies ([#729](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/729)) ([7526608](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/75266085615c6a75da9b3a9c26b163d4821a4851))
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#711](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/711)) ([a229d1c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/a229d1cb8239985d69fbf036065d56aecbbd253c))
+* service only sync necessary fields to avoid conflicts ([#731](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/731)) ([20d0332](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/20d0332d7578ca616fac7093ea5d8092f4b1c075))
+
+
+### Other
+
+* **deps:** update docker/login-action digest to 184bdaa ([#733](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/733)) ([830bffe](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/830bffe70ed0ccccd8942bc091d35233095bb69a))
+* **deps:** update docker/setup-buildx-action digest to e468171 ([#723](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/723)) ([e93f87b](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e93f87b3be25f6579ce290eeb30954177859fb20))
+
+
+### Docs
+
+* Improve and correct exhaustive_sample.yaml ([#738](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/738)) ([7ce3e5d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/7ce3e5d9659c185e02d30fa1b8e0515e731bfb82))
+
 ## [0.2.22](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.21...v0.2.22) (2025-06-20)
 
 

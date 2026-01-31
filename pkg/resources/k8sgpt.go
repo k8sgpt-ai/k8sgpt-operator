@@ -244,6 +244,17 @@ func GetClusterRole(config v1alpha1.K8sGPT, serviceAccountName string) (*v1.Clus
 	return clusterRole, nil
 }
 
+// buildK8sGPTArgs builds the command-line arguments for the k8sgpt serve command
+func buildK8sGPTArgs(config v1alpha1.K8sGPT) []string {
+	args := []string{"serve"}
+
+	// Note: Filters are passed via the gRPC API when analysis is requested,
+	// not as command-line arguments to the serve command.
+	// See pkg/client/analysis.go where filters are included in the AnalyzeRequest.
+
+	return args
+}
+
 // GetDeployment Create deployment with the latest K8sGPT image
 func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Client,
 	serviceAccountName string) (*appsv1.Deployment, error) {
@@ -251,6 +262,25 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 	// Create deployment
 	image := config.Spec.Repository + ":" + config.Spec.Version
 	replicas := int32(1)
+
+	// Merge default labels with custom pod labels
+	podLabels := map[string]string{
+		"app": config.Name,
+	}
+	if config.Spec.PodLabels != nil {
+		for k, v := range config.Spec.PodLabels {
+			podLabels[k] = v
+		}
+	}
+
+	// Create pod annotations if specified
+	podAnnotations := make(map[string]string)
+	if config.Spec.PodAnnotations != nil {
+		for k, v := range config.Spec.PodAnnotations {
+			podAnnotations[k] = v
+		}
+	}
+
 	deployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.Name,
@@ -275,9 +305,8 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: map[string]string{
-						"app": config.Name,
-					},
+					Labels:      podLabels,
+					Annotations: podAnnotations,
 				},
 				Spec: corev1.PodSpec{
 					ServiceAccountName: serviceAccountName,
@@ -286,9 +315,7 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 							Name:            "k8sgpt",
 							ImagePullPolicy: config.Spec.ImagePullPolicy,
 							Image:           image,
-							Args: []string{
-								"serve",
-							},
+							Args:            buildK8sGPTArgs(config),
 							Env: []corev1.EnvVar{
 								{
 									Name:  "K8SGPT_MODEL",
@@ -372,6 +399,7 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 									Name:      "k8sgpt-vol",
 								},
 							},
+							SecurityContext: config.Spec.ContainerSecurityContext,
 						},
 					},
 					Volumes: []corev1.Volume{
@@ -380,7 +408,8 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 							Name:         "k8sgpt-vol",
 						},
 					},
-					NodeSelector: config.Spec.NodeSelector,
+					NodeSelector:    config.Spec.NodeSelector,
+					SecurityContext: config.Spec.SecurityContext,
 				},
 			},
 		},
