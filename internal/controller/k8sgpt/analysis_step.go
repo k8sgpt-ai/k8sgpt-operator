@@ -64,7 +64,7 @@ func (step *AnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, error)
 	// Parse the k8sgpt-deployment response into a list of results
 	step.setk8sgptNumberOfResults(instance, response.Results)
 
-	rawResults, err := resources.MapResults(*instance.R.Integrations, response.Results, *instance.K8sgptConfig)
+	rawResults, err := resources.MapResults(*instance.R.Integrations, response.Results, *instance.K8sgptConfig, instance.R.Scheme)
 	if err != nil {
 		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}

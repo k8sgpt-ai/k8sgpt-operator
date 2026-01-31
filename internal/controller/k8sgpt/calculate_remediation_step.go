@@ -1,6 +1,8 @@
 package k8sgpt
 
 import (
+	"fmt"
+
 	"github.com/go-logr/logr"
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/conversions"
@@ -50,12 +52,27 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 
 	step.logger.Info("eligibleResources", "count", len(eligibleResources))
 
+	// Get the GVK from the scheme once for all mutations
+	gvks, _, err := instance.R.Scheme.ObjectKinds(instance.K8sgptConfig)
+	if err != nil {
+		instance.logger.Error(err, "Failed to get GVK for K8sGPT resource when setting OwnerReference for Mutations")
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
+	}
+	if len(gvks) == 0 {
+		err := fmt.Errorf("no GVK found for K8sGPT resource when setting OwnerReference for Mutations")
+		instance.logger.Error(err, "Unable to create Mutations without OwnerReference")
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
+	}
+
 	// Create mutations for eligible resources
 	for _, eligibleResource := range eligibleResources {
 		mutation := corev1alpha1.Mutation{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      eligibleResource.ResultRef.Name,
 				Namespace: instance.K8sgptConfig.Namespace,
+				OwnerReferences: []metav1.OwnerReference{
+					*metav1.NewControllerRef(instance.K8sgptConfig, gvks[0]),
+				},
 			},
 			Spec: corev1alpha1.MutationSpec{
 				ResourceRef:         eligibleResource.ObjectRef,
