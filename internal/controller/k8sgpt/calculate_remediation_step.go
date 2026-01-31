@@ -1,6 +1,8 @@
 package k8sgpt
 
 import (
+	"fmt"
+
 	"github.com/go-logr/logr"
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/conversions"
@@ -54,7 +56,13 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 	for _, eligibleResource := range eligibleResources {
 		// Get the GVK from the scheme
 		gvks, _, err := instance.R.Scheme.ObjectKinds(instance.K8sgptConfig)
-		if err != nil || len(gvks) == 0 {
+		if err != nil {
+			instance.logger.Error(err, "Failed to get GVK for K8sGPT resource")
+			return instance.R.FinishReconcile(err, false, eligibleResource.ResultRef.Name, instance.K8sgptConfig)
+		}
+		if len(gvks) == 0 {
+			err := fmt.Errorf("no GVK found for K8sGPT resource")
+			instance.logger.Error(err, "Unable to set OwnerReference for Mutation")
 			return instance.R.FinishReconcile(err, false, eligibleResource.ResultRef.Name, instance.K8sgptConfig)
 		}
 		mutation := corev1alpha1.Mutation{
