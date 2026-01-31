@@ -73,7 +73,6 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 					*metav1.NewControllerRef(instance.K8sgptConfig, gvks[0]),
 				},
 			},
-
 			Spec: corev1alpha1.MutationSpec{
 				ResourceRef:         eligibleResource.ObjectRef,
 				ResourceGVK:         eligibleResource.GVK,

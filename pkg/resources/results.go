@@ -98,9 +98,9 @@ func MapResults(i integrations.Integrations, resultsSpec []v1alpha1.ResultSpec, 
 func GetResult(resultSpec v1alpha1.ResultSpec, name, namespace, backend string, detail string, owner *v1alpha1.K8sGPT, scheme *runtime.Scheme) v1alpha1.Result {
 	resultSpec.Backend = backend
 	resultSpec.Details = detail
-	
+
 	logger := log.Log.WithName("resources")
-	
+
 	// Get the GVK from the scheme for the owner
 	gvks, _, err := scheme.ObjectKinds(owner)
 	var ownerRefs []metav1.OwnerReference
@@ -113,7 +113,7 @@ func GetResult(resultSpec v1alpha1.ResultSpec, name, namespace, backend string, 
 			*metav1.NewControllerRef(owner, gvks[0]),
 		}
 	}
-	
+
 	return v1alpha1.Result{
 		Spec: resultSpec,
 		ObjectMeta: metav1.ObjectMeta{
