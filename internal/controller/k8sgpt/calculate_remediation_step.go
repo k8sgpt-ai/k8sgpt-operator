@@ -52,19 +52,20 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 
 	step.logger.Info("eligibleResources", "count", len(eligibleResources))
 
+	// Get the GVK from the scheme once for all mutations
+	gvks, _, err := instance.R.Scheme.ObjectKinds(instance.K8sgptConfig)
+	if err != nil {
+		instance.logger.Error(err, "Failed to get GVK for K8sGPT resource")
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
+	}
+	if len(gvks) == 0 {
+		err := fmt.Errorf("no GVK found for K8sGPT resource")
+		instance.logger.Error(err, "Unable to set OwnerReference for Mutations")
+		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
+	}
+
 	// Create mutations for eligible resources
 	for _, eligibleResource := range eligibleResources {
-		// Get the GVK from the scheme
-		gvks, _, err := instance.R.Scheme.ObjectKinds(instance.K8sgptConfig)
-		if err != nil {
-			instance.logger.Error(err, "Failed to get GVK for K8sGPT resource")
-			return instance.R.FinishReconcile(err, false, eligibleResource.ResultRef.Name, instance.K8sgptConfig)
-		}
-		if len(gvks) == 0 {
-			err := fmt.Errorf("no GVK found for K8sGPT resource")
-			instance.logger.Error(err, "Unable to set OwnerReference for Mutation")
-			return instance.R.FinishReconcile(err, false, eligibleResource.ResultRef.Name, instance.K8sgptConfig)
-		}
 		mutation := corev1alpha1.Mutation{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      eligibleResource.ResultRef.Name,
