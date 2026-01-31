@@ -55,12 +55,12 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 	// Get the GVK from the scheme once for all mutations
 	gvks, _, err := instance.R.Scheme.ObjectKinds(instance.K8sgptConfig)
 	if err != nil {
-		instance.logger.Error(err, "Failed to get GVK for K8sGPT resource")
+		instance.logger.Error(err, "Failed to get GVK for K8sGPT resource when setting OwnerReference for Mutations")
 		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 	if len(gvks) == 0 {
-		err := fmt.Errorf("no GVK found for K8sGPT resource")
-		instance.logger.Error(err, "Unable to set OwnerReference for Mutations")
+		err := fmt.Errorf("no GVK found for K8sGPT resource when setting OwnerReference for Mutations")
+		instance.logger.Error(err, "Unable to create Mutations without OwnerReference")
 		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 
