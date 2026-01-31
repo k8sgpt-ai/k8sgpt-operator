@@ -99,15 +99,15 @@ func GetResult(resultSpec v1alpha1.ResultSpec, name, namespace, backend string, 
 	resultSpec.Backend = backend
 	resultSpec.Details = detail
 
-	logger := log.Log.WithName("resources")
+	logger := log.Log.WithName("result-owner-reference")
 
 	// Get the GVK from the scheme for the owner
 	gvks, _, err := scheme.ObjectKinds(owner)
 	var ownerRefs []metav1.OwnerReference
 	if err != nil {
-		logger.Error(err, "Failed to get GVK for K8sGPT resource; Result will be created without OwnerReference and may not be garbage collected automatically")
+		logger.Error(err, "Failed to get GVK for K8sGPT resource", "consequence", "Result will lack OwnerReference and may not be garbage collected")
 	} else if len(gvks) == 0 {
-		logger.Info("No GVK found for K8sGPT resource; Result will be created without OwnerReference and may not be garbage collected automatically")
+		logger.Info("No GVK found for K8sGPT resource", "consequence", "Result will lack OwnerReference and may not be garbage collected")
 	} else {
 		ownerRefs = []metav1.OwnerReference{
 			*metav1.NewControllerRef(owner, gvks[0]),
