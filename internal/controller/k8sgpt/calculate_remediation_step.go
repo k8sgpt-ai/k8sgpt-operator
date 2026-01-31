@@ -52,12 +52,17 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 
 	// Create mutations for eligible resources
 	for _, eligibleResource := range eligibleResources {
+		// Get the GVK from the scheme
+		gvks, _, err := instance.R.Scheme.ObjectKinds(instance.K8sgptConfig)
+		if err != nil || len(gvks) == 0 {
+			return instance.R.FinishReconcile(err, false, eligibleResource.ResultRef.Name, instance.K8sgptConfig)
+		}
 		mutation := corev1alpha1.Mutation{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      eligibleResource.ResultRef.Name,
 				Namespace: instance.K8sgptConfig.Namespace,
 				OwnerReferences: []metav1.OwnerReference{
-					*metav1.NewControllerRef(instance.K8sgptConfig, instance.K8sgptConfig.GetObjectKind().GroupVersionKind()),
+					*metav1.NewControllerRef(instance.K8sgptConfig, gvks[0]),
 				},
 			},
 

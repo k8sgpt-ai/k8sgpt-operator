@@ -12,6 +12,7 @@ import (
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -64,7 +65,7 @@ func hashResultContent(spec v1alpha1.ResultSpec) string {
 	return fmt.Sprintf("%x", hash)
 }
 
-func MapResults(i integrations.Integrations, resultsSpec []v1alpha1.ResultSpec, config v1alpha1.K8sGPT) (map[string]v1alpha1.Result, error) {
+func MapResults(i integrations.Integrations, resultsSpec []v1alpha1.ResultSpec, config v1alpha1.K8sGPT, scheme *runtime.Scheme) (map[string]v1alpha1.Result, error) {
 	namespace := config.Namespace
 	backend := config.Spec.AI.Backend
 	backstageEnabled := config.Spec.ExtraOptions != nil && config.Spec.ExtraOptions.Backstage.Enabled
@@ -72,7 +73,7 @@ func MapResults(i integrations.Integrations, resultsSpec []v1alpha1.ResultSpec, 
 	for _, resultSpec := range resultsSpec {
 		name := strings.ReplaceAll(resultSpec.Name, "-", "")
 		name = strings.ReplaceAll(name, "/", "")
-		result := GetResult(resultSpec, name, namespace, backend, resultSpec.Details, &config)
+		result := GetResult(resultSpec, name, namespace, backend, resultSpec.Details, &config, scheme)
 		labels := map[string]string{
 			"k8sgpts.k8sgpt.ai/name":      config.Name,
 			"k8sgpts.k8sgpt.ai/namespace": config.Namespace,
@@ -94,17 +95,25 @@ func MapResults(i integrations.Integrations, resultsSpec []v1alpha1.ResultSpec, 
 	return rawResults, nil
 }
 
-func GetResult(resultSpec v1alpha1.ResultSpec, name, namespace, backend string, detail string, owner *v1alpha1.K8sGPT) v1alpha1.Result {
+func GetResult(resultSpec v1alpha1.ResultSpec, name, namespace, backend string, detail string, owner *v1alpha1.K8sGPT, scheme *runtime.Scheme) v1alpha1.Result {
 	resultSpec.Backend = backend
 	resultSpec.Details = detail
+	
+	// Get the GVK from the scheme for the owner
+	gvks, _, err := scheme.ObjectKinds(owner)
+	var ownerRefs []metav1.OwnerReference
+	if err == nil && len(gvks) > 0 {
+		ownerRefs = []metav1.OwnerReference{
+			*metav1.NewControllerRef(owner, gvks[0]),
+		}
+	}
+	
 	return v1alpha1.Result{
 		Spec: resultSpec,
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(owner, owner.GetObjectKind().GroupVersionKind()),
-			},
+			Name:            name,
+			Namespace:       namespace,
+			OwnerReferences: ownerRefs,
 		},
 	}
 }
