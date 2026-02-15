@@ -260,7 +260,11 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 	serviceAccountName string) (*appsv1.Deployment, error) {
 
 	// Create deployment
-	image := config.Spec.Repository + ":" + config.Spec.Version
+	version := config.Spec.Version
+	if version == "" {
+		version = "latest"
+	}
+	image := config.Spec.Repository + ":" + version
 	replicas := int32(1)
 
 	// Merge default labels with custom pod labels
