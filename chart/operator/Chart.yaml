@@ -14,8 +14,8 @@ annotations:
   artifacthub.io/license: Apache-2.0
   artifacthub.io/categories: monitoring-logging
 type: application
-version: 0.2.25
-appVersion: 0.0.26
+version: 0.0.26
+appVersion: 0.2.25
 dependencies:
   - name: interplex
     version: 1.1.0
