@@ -131,6 +131,7 @@ type AISpec struct {
 	MaxTokens string `json:"maxTokens,omitempty"`
 	// +kubebuilder:default:="50"
 	Topk string `json:"topk,omitempty"`
+	CustomHeaders map[string]string `json:"customHeaders,omitempty"`
 }
 
 type Trivy struct {
