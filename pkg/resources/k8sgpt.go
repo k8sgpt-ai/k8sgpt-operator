@@ -285,10 +285,30 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 		}
 	}
 
+	// Merge default labels with custom deployment labels
+	deploymentLabels := map[string]string{
+		"app": config.Name,
+	}
+	if config.Spec.DeploymentLabels != nil {
+		for k, v := range config.Spec.DeploymentLabels {
+			deploymentLabels[k] = v
+		}
+	}
+
+	// Create deployment annotations if specified
+	deploymentAnnotations := make(map[string]string)
+	if config.Spec.DeploymentAnnotations != nil {
+		for k, v := range config.Spec.DeploymentAnnotations {
+			deploymentAnnotations[k] = v
+		}
+	}
+
 	deployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.Name,
 			Namespace: config.Namespace,
+			Labels:      deploymentLabels,
+			Annotations: deploymentAnnotations,
 			OwnerReferences: []metav1.OwnerReference{
 				{
 					Kind:               config.Kind,
