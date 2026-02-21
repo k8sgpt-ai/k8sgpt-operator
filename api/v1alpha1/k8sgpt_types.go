@@ -174,6 +174,12 @@ type K8sGPTSpec struct {
 	// Define the kubeconfig the Deployment must use.
 	// If empty, the Deployment will use the ServiceAccount provided by Kubernetes itself.
 	Kubeconfig *SecretRef `json:"kubeconfig,omitempty"`
+	// DeploymentLabels allows adding custom labels to the K8sGPT Deployment for
+	// organizational tracking, monitoring, logging, and cost allocation purposes.
+	DeploymentLabels map[string]string `json:"deploymentLabels,omitempty"`
+	// DeploymentAnnotations allows adding custom annotations to the K8sGPT Deployment
+	// for integration with monitoring systems and other infrastructure components.
+	DeploymentAnnotations map[string]string `json:"deploymentAnnotations,omitempty"`
 	// PodLabels allows adding custom labels to the K8sGPT pods for organizational tracking,
 	// service mesh integration, and monitoring purposes.
 	PodLabels map[string]string `json:"podLabels,omitempty"`
