@@ -292,6 +292,47 @@ EOF
 
 </details>
 
+<details>
+
+<summary>Minio</summary>
+
+1. Install the operator from the [Installation](#installation) section.
+
+2. Create secret:
+```sh
+kubectl create secret generic k8sgpt-sample-cache-secret --from-literal=minio_access_key=<MINIO_ACCESS_KEY>  --from-literal=minio_secret_key=<MINIO_SECRET_KEY> -n k8sgpt-operator-system
+```
+
+3. Apply the K8sGPT configuration object:
+```
+kubectl apply -f - << EOF
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: K8sGPT
+metadata:
+  name: k8sgpt-sample
+  namespace: k8sgpt-operator-system
+spec:
+  ai:
+    enabled: true
+    secret:
+     name: bedrock-sample-secret
+    model: anthropic.claude-v2
+    region: eu-central-1
+    backend: amazonbedrock
+  noCache: false
+  version: v0.3.41
+  remoteCache:
+    credentials:
+      name: k8sgpt-sample-cache-secret
+    s3:
+      bucketName: k8sgpt-cache-123456789
+      endpoint: http://minio.k8sgpt-operator-system.svc.cluster.local:9000
+      insecure: true
+EOF
+```
+
+</details>
+
 ## Other AI Backend Examples
 
 <details>
