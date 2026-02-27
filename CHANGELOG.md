@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.2.26](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.25...v0.2.26) (2026-02-27)
+
+
+### Features
+
+* add deploymentLabels and deploymentAnnotations to K8sGPT CRD ([#796](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/796)) ([c5e58a8](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/c5e58a8404bec4bc80addf5038959c68df14f92b)), closes [#689](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/689)
+
+
+### Bug Fixes
+
+* align CI Go version with go.mod to resolve build failures ([#793](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/793)) ([18216a3](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/18216a3fe90454fd574fa6ecaf96d960425134ed))
+* Corrected version and appVersion in Chart.yaml ([#724](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/724)) ([#791](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/791)) ([7028c58](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/7028c580e790ef3f2839f3dee2be720b319bfc6c))
+* **deps:** update module gopkg.in/yaml.v2 to v3 ([#747](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/747)) ([7e37fbb](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/7e37fbb79048c129a99015fb2ea4dc32c9ae6027))
+* Remove --filter flags from k8sgpt serve command to resolve crashloop ([#766](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/766)) ([8315155](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8315155aa6f5d43af0fc2c66c2a5ae76ca824b2a))
+* respect analysis interval when auto-remediation is disabled ([#771](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/771)) ([b94e41f](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/b94e41f434417bd1fa5f2c3112dddabe9fcc3f9e))
+* use 'latest' as default image tag when version is not specified ([#794](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/794)) ([98e63a0](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/98e63a072679da32a0ec521bf109bcd99be1dce9))
+
+
+### Other
+
+* **deps:** replace google-github-actions/release-please-action action with googleapis/release-please-action v4 ([#782](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/782)) ([b197d74](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/b197d7481ff58c20342a545bd8564ad75cd2ccaa))
+* **deps:** update actions/checkout action to v6 ([#774](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/774)) ([60cb67d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/60cb67d242bf6589d04c2c281b094b000ec06630))
+* **deps:** update actions/checkout digest to de0fac2 ([#773](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/773)) ([8e0762e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8e0762e26dc7a10a5b945cd9259acb82f8e2b2aa))
+* **deps:** update actions/upload-artifact action to v6 ([#770](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/770)) ([160e258](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/160e258bba1015e5115c7737e9a1bbfda9097505))
+* **deps:** update googleapis/release-please-action digest to 16a9c90 ([#790](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/790)) ([f98518a](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/f98518abf6ac5443888f44a94791fefb5b56ba44))
+
 ## [0.2.25](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.24...v0.2.25) (2026-01-09)
 
 
