@@ -589,6 +589,17 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 			},
 		)
 	}
+	// Add checks for googlevertexai
+	if config.Spec.AI.Backend == v1alpha1.GoogleVertexAI {
+		if config.Spec.AI.Region != "" {
+			deployment.Spec.Template.Spec.Containers[0].Env = append(
+				deployment.Spec.Template.Spec.Containers[0].Env, corev1.EnvVar{
+					Name:  "K8SGPT_PROVIDER_REGION",
+					Value: config.Spec.AI.Region,
+				},
+			)
+		}
+	}
 	// Add checks for ibmwatsonxai
 	if config.Spec.AI.Backend == v1alpha1.IBMWatsonxAI {
 		if config.Spec.AI.Secret != nil {
