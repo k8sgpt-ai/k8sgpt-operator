@@ -162,15 +162,17 @@ type K8sGPTSpec struct {
 	Resources        *corev1.ResourceRequirements `json:"resources,omitempty"`
 	NoCache          bool                         `json:"noCache,omitempty"`
 	CustomAnalyzers  []CustomAnalyzer             `json:"customAnalyzers,omitempty"`
-	Filters          []string                     `json:"filters,omitempty"`
-	ExtraOptions     *ExtraOptionsRef             `json:"extraOptions,omitempty"`
-	Sink             *WebhookRef                  `json:"sink,omitempty"`
-	AI               *AISpec                      `json:"ai,omitempty"`
-	RemoteCache      *RemoteCacheRef              `json:"remoteCache,omitempty"`
-	Integrations     *Integrations                `json:"integrations,omitempty"`
-	NodeSelector     map[string]string            `json:"nodeSelector,omitempty"`
-	TargetNamespace  string                       `json:"targetNamespace,omitempty"`
-	Analysis         *AnalysisConfig              `json:"analysis,omitempty"`
+	// +kubebuilder:default:=false
+	HTTP            bool              `json:"http,omitempty"`
+	Filters         []string          `json:"filters,omitempty"`
+	ExtraOptions    *ExtraOptionsRef  `json:"extraOptions,omitempty"`
+	Sink            *WebhookRef       `json:"sink,omitempty"`
+	AI              *AISpec           `json:"ai,omitempty"`
+	RemoteCache     *RemoteCacheRef   `json:"remoteCache,omitempty"`
+	Integrations    *Integrations     `json:"integrations,omitempty"`
+	NodeSelector    map[string]string `json:"nodeSelector,omitempty"`
+	TargetNamespace string            `json:"targetNamespace,omitempty"`
+	Analysis        *AnalysisConfig   `json:"analysis,omitempty"`
 	// Define the kubeconfig the Deployment must use.
 	// If empty, the Deployment will use the ServiceAccount provided by Kubernetes itself.
 	Kubeconfig *SecretRef `json:"kubeconfig,omitempty"`

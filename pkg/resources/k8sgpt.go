@@ -252,6 +252,11 @@ func buildK8sGPTArgs(config v1alpha1.K8sGPT) []string {
 	// not as command-line arguments to the serve command.
 	// See pkg/client/analysis.go where filters are included in the AnalyzeRequest.
 
+	// Enable REST/http using gppc-gateway if specified in the configuration
+	if config.Spec.HTTP {
+		args = append(args, "--http")
+	}
+
 	return args
 }
 

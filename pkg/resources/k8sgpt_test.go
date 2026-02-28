@@ -343,3 +343,61 @@ func Test_GetDeploymentWithFilters(t *testing.T) {
 		})
 	}
 }
+func Test_GetDeploymentWithHttpMode(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, appsv1.AddToScheme(scheme))
+	require.NoError(t, v1.AddToScheme(scheme))
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+
+	testCases := []struct {
+		name         string
+		httpEnabled  bool
+		expectedArgs []string
+	}{
+		{
+			name:         "HTTP mode disabled",
+			httpEnabled:  false,
+			expectedArgs: []string{"serve"},
+		},
+		{
+			name:         "HTTP mode enabled",
+			httpEnabled:  true,
+			expectedArgs: []string{"serve", "--http"},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			config := v1alpha1.K8sGPT{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "K8sGPT",
+					APIVersion: "core.k8sgpt.ai/v1alpha1",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-k8sgpt",
+					Namespace: "test-namespace",
+					UID:       "test-uid",
+				},
+				Spec: v1alpha1.K8sGPTSpec{
+					Repository:      "ghcr.io/k8sgpt-ai/k8sgpt",
+					Version:         "v0.4.1",
+					ImagePullPolicy: v1.PullAlways,
+					HTTP:            tc.httpEnabled,
+					AI: &v1alpha1.AISpec{
+						Backend:   "openai",
+						Model:     "gpt-4o-mini",
+						MaxTokens: "2048",
+						Topk:      "50",
+					},
+				},
+			}
+
+			deployment, err := GetDeployment(config, false, fakeClient, "test-sa")
+			require.NoError(t, err)
+
+			// Verify the args contain the expected values
+			assert.Equal(t, tc.expectedArgs, deployment.Spec.Template.Spec.Containers[0].Args,
+				"Expected args to match for HTTP mode: %v", tc.httpEnabled)
+		})
+	}
+}
