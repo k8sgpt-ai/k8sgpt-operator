@@ -15,6 +15,7 @@ on:
 env:
   GO_VERSION: "~1.21"
   IMAGE_NAME: "k8sgpt-operator"
+  REGISTRY_IMAGE: "ghcr.io/${{ toLower(github.repository) }}"
 defaults:
   run:
     shell: bash
@@ -136,7 +137,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           target: production
           tags: |
-            ghcr.io/k8sgpt-ai/${{ env.IMAGE_NAME }}:dev-${{ env.DATETIME }}
+            ${{ env.REGISTRY_IMAGE }}:dev-${{ env.DATETIME }}
           build-args: |
             GIT_HASH=${{ env.GIT_SHA }}
             RELEASE_VERSION=dev-${{ env.DATETIME }}
