@@ -515,8 +515,15 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 			addRemoteCacheEnvVar("AZURE_TENANT_ID", "azure_tenant_id")
 			addRemoteCacheEnvVar("AZURE_CLIENT_SECRET", "azure_client_secret")
 		} else if config.Spec.RemoteCache.S3 != nil {
-			addRemoteCacheEnvVar("AWS_ACCESS_KEY_ID", "aws_access_key_id")
-			addRemoteCacheEnvVar("AWS_SECRET_ACCESS_KEY", "aws_secret_access_key")
+			if config.Spec.RemoteCache.S3.Endpoint != "" {
+				// MinIO
+				addRemoteCacheEnvVar("MINIO_ACCESS_KEY", "minio_access_key")
+				addRemoteCacheEnvVar("MINIO_SECRET_KEY", "minio_secret_key")
+			} else {
+				// AWS S3
+				addRemoteCacheEnvVar("AWS_ACCESS_KEY_ID", "aws_access_key_id")
+				addRemoteCacheEnvVar("AWS_SECRET_ACCESS_KEY", "aws_secret_access_key")
+			}
 		}
 	}
 
@@ -588,14 +595,6 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 				Value: config.Spec.AI.Region,
 			},
 		)
-	}
-	// Add checks for ibmwatsonxai
-	if config.Spec.AI.Backend == v1alpha1.IBMWatsonxAI {
-		if config.Spec.AI.Secret != nil {
-			if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "K8SGPT_PROVIDER_ID", config, c, &deployment); err != nil {
-				return &appsv1.Deployment{}, err
-			}
-		}
 	}
 	return &deployment, nil
 }
