@@ -1,0 +1,95 @@
+{{/*
+  Static RBAC resources for the k8sgpt workload.
+  These are provisioned by Helm when dynamicRBAC is disabled (default).
+  When dynamicRBAC.enabled is true the operator creates these resources
+  at runtime instead and this template is skipped.
+*/}}
+{{- if not .Values.dynamicRBAC.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: k8sgpt
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/component: k8sgpt
+    app.kubernetes.io/created-by: k8sgpt-operator
+    app.kubernetes.io/part-of: k8sgpt-operator
+  {{- include "chart.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: k8sgpt-clusterrole
+  labels:
+    app.kubernetes.io/component: k8sgpt
+    app.kubernetes.io/created-by: k8sgpt-operator
+    app.kubernetes.io/part-of: k8sgpt-operator
+  {{- include "chart.labels" . | nindent 4 }}
+rules:
+- apiGroups: [""]
+  resources:
+  - pods
+  - services
+  - secrets
+  - endpoints
+  - nodes
+  - configmaps
+  - namespaces
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["persistentvolumeclaims"]
+  verbs: ["list"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["list"]
+- apiGroups: ["apps"]
+  resources:
+  - deployments
+  - replicasets
+  - statefulsets
+  - daemonsets
+  - replicationcontrollers
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["batch"]
+  resources: ["cronjobs", "jobs"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["autoscaling"]
+  resources: ["horizontalpodautoscalers"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["ingresses", "networkpolicies"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["admissionregistration.k8s.io"]
+  resources: ["validatingwebhookconfigurations", "mutatingwebhookconfigurations"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["policy"]
+  resources: ["poddisruptionbudgets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["storage.k8s.io"]
+  resources: ["storageclasses"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["gateway.networking.k8s.io"]
+  resources: ["gatewayclasses", "gateways", "httproutes"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: k8sgpt-clusterrole-binding
+  labels:
+    app.kubernetes.io/component: k8sgpt
+    app.kubernetes.io/created-by: k8sgpt-operator
+    app.kubernetes.io/part-of: k8sgpt-operator
+  {{- include "chart.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: k8sgpt-clusterrole
+subjects:
+- kind: ServiceAccount
+  name: k8sgpt
+  namespace: {{ .Release.Namespace }}
+{{- end }}
