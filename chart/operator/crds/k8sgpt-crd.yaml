@@ -5,8 +5,6 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.16.0
   name: k8sgpts.core.k8sgpt.ai
-  labels:
-  {{- include "chart.labels" . | nindent 4 }}
 spec:
   group: core.k8sgpt.ai
   names:
@@ -341,4 +339,3 @@ spec:
     storage: true
     subresources:
       status: {}
-
