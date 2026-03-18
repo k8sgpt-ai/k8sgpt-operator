@@ -131,6 +131,11 @@ type AISpec struct {
 	MaxTokens string `json:"maxTokens,omitempty"`
 	// +kubebuilder:default:="50"
 	Topk string `json:"topk,omitempty"`
+	// RoleArn is an optional IAM role ARN to assume when calling the AI backend.
+	// For amazonbedrock, this enables cross-account access: the pod's IRSA role
+	// (set via extraOptions.serviceAccountIRSA) chains into this role to invoke
+	// Bedrock in a different AWS account. Requires serviceAccountIRSA to also be set.
+	RoleArn string `json:"roleArn,omitempty"`
 }
 
 type Trivy struct {
