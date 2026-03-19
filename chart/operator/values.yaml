@@ -2,6 +2,13 @@
 interplex:
   enabled: false
 
+## When enabled the operator dynamically creates ServiceAccount, ClusterRole
+## and ClusterRoleBinding for each k8sgpt workload it manages.
+## When disabled (default) those resources must be pre-provisioned, e.g. via
+## the static Helm templates shipped in this chart.
+dynamicRBAC:
+  enabled: false
+
 serviceMonitor:
   enabled: false
   additionalLabels: {}
