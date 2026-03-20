@@ -365,6 +365,14 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 									Name:  "XDG_CACHE_HOME",
 									Value: "/k8sgpt-data/.cache",
 								},
+								// Anthropic/Claude models reject requests with both temperature
+								// and top_p set. k8sgpt defaults top_p to 1.0 when unset.
+								// Setting K8SGPT_TOP_P=0 causes the go-openai library to omit
+								// top_p from the JSON payload (float32 zero + omitempty).
+								{
+									Name:  "K8SGPT_TOP_P",
+									Value: "0",
+								},
 							},
 							Ports: []corev1.ContainerPort{
 								{
