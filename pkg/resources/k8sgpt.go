@@ -18,6 +18,8 @@ import (
 	"context"
 	err "errors"
 	"fmt"
+	"os"
+	"strconv"
 
 	v1 "k8s.io/api/rbac/v1"
 
@@ -42,6 +44,27 @@ const (
 	SyncOp SyncOrDestroy = iota
 	DestroyOp
 )
+
+const (
+	dynamicRBACEnvVar         = "K8SGPT_ENABLE_DYNAMIC_RBAC"
+	defaultServiceAccountName = "k8sgpt"
+)
+
+// dynamicRBACEnabled returns true when dynamic RBAC resources should be
+// created by the operator.  This is the default behaviour; set the env var
+// to "false" (or "0") to disable it and rely on static Helm-managed RBAC
+// instead.
+func dynamicRBACEnabled() bool {
+	value, exists := os.LookupEnv(dynamicRBACEnvVar)
+	if !exists {
+		return true
+	}
+	enabled, err := strconv.ParseBool(value)
+	if err != nil {
+		return true
+	}
+	return enabled
+}
 
 func addSecretAsEnvToDeployment(secretName string, secretKey string,
 	config v1alpha1.K8sGPT, c client.Client,
@@ -305,8 +328,8 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 
 	deployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.Name,
-			Namespace: config.Namespace,
+			Name:        config.Name,
+			Namespace:   config.Namespace,
 			Labels:      deploymentLabels,
 			Annotations: deploymentAnnotations,
 			OwnerReferences: []metav1.OwnerReference{
@@ -364,6 +387,14 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 								{
 									Name:  "XDG_CACHE_HOME",
 									Value: "/k8sgpt-data/.cache",
+								},
+								// Anthropic/Claude models reject requests with both temperature
+								// and top_p set. k8sgpt defaults top_p to 1.0 when unset.
+								// Setting K8SGPT_TOP_P=0 causes the go-openai library to omit
+								// top_p from the JSON payload (float32 zero + omitempty).
+								{
+									Name:  "K8SGPT_TOP_P",
+									Value: "0",
 								},
 							},
 							Ports: []corev1.ContainerPort{
@@ -589,6 +620,17 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 			},
 		)
 	}
+	// Add checks for googlevertexai
+	if config.Spec.AI.Backend == v1alpha1.GoogleVertexAI {
+		if config.Spec.AI.Region != "" {
+			deployment.Spec.Template.Spec.Containers[0].Env = append(
+				deployment.Spec.Template.Spec.Containers[0].Env, corev1.EnvVar{
+					Name:  "K8SGPT_PROVIDER_REGION",
+					Value: config.Spec.AI.Region,
+				},
+			)
+		}
+	}
 	// Add checks for ibmwatsonxai
 	if config.Spec.AI.Backend == v1alpha1.IBMWatsonxAI {
 		if config.Spec.AI.Secret != nil {
@@ -605,17 +647,25 @@ func Sync(ctx context.Context, c client.Client,
 
 	var objs []client.Object
 	outOfClusterMode := config.Spec.Kubeconfig != nil
-	// Build the names for the sa,cr,crd
-	serviceAccountName := fmt.Sprintf("k8sgpt-%s", config.Namespace)
-	clusterRoleName := fmt.Sprintf("%s-clusterrole", serviceAccountName)
-	clusterRoleNameBinding := fmt.Sprintf("%s-binding", clusterRoleName)
+	useDynamicRBAC := dynamicRBACEnabled()
+	serviceAccountName := defaultServiceAccountName
+	var (
+		clusterRoleName        string
+		clusterRoleNameBinding string
+	)
 
-	sa, er := GetServiceAccount(config, serviceAccountName)
-	if er != nil {
-		return er
+	if useDynamicRBAC {
+		serviceAccountName = fmt.Sprintf("k8sgpt-%s", config.Namespace)
+		clusterRoleName = fmt.Sprintf("%s-clusterrole", serviceAccountName)
+		clusterRoleNameBinding = fmt.Sprintf("%s-binding", clusterRoleName)
+
+		sa, er := GetServiceAccount(config, serviceAccountName)
+		if er != nil {
+			return er
+		}
+
+		objs = append(objs, sa)
 	}
-
-	objs = append(objs, sa)
 
 	svc, er := GetService(config)
 	if er != nil {
@@ -631,18 +681,20 @@ func Sync(ctx context.Context, c client.Client,
 
 	objs = append(objs, deployment)
 
-	clusterRole, er := GetClusterRole(config, serviceAccountName)
-	if er != nil {
-		return er
-	}
+	if useDynamicRBAC {
+		clusterRole, er := GetClusterRole(config, serviceAccountName)
+		if er != nil {
+			return er
+		}
 
-	objs = append(objs, clusterRole)
+		objs = append(objs, clusterRole)
 
-	clusterRoleBinding, err := GetClusterRoleBinding(config, serviceAccountName, clusterRoleNameBinding, clusterRoleName)
-	if err != nil {
-		return err
+		clusterRoleBinding, err := GetClusterRoleBinding(config, serviceAccountName, clusterRoleNameBinding, clusterRoleName)
+		if err != nil {
+			return err
+		}
+		objs = append(objs, clusterRoleBinding)
 	}
-	objs = append(objs, clusterRoleBinding)
 
 	// for each object, create or destroy
 	for _, obj := range objs {
@@ -703,9 +755,7 @@ func doSync(ctx context.Context, clt client.Client, obj client.Object) error {
 			return err
 		} else if err == nil {
 			mutateFn = func() error {
-				// Only need update fields specify in GetService func,avoid update other immutable fields.
-				exist.Spec.Selector = expect.Spec.Selector
-				exist.Spec.Ports = expect.Spec.Ports
+				exist.Spec = expect.Spec
 				return nil
 			}
 			obj = exist
