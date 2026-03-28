@@ -92,6 +92,8 @@ spec:
           value: {{ quote .Values.kubernetesClusterDomain }}
         - name: OPERATOR_SINK_WEBHOOK_TIMEOUT_SECONDS
           value: {{ quote .Values.controllerManager.manager.sinkWebhookTimeout }}
+        - name: K8SGPT_ENABLE_DYNAMIC_RBAC
+          value: {{ quote .Values.dynamicRBAC.enabled }}
         image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag
           | default .Chart.AppVersion }}
         livenessProbe:
