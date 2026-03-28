@@ -46,7 +46,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Publish Helm chart
-        uses: stefanprodan/helm-gh-pages@master
+        uses: stefanprodan/helm-gh-pages@89c6698c192e70ed0e495bee7d3d1ca5b477fe82 # master
         with:
           token: ${{ secrets.K8SGPT_BOT_SECRET }}
           charts_dir: chart
