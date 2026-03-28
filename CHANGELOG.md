@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.27](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.26...v0.2.27) (2026-03-28)
+
+
+### Features
+
+* default dynamicRBAC to true (opt-out instead of opt-in) ([#803](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/803)) ([8a1ecdd](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8a1ecddcf5845b4a15896d12e3af44cd62d3084f))
+
+
+### Other
+
+* **deps:** update docker/build-push-action digest to 10e90e3 ([#797](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/797)) ([d06da73](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d06da7366d843911f944b49ae9e5902c83cdcfc9))
+
 ## [0.2.26](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.25...v0.2.26) (2026-03-20)
 
 
