@@ -273,6 +273,160 @@ func Test_GetDeploymentWithKubeconfigAndIRSA(t *testing.T) {
 	}
 }
 
+func Test_GetAWSConfigMap(t *testing.T) {
+	config := v1alpha1.K8sGPT{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "K8sGPT",
+			APIVersion: "core.k8sgpt.ai/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-k8sgpt",
+			Namespace: "test-namespace",
+			UID:       "test-uid",
+		},
+		Spec: v1alpha1.K8sGPTSpec{
+			AI: &v1alpha1.AISpec{
+				Backend: "amazonbedrock",
+				RoleArn: "arn:aws:iam::999999999999:role/bedrock-role",
+			},
+			ExtraOptions: &v1alpha1.ExtraOptionsRef{
+				ServiceAccountIRSA: "arn:aws:iam::111111111111:role/irsa-role",
+			},
+		},
+	}
+
+	cm, err := GetAWSConfigMap(config)
+	require.NoError(t, err)
+
+	assert.Equal(t, "test-k8sgpt-aws-config", cm.Name)
+	assert.Equal(t, "test-namespace", cm.Namespace)
+	assert.Contains(t, cm.Data["config"], "arn:aws:iam::111111111111:role/irsa-role")
+	assert.Contains(t, cm.Data["config"], "arn:aws:iam::999999999999:role/bedrock-role")
+	assert.Contains(t, cm.Data["config"], "[profile source]")
+	assert.Contains(t, cm.Data["config"], "[profile cross-account]")
+	assert.Contains(t, cm.Data["config"], "source_profile = source")
+	assert.Contains(t, cm.Data["config"], "web_identity_token_file = /var/run/secrets/eks.amazonaws.com/serviceaccount/token")
+}
+
+func Test_GetDeploymentWithBedrockCrossAccountRole(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, appsv1.AddToScheme(scheme))
+	require.NoError(t, v1.AddToScheme(scheme))
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+
+	testCases := []struct {
+		name              string
+		roleArn           string
+		irsaArn           string
+		expectError       bool
+		expectVolume      bool
+		expectEnvVars     bool
+	}{
+		{
+			name:          "No roleArn set",
+			roleArn:       "",
+			irsaArn:       "",
+			expectError:   false,
+			expectVolume:  false,
+			expectEnvVars: false,
+		},
+		{
+			name:          "roleArn set without serviceAccountIRSA returns error",
+			roleArn:       "arn:aws:iam::999999999999:role/bedrock-role",
+			irsaArn:       "",
+			expectError:   true,
+			expectVolume:  false,
+			expectEnvVars: false,
+		},
+		{
+			name:          "roleArn and serviceAccountIRSA both set",
+			roleArn:       "arn:aws:iam::999999999999:role/bedrock-role",
+			irsaArn:       "arn:aws:iam::111111111111:role/irsa-role",
+			expectError:   false,
+			expectVolume:  true,
+			expectEnvVars: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			config := v1alpha1.K8sGPT{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "K8sGPT",
+					APIVersion: "core.k8sgpt.ai/v1alpha1",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-k8sgpt",
+					Namespace: "test-namespace",
+					UID:       "test-uid",
+				},
+				Spec: v1alpha1.K8sGPTSpec{
+					Repository:      "ghcr.io/k8sgpt-ai/k8sgpt",
+					Version:         "v0.4.1",
+					ImagePullPolicy: v1.PullAlways,
+					AI: &v1alpha1.AISpec{
+						Backend:   "amazonbedrock",
+						Model:     "anthropic.claude-3-sonnet-20240229-v1:0",
+						MaxTokens: "2048",
+						Topk:      "50",
+						Region:    "us-east-1",
+						RoleArn:   tc.roleArn,
+					},
+				},
+			}
+			if tc.irsaArn != "" {
+				config.Spec.ExtraOptions = &v1alpha1.ExtraOptionsRef{
+					ServiceAccountIRSA: tc.irsaArn,
+				}
+			}
+
+			deployment, err := GetDeployment(config, false, fakeClient, "test-sa")
+			if tc.expectError {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+
+			if tc.expectVolume {
+				foundVolume := false
+				for _, vol := range deployment.Spec.Template.Spec.Volumes {
+					if vol.Name == "aws-config" {
+						foundVolume = true
+						assert.Equal(t, "test-k8sgpt-aws-config", vol.ConfigMap.Name)
+						break
+					}
+				}
+				assert.True(t, foundVolume, "aws-config volume not found")
+
+				foundMount := false
+				for _, mount := range deployment.Spec.Template.Spec.Containers[0].VolumeMounts {
+					if mount.Name == "aws-config" {
+						foundMount = true
+						assert.Equal(t, "/root/.aws", mount.MountPath)
+						assert.True(t, mount.ReadOnly)
+						break
+					}
+				}
+				assert.True(t, foundMount, "aws-config volume mount not found")
+			}
+
+			if tc.expectEnvVars {
+				envMap := make(map[string]string)
+				for _, e := range deployment.Spec.Template.Spec.Containers[0].Env {
+					envMap[e.Name] = e.Value
+				}
+				assert.Equal(t, "/root/.aws/config", envMap["AWS_CONFIG_FILE"])
+				assert.Equal(t, "cross-account", envMap["AWS_PROFILE"])
+			} else {
+				for _, e := range deployment.Spec.Template.Spec.Containers[0].Env {
+					assert.NotEqual(t, "AWS_PROFILE", e.Name)
+					assert.NotEqual(t, "AWS_CONFIG_FILE", e.Name)
+				}
+			}
+		})
+	}
+}
+
 func Test_GetDeploymentWithFilters(t *testing.T) {
 	scheme := runtime.NewScheme()
 	require.NoError(t, appsv1.AddToScheme(scheme))
