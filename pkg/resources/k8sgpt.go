@@ -92,6 +92,39 @@ func addSecretAsEnvToDeployment(secretName string, secretKey string,
 	return nil
 }
 
+// GetAWSConfigMap creates a ConfigMap containing an AWS config file that chains
+// the pod's IRSA role (sourceRoleArn) to a cross-account role (targetRoleArn).
+// The k8sgpt container is configured to use the "cross-account" profile, which
+// sources credentials via WebIdentity from the EKS-projected service account token.
+func GetAWSConfigMap(config v1alpha1.K8sGPT) (*corev1.ConfigMap, error) {
+	sourceRoleArn := config.Spec.ExtraOptions.ServiceAccountIRSA
+	targetRoleArn := config.Spec.AI.RoleArn
+	configContent := fmt.Sprintf(
+		"[profile source]\nweb_identity_token_file = /var/run/secrets/eks.amazonaws.com/serviceaccount/token\nrole_arn = %s\n\n[profile cross-account]\nsource_profile = source\nrole_arn = %s\n",
+		sourceRoleArn,
+		targetRoleArn,
+	)
+	return &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      fmt.Sprintf("%s-aws-config", config.Name),
+			Namespace: config.Namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					Kind:               config.Kind,
+					Name:               config.Name,
+					UID:                config.UID,
+					APIVersion:         config.APIVersion,
+					BlockOwnerDeletion: utils.PtrBool(true),
+					Controller:         utils.PtrBool(true),
+				},
+			},
+		},
+		Data: map[string]string{
+			"config": configContent,
+		},
+	}, nil
+}
+
 // GetServiceAccount Create ServiceAccount for K8sGPT
 func GetServiceAccount(config v1alpha1.K8sGPT, serviceAccountName string) (*corev1.ServiceAccount, error) {
 	serviceAccount := &corev1.ServiceAccount{
@@ -619,6 +652,35 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 				Value: config.Spec.AI.Region,
 			},
 		)
+		if config.Spec.AI.RoleArn != "" {
+			if config.Spec.ExtraOptions == nil || config.Spec.ExtraOptions.ServiceAccountIRSA == "" {
+				return &appsv1.Deployment{}, err.New("serviceAccountIRSA must be set in extraOptions when roleArn is specified for amazonbedrock")
+			}
+			configMapName := fmt.Sprintf("%s-aws-config", config.Name)
+			deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
+				Name: "aws-config",
+				VolumeSource: corev1.VolumeSource{
+					ConfigMap: &corev1.ConfigMapVolumeSource{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: configMapName,
+						},
+					},
+				},
+			})
+			deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(
+				deployment.Spec.Template.Spec.Containers[0].VolumeMounts,
+				corev1.VolumeMount{
+					Name:      "aws-config",
+					MountPath: "/root/.aws",
+					ReadOnly:  true,
+				},
+			)
+			deployment.Spec.Template.Spec.Containers[0].Env = append(
+				deployment.Spec.Template.Spec.Containers[0].Env,
+				corev1.EnvVar{Name: "AWS_CONFIG_FILE", Value: "/root/.aws/config"},
+				corev1.EnvVar{Name: "AWS_PROFILE", Value: "cross-account"},
+			)
+		}
 	}
 	// Add checks for googlevertexai
 	if config.Spec.AI.Backend == v1alpha1.GoogleVertexAI {
@@ -696,6 +758,14 @@ func Sync(ctx context.Context, c client.Client,
 		objs = append(objs, clusterRoleBinding)
 	}
 
+	if config.Spec.AI != nil && config.Spec.AI.Backend == v1alpha1.AmazonBedrock && config.Spec.AI.RoleArn != "" {
+		awsConfigMap, er := GetAWSConfigMap(config)
+		if er != nil {
+			return er
+		}
+		objs = append(objs, awsConfigMap)
+	}
+
 	// for each object, create or destroy
 	for _, obj := range objs {
 		switch i {
@@ -756,6 +826,18 @@ func doSync(ctx context.Context, clt client.Client, obj client.Object) error {
 		} else if err == nil {
 			mutateFn = func() error {
 				exist.Spec = expect.Spec
+				return nil
+			}
+			obj = exist
+		}
+	case *corev1.ConfigMap:
+		exist := &corev1.ConfigMap{}
+		err := clt.Get(context.Background(), client.ObjectKeyFromObject(obj), exist)
+		if err != nil && !errors.IsNotFound(err) {
+			return err
+		} else if err == nil {
+			mutateFn = func() error {
+				exist.Data = expect.Data
 				return nil
 			}
 			obj = exist
