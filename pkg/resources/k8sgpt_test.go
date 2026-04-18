@@ -343,3 +343,253 @@ func Test_GetDeploymentWithFilters(t *testing.T) {
 		})
 	}
 }
+
+func findEnvVar(envs []v1.EnvVar, name string) *v1.EnvVar {
+	for _, e := range envs {
+		if e.Name == name {
+			return &e
+		}
+	}
+	return nil
+}
+
+func Test_GetDeploymentWithAzureAPIType(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, appsv1.AddToScheme(scheme))
+	require.NoError(t, v1.AddToScheme(scheme))
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+
+	testCases := []struct {
+		name             string
+		backend          string
+		azureAPIType     string
+		expectError      bool
+		expectedErrorMsg string
+		expectedEnvValue string
+	}{
+		{
+			name:             "AzureAPIType AZURE with azureopenai",
+			backend:          "azureopenai",
+			azureAPIType:     "AZURE",
+			expectedEnvValue: "AZURE",
+		},
+		{
+			name:             "AzureAPIType AZURE_AD with azureopenai",
+			backend:          "azureopenai",
+			azureAPIType:     "AZURE_AD",
+			expectedEnvValue: "AZURE_AD",
+		},
+		{
+			name:             "AzureAPIType CLOUDFLARE_AZURE with azureopenai",
+			backend:          "azureopenai",
+			azureAPIType:     "CLOUDFLARE_AZURE",
+			expectedEnvValue: "CLOUDFLARE_AZURE",
+		},
+		{
+			name:             "AzureAPIType with non-azure backend returns error",
+			backend:          "openai",
+			azureAPIType:     "AZURE",
+			expectError:      true,
+			expectedErrorMsg: "azureAPIType is supported only by azureopenai provider",
+		},
+		{
+			name:         "Empty AzureAPIType with azureopenai is no-op",
+			backend:      "azureopenai",
+			azureAPIType: "",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			config := v1alpha1.K8sGPT{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "K8sGPT",
+					APIVersion: "core.k8sgpt.ai/v1alpha1",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-k8sgpt",
+					Namespace: "test-namespace",
+					UID:       "test-uid",
+				},
+				Spec: v1alpha1.K8sGPTSpec{
+					Repository:      "ghcr.io/k8sgpt-ai/k8sgpt",
+					Version:         "v0.4.1",
+					ImagePullPolicy: v1.PullAlways,
+					AI: &v1alpha1.AISpec{
+						Backend:      tc.backend,
+						Model:        "gpt-4o-mini",
+						MaxTokens:    "2048",
+						Topk:         "50",
+						AzureAPIType: tc.azureAPIType,
+					},
+				},
+			}
+
+			deployment, err := GetDeployment(config, false, fakeClient, "test-sa")
+
+			if tc.expectError {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tc.expectedErrorMsg)
+				return
+			}
+
+			require.NoError(t, err)
+			envVar := findEnvVar(deployment.Spec.Template.Spec.Containers[0].Env, "K8SGPT_AZURE_API_TYPE")
+			if tc.expectedEnvValue != "" {
+				require.NotNil(t, envVar, "Expected K8SGPT_AZURE_API_TYPE env var to be set")
+				assert.Equal(t, tc.expectedEnvValue, envVar.Value)
+			} else {
+				assert.Nil(t, envVar, "Expected K8SGPT_AZURE_API_TYPE env var to NOT be set")
+			}
+		})
+	}
+}
+
+func Test_GetDeploymentWithCustomHeaders(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, appsv1.AddToScheme(scheme))
+	require.NoError(t, v1.AddToScheme(scheme))
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+
+	testCases := []struct {
+		name             string
+		backend          string
+		customHeaders    string
+		expectedEnvValue string
+	}{
+		{
+			name:             "CustomHeaders with openai",
+			backend:          "openai",
+			customHeaders:    "X-Custom:val1",
+			expectedEnvValue: "X-Custom:val1",
+		},
+		{
+			name:             "CustomHeaders with azureopenai",
+			backend:          "azureopenai",
+			customHeaders:    "Key1:Val1,Key2:Val2",
+			expectedEnvValue: "Key1:Val1,Key2:Val2",
+		},
+		{
+			name:          "Empty CustomHeaders is no-op",
+			backend:       "openai",
+			customHeaders: "",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			config := v1alpha1.K8sGPT{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "K8sGPT",
+					APIVersion: "core.k8sgpt.ai/v1alpha1",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-k8sgpt",
+					Namespace: "test-namespace",
+					UID:       "test-uid",
+				},
+				Spec: v1alpha1.K8sGPTSpec{
+					Repository:      "ghcr.io/k8sgpt-ai/k8sgpt",
+					Version:         "v0.4.1",
+					ImagePullPolicy: v1.PullAlways,
+					AI: &v1alpha1.AISpec{
+						Backend:       tc.backend,
+						Model:         "gpt-4o-mini",
+						MaxTokens:     "2048",
+						Topk:          "50",
+						CustomHeaders: tc.customHeaders,
+					},
+				},
+			}
+
+			deployment, err := GetDeployment(config, false, fakeClient, "test-sa")
+			require.NoError(t, err)
+
+			envVar := findEnvVar(deployment.Spec.Template.Spec.Containers[0].Env, "K8SGPT_CUSTOM_HEADERS")
+			if tc.expectedEnvValue != "" {
+				require.NotNil(t, envVar, "Expected K8SGPT_CUSTOM_HEADERS env var to be set")
+				assert.Equal(t, tc.expectedEnvValue, envVar.Value)
+			} else {
+				assert.Nil(t, envVar, "Expected K8SGPT_CUSTOM_HEADERS env var to NOT be set")
+			}
+		})
+	}
+}
+
+func Test_GetDeploymentWithAzureAPITypeAndCustomHeaders(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, appsv1.AddToScheme(scheme))
+	require.NoError(t, v1.AddToScheme(scheme))
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+
+	testCases := []struct {
+		name             string
+		backend          string
+		azureAPIType     string
+		customHeaders    string
+		expectError      bool
+		expectedErrorMsg string
+	}{
+		{
+			name:          "Both set with azureopenai",
+			backend:       "azureopenai",
+			azureAPIType:  "AZURE_AD",
+			customHeaders: "X-Key:val",
+		},
+		{
+			name:             "AzureAPIType with wrong backend errors before CustomHeaders",
+			backend:          "openai",
+			azureAPIType:     "AZURE",
+			customHeaders:    "X-Key:val",
+			expectError:      true,
+			expectedErrorMsg: "azureAPIType is supported only by azureopenai provider",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			config := v1alpha1.K8sGPT{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "K8sGPT",
+					APIVersion: "core.k8sgpt.ai/v1alpha1",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-k8sgpt",
+					Namespace: "test-namespace",
+					UID:       "test-uid",
+				},
+				Spec: v1alpha1.K8sGPTSpec{
+					Repository:      "ghcr.io/k8sgpt-ai/k8sgpt",
+					Version:         "v0.4.1",
+					ImagePullPolicy: v1.PullAlways,
+					AI: &v1alpha1.AISpec{
+						Backend:       tc.backend,
+						Model:         "gpt-4o-mini",
+						MaxTokens:     "2048",
+						Topk:          "50",
+						AzureAPIType:  tc.azureAPIType,
+						CustomHeaders: tc.customHeaders,
+					},
+				},
+			}
+
+			deployment, err := GetDeployment(config, false, fakeClient, "test-sa")
+
+			if tc.expectError {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tc.expectedErrorMsg)
+				return
+			}
+
+			require.NoError(t, err)
+
+			apiTypeEnv := findEnvVar(deployment.Spec.Template.Spec.Containers[0].Env, "K8SGPT_AZURE_API_TYPE")
+			require.NotNil(t, apiTypeEnv, "Expected K8SGPT_AZURE_API_TYPE env var to be set")
+			assert.Equal(t, tc.azureAPIType, apiTypeEnv.Value)
+
+			headersEnv := findEnvVar(deployment.Spec.Template.Spec.Containers[0].Env, "K8SGPT_CUSTOM_HEADERS")
+			require.NotNil(t, headersEnv, "Expected K8SGPT_CUSTOM_HEADERS env var to be set")
+			assert.Equal(t, tc.customHeaders, headersEnv.Value)
+		})
+	}
+}
