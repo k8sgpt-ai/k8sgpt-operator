@@ -589,6 +589,30 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 		return &appsv1.Deployment{}, err.New("engine is supported only by azureopenai provider")
 	}
 
+	// Add Azure API Type if using Azure OpenAI
+	if config.Spec.AI.AzureAPIType != "" && config.Spec.AI.Backend == v1alpha1.AzureOpenAI {
+		apiType := corev1.EnvVar{
+			Name:  "K8SGPT_AZURE_API_TYPE",
+			Value: config.Spec.AI.AzureAPIType,
+		}
+		deployment.Spec.Template.Spec.Containers[0].Env = append(
+			deployment.Spec.Template.Spec.Containers[0].Env, apiType,
+		)
+	} else if config.Spec.AI.AzureAPIType != "" && config.Spec.AI.Backend != v1alpha1.AzureOpenAI {
+		return &appsv1.Deployment{}, err.New("azureAPIType is supported only by azureopenai provider")
+	}
+
+	// Add Custom Headers if specified
+	if config.Spec.AI.CustomHeaders != "" {
+		customHeaders := corev1.EnvVar{
+			Name:  "K8SGPT_CUSTOM_HEADERS",
+			Value: config.Spec.AI.CustomHeaders,
+		}
+		deployment.Spec.Template.Spec.Containers[0].Env = append(
+			deployment.Spec.Template.Spec.Containers[0].Env, customHeaders,
+		)
+	}
+
 	// Configure ProxyEndpoint env variable
 	if config.Spec.AI.ProxyEndpoint != "" {
 		proxyEndpoint := corev1.EnvVar{
