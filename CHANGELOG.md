@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.2.28](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.27...v0.2.28) (2026-04-22)
+
+
+### Features
+
+* add Azure API type and custom headers in k8sgpt-operator ([#811](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/811)) ([92cc206](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/92cc2065bbcf23595b2b66c5b57d219a2ccb7bc9))
+
+
+### Bug Fixes
+
+* **deps:** update module google.golang.org/grpc to v1.79.3 [security] ([#806](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/806)) ([56c5653](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/56c56531556b6c1b02d58a855fb0dd764ccde50a))
+* enforce original deployment identity in auto-remediation to prevent cross-namespace mutation via prompt injection ([e125807](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e125807f9f4f36141eaae1151465b58359c68f17))
+
+
+### Other
+
+* **deps:** pin dependencies ([#808](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/808)) ([3012331](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/3012331b702909ab76a63857f55a02a7c669c78d))
+
+
+### Docs
+
+* update k8sgpt version to v0.4.32 in README examples ([47b9b88](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/47b9b88db3d2775a1e970ce63caabb441fa62e0a))
+
 ## [0.2.27](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.26...v0.2.27) (2026-03-28)
 
 
