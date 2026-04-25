@@ -136,6 +136,10 @@ type AISpec struct {
 	// Custom headers to be passed to the AI provider
 	// Format: "Key1:Value1,Key2:Value2"
 	CustomHeaders string `json:"customHeaders,omitempty"`
+	// MaxConcurrency limits how many AI-provider requests the analyzer runs in parallel.
+	// Defaults to the analyzer's built-in default (10) when unset.
+	// +kubebuilder:validation:Minimum=1
+	MaxConcurrency *int32 `json:"maxConcurrency,omitempty"`
 }
 
 type Trivy struct {
