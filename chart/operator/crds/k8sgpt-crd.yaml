@@ -114,6 +114,13 @@ spec:
                   language:
                     default: english
                     type: string
+                  maxConcurrency:
+                    description: |-
+                      MaxConcurrency limits how many AI-provider requests the analyzer runs in parallel.
+                      Defaults to the analyzer's built-in default (10) when unset.
+                    format: int32
+                    minimum: 1
+                    type: integer
                   maxTokens:
                     default: "2048"
                     type: string
