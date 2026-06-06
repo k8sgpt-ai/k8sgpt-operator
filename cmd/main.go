@@ -167,6 +167,7 @@ func main() {
 		SinkClient:          sinkClient,
 		MetricsBuilder:      metricsBuilder,
 		EnableResultLogging: enableResultLogging,
+		Recorder:            mgr.GetEventRecorderFor("k8sgpt-controller"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "K8sGPT")
 		os.Exit(1)

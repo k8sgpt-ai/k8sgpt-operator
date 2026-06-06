@@ -215,8 +215,10 @@ const (
 // show the current backend used
 // +kubebuilder:printcolumn:name="Backend",type="string",JSONPath=".spec.ai.backend",description="The current backend used"
 type K8sGPTStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// LastAnalysisError contains the latest Analyze RPC or AI backend error reported by K8sGPT.
+	LastAnalysisError string `json:"lastAnalysisError,omitempty"`
+	// LastAnalysisErrorTime is the time when LastAnalysisError was last updated.
+	LastAnalysisErrorTime *metav1.Time `json:"lastAnalysisErrorTime,omitempty"`
 }
 
 //+kubebuilder:object:root=true

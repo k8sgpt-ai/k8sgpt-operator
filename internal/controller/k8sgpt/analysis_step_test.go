@@ -14,10 +14,17 @@ limitations under the License.
 package k8sgpt
 
 import (
+	"context"
+	"errors"
+
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
 var _ = Describe("AnalysisStep", func() {
@@ -66,6 +73,58 @@ var _ = Describe("AnalysisStep", func() {
 				Expect(counts).To(HaveKeyWithValue("kube-system", 1))
 				Expect(counts).To(HaveKeyWithValue("", 1))
 			})
+		})
+	})
+
+	Describe("analysis error status", func() {
+		var (
+			ctx            context.Context
+			scheme         *runtime.Scheme
+			k8sgpt         *corev1alpha1.K8sGPT
+			namespacedName types.NamespacedName
+		)
+
+		BeforeEach(func() {
+			ctx = context.Background()
+			scheme = runtime.NewScheme()
+			Expect(corev1alpha1.AddToScheme(scheme)).To(Succeed())
+			k8sgpt = &corev1alpha1.K8sGPT{}
+			k8sgpt.Name = "test-k8sgpt"
+			k8sgpt.Namespace = "default"
+			namespacedName = types.NamespacedName{Name: k8sgpt.Name, Namespace: k8sgpt.Namespace}
+		})
+
+		It("stores the latest Analyze error on status", func() {
+			k8sClient := fake.NewClientBuilder().
+				WithScheme(scheme).
+				WithStatusSubresource(&corev1alpha1.K8sGPT{}).
+				WithObjects(k8sgpt).
+				Build()
+
+			Expect(setAnalysisErrorStatus(ctx, k8sClient, k8sgpt, errors.New("failed while calling AI provider openai: unexpected EOF"))).To(Succeed())
+
+			updated := &corev1alpha1.K8sGPT{}
+			Expect(k8sClient.Get(ctx, namespacedName, updated)).To(Succeed())
+			Expect(updated.Status.LastAnalysisError).To(ContainSubstring("unexpected EOF"))
+			Expect(updated.Status.LastAnalysisErrorTime).NotTo(BeNil())
+		})
+
+		It("clears the stored Analyze error after recovery", func() {
+			k8sgpt.Status.LastAnalysisError = "failed while calling AI provider openai: unexpected EOF"
+			now := metav1.Now()
+			k8sgpt.Status.LastAnalysisErrorTime = &now
+			k8sClient := fake.NewClientBuilder().
+				WithScheme(scheme).
+				WithStatusSubresource(&corev1alpha1.K8sGPT{}).
+				WithObjects(k8sgpt).
+				Build()
+
+			Expect(clearAnalysisErrorStatus(ctx, k8sClient, k8sgpt)).To(Succeed())
+
+			updated := &corev1alpha1.K8sGPT{}
+			Expect(k8sClient.Get(ctx, namespacedName, updated)).To(Succeed())
+			Expect(updated.Status.LastAnalysisError).To(BeEmpty())
+			Expect(updated.Status.LastAnalysisErrorTime).To(BeNil())
 		})
 	})
 })
