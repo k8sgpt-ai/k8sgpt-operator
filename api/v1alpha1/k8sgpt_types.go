@@ -174,6 +174,7 @@ type K8sGPTSpec struct {
 	RemoteCache      *RemoteCacheRef              `json:"remoteCache,omitempty"`
 	Integrations     *Integrations                `json:"integrations,omitempty"`
 	NodeSelector     map[string]string            `json:"nodeSelector,omitempty"`
+	Tolerations      []corev1.Toleration          `json:"tolerations,omitempty"`
 	TargetNamespace  string                       `json:"targetNamespace,omitempty"`
 	Analysis         *AnalysisConfig              `json:"analysis,omitempty"`
 	// Define the kubeconfig the Deployment must use.

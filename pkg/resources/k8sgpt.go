@@ -464,6 +464,7 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 						},
 					},
 					NodeSelector:    config.Spec.NodeSelector,
+					Tolerations:     config.Spec.Tolerations,
 					SecurityContext: config.Spec.SecurityContext,
 				},
 			},
