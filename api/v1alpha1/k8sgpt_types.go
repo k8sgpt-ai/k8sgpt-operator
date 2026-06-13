@@ -116,6 +116,8 @@ type AISpec struct {
 	BackOff *BackOff `json:"backOff,omitempty"`
 	BaseUrl string   `json:"baseUrl,omitempty"`
 	Region  string   `json:"region,omitempty"`
+	// +kubebuilder:validation:Enum=AZURE;AZURE_AD;CLOUDFLARE_AZURE
+	AzureAPIType string `json:"azureAPIType,omitempty"`
 	// +kubebuilder:default:=gpt-4o-mini
 	Model   string     `json:"model,omitempty"`
 	Engine  string     `json:"engine,omitempty"`
@@ -131,6 +133,9 @@ type AISpec struct {
 	MaxTokens string `json:"maxTokens,omitempty"`
 	// +kubebuilder:default:="50"
 	Topk string `json:"topk,omitempty"`
+	// Custom headers to be passed to the AI provider
+	// Format: "Key1:Value1,Key2:Value2"
+	CustomHeaders string `json:"customHeaders,omitempty"`
 }
 
 type Trivy struct {

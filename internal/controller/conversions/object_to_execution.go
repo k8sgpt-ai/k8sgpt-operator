@@ -86,6 +86,10 @@ func deploymentExecution(config ObjectExecutionConfig, deployment appsv1.Deploym
 		config.Log.Error(err, "unable to unmarshal response to deployment", "deployment", deployment.GetName())
 		return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, err
 	}
+	// Enforce the original deployment's identity to prevent cross-namespace mutations
+	// from prompt injection or AI hallucination
+	newDeployment.Name = deployment.Name
+	newDeployment.Namespace = deployment.Namespace
 	// Update the new deployment
 	if err := config.Rc.Update(config.Ctx, &newDeployment); err != nil {
 		config.Log.Error(err, "unable to updated the deployment", "deployment", deployment.GetName())
