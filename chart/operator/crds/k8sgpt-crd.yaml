@@ -68,6 +68,12 @@ spec:
                     - resources
                     - similarityRequirement
                     type: object
+                  azureAPIType:
+                    enum:
+                    - AZURE
+                    - AZURE_AD
+                    - CLOUDFLARE_AZURE
+                    type: string
                   backOff:
                     properties:
                       enabled:
@@ -95,6 +101,11 @@ spec:
                     - customrest
                     type: string
                   baseUrl:
+                    type: string
+                  customHeaders:
+                    description: |-
+                      Custom headers to be passed to the AI provider
+                      Format: "Key1:Value1,Key2:Value2"
                     type: string
                   enabled:
                     type: boolean
