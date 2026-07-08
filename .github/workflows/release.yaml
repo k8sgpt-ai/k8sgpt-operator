@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 env:
   # Default minimum version of Go to support.
-  DEFAULT_GO_VERSION: 1.19
+  DEFAULT_GO_VERSION: 1.26
   REGISTRY: ghcr.io
   GITHUB_PAGES_BRANCH: gh_pages
 

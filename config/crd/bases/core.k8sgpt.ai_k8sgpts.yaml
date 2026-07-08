@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.0
+    controller-gen.kubebuilder.io/version: v0.21.0
   name: k8sgpts.core.k8sgpt.ai
 spec:
   group: core.k8sgpt.ai
@@ -352,6 +352,20 @@ spec:
                       type: string
                   type: object
                 type: array
+              deploymentAnnotations:
+                additionalProperties:
+                  type: string
+                description: |-
+                  DeploymentAnnotations allows adding custom annotations to the K8sGPT Deployment
+                  for integration with monitoring systems and other infrastructure components.
+                type: object
+              deploymentLabels:
+                additionalProperties:
+                  type: string
+                description: |-
+                  DeploymentLabels allows adding custom labels to the K8sGPT Deployment for
+                  organizational tracking, monitoring, logging, and cost allocation purposes.
+                type: object
               extraOptions:
                 properties:
                   backstage:
