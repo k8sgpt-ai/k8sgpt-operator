@@ -94,6 +94,11 @@ spec:
       namespace: <namespace>
   nodeSelector:                # Node selector for the K8sGPT pod (optional)
     <label-key>: <label-value>
+  tolerations:                 # Tolerations for the K8sGPT pod (optional)
+    - key: dedicated
+      operator: Equal
+      value: ai
+      effect: NoSchedule
   targetNamespace: <namespace>   # Target namespace for analysis (optional)
   kubeconfig:                  # Kubeconfig secret for accessing the cluster (optional)
     name: <secret-name>

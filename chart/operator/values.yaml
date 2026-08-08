@@ -72,6 +72,7 @@ controllerManager:
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
   #
   nodeSelector: {}
+  tolerations: []
   podSecurityContext:
     runAsNonRoot: true
     # Set securityContext.runAsUser/runAsGroup if necessary. Values below were taken from https://github.com/k8sgpt-ai/k8sgpt-operator/blob/main/Dockerfile
