@@ -24,7 +24,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 )
 
 var _ = Describe("AnalysisStep", func() {
@@ -107,6 +109,34 @@ var _ = Describe("AnalysisStep", func() {
 			Expect(k8sClient.Get(ctx, namespacedName, updated)).To(Succeed())
 			Expect(updated.Status.LastAnalysisError).To(ContainSubstring("unexpected EOF"))
 			Expect(updated.Status.LastAnalysisErrorTime).NotTo(BeNil())
+		})
+
+		It("does not update status for an unchanged Analyze error", func() {
+			const analysisError = "failed while calling AI provider openai: unexpected EOF"
+			k8sgpt.Status.LastAnalysisError = analysisError
+			originalTime := metav1.Now()
+			k8sgpt.Status.LastAnalysisErrorTime = &originalTime
+			statusUpdateCalls := 0
+			k8sClient := fake.NewClientBuilder().
+				WithScheme(scheme).
+				WithStatusSubresource(&corev1alpha1.K8sGPT{}).
+				WithObjects(k8sgpt).
+				WithInterceptorFuncs(interceptor.Funcs{
+					SubResourceUpdate: func(ctx context.Context, c client.Client, subResourceName string, obj client.Object, opts ...client.SubResourceUpdateOption) error {
+						statusUpdateCalls++
+						return c.SubResource(subResourceName).Update(ctx, obj, opts...)
+					},
+				}).
+				Build()
+
+			step.recordAnalysisError(&K8sGPTInstance{
+				R:            &K8sGPTReconciler{Client: k8sClient},
+				Ctx:          ctx,
+				K8sgptConfig: k8sgpt,
+				logger:       ctrl.Log.WithName("test-analysis-error-status"),
+			}, errors.New(analysisError))
+			Expect(statusUpdateCalls).To(Equal(0))
+			Expect(k8sgpt.Status.LastAnalysisErrorTime).To(Equal(&originalTime))
 		})
 
 		It("clears the stored Analyze error after recovery", func() {

@@ -118,6 +118,10 @@ func (step *AnalysisStep) clearAnalysisError(instance *K8sGPTInstance) {
 }
 
 func setAnalysisErrorStatus(ctx context.Context, c client.Client, k8sgpt *corev1alpha1.K8sGPT, analysisErr error) error {
+	if k8sgpt.Status.LastAnalysisError == analysisErr.Error() {
+		return nil
+	}
+
 	now := metav1.Now()
 	k8sgpt.Status.LastAnalysisError = analysisErr.Error()
 	k8sgpt.Status.LastAnalysisErrorTime = &now
