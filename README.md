@@ -18,6 +18,8 @@
 >
 > Get started with [Auto Remediation](./AUTO_REMEDIATION.md) or the [DeepSeek live example](./config/samples/autoremediation/valid_k8sgpt_remediation_deepseek.yaml).
 
+<img src="./images/auto-remediation-flow.svg" alt="Animated auto-remediation flow from image-pull failure through DeepSeek, policy gate, Kubernetes rollout, and verification" width="100%" />
+
 This Operator is designed to enable [K8sGPT](https://github.com/k8sgpt-ai/k8sgpt/) within a Kubernetes cluster.
 It will allow you to create a custom resource that defines the behaviour and scope of a managed K8sGPT workload. Analysis and outputs will also be configurable to enable integration into existing workflows.
 

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="420" viewBox="0 0 1100 420" role="img" aria-labelledby="title desc">
+  <title id="title">K8sGPT Operator auto-remediation flow</title>
+  <desc id="desc">An animated diagram showing a broken image, DeepSeek analysis, a policy gate, Kubernetes rollout, and successful verification.</desc>
+  <style>
+    .bg { fill: #0b1020; }
+    .title { fill: #f8fafc; font: 700 26px system-ui, sans-serif; }
+    .subtitle { fill: #a5b4fc; font: 500 14px system-ui, sans-serif; }
+    .label { fill: #e2e8f0; font: 700 16px system-ui, sans-serif; }
+    .small { fill: #94a3b8; font: 13px system-ui, sans-serif; }
+    .card { fill: #151d36; stroke: #334155; stroke-width: 2; }
+    .arrow { stroke: #475569; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+    .danger { fill: #fb7185; }
+    .info { fill: #60a5fa; }
+    .safe { fill: #34d399; }
+    .packet { opacity: 0; }
+    .p1 { animation: travel1 8s infinite; }
+    .p2 { animation: travel2 8s infinite; }
+    .p3 { animation: travel3 8s infinite; }
+    .p4 { animation: travel4 8s infinite; }
+    .failure { animation: failure 8s infinite; }
+    .proposal { animation: proposal 8s infinite; }
+    .approved { animation: approved 8s infinite; }
+    .healthy { animation: healthy 8s infinite; }
+    @keyframes travel1 { 0%,5% { opacity:0; transform:translate(0,0) } 6%,20% { opacity:1 } 21%,100% { opacity:0; transform:translate(180px,0) } }
+    @keyframes travel2 { 0%,22% { opacity:0; transform:translate(0,0) } 23%,37% { opacity:1 } 38%,100% { opacity:0; transform:translate(180px,0) } }
+    @keyframes travel3 { 0%,39% { opacity:0; transform:translate(0,0) } 40%,54% { opacity:1 } 55%,100% { opacity:0; transform:translate(180px,0) } }
+    @keyframes travel4 { 0%,56% { opacity:0; transform:translate(0,0) } 57%,71% { opacity:1 } 72%,100% { opacity:0; transform:translate(180px,0) } }
+    @keyframes failure { 0%,58% { opacity:1 } 59%,100% { opacity:0 } }
+    @keyframes proposal { 0%,25% { opacity:0 } 26%,100% { opacity:1 } }
+    @keyframes approved { 0%,42% { opacity:0 } 43%,100% { opacity:1 } }
+    @keyframes healthy { 0%,70% { opacity:0 } 71%,100% { opacity:1 } }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker>
+  </defs>
+  <rect class="bg" width="1100" height="420" rx="22"/>
+  <text x="50" y="55" class="title">Auto-remediation, with a deterministic safety gate</text>
+  <text x="50" y="80" class="subtitle">The LLM suggests one image; the operator decides whether Kubernetes may apply it.</text>
+
+  <path class="arrow" d="M230 210H300"/><path class="arrow" d="M440 210H510"/><path class="arrow" d="M650 210H720"/><path class="arrow" d="M860 210H930"/>
+  <g transform="translate(50 135)"><rect class="card" width="180" height="150" rx="16"/><circle cx="35" cy="38" r="15" class="danger"/><text x="62" y="43" class="label">Broken workload</text><text x="25" y="82" class="small">image: nginxxx</text><text x="25" y="108" class="small failure">ImagePullBackOff</text><text x="25" y="108" class="small healthy">✓ replacement Pod Ready</text></g>
+  <g transform="translate(300 135)"><rect class="card" width="140" height="150" rx="16"/><circle cx="32" cy="38" r="15" class="info"/><text x="57" y="43" class="label">DeepSeek</text><text x="20" y="83" class="small">analyzes finding</text><text x="20" y="109" class="small proposal">app → nginx</text></g>
+  <g transform="translate(510 135)"><rect class="card" width="140" height="150" rx="16"/><circle cx="32" cy="38" r="15" class="safe"/><text x="57" y="43" class="label">Policy gate</text><text x="20" y="83" class="small">exact target</text><text x="20" y="106" class="small">one image path</text><text x="20" y="129" class="small approved">✓ dry-run passed</text></g>
+  <g transform="translate(720 135)"><rect class="card" width="140" height="150" rx="16"/><circle cx="32" cy="38" r="15" class="info"/><text x="57" y="43" class="label">Kubernetes</text><text x="20" y="83" class="small">patch Deployment</text><text x="20" y="109" class="small approved">rollout begins</text></g>
+  <g transform="translate(930 135)"><rect class="card" width="120" height="150" rx="16"/><circle cx="32" cy="38" r="15" class="safe"/><text x="57" y="43" class="label">Verified</text><text x="20" y="83" class="small healthy">available: 1</text><text x="20" y="109" class="small healthy">Successful</text></g>
+
+  <circle class="packet p1 danger" cx="230" cy="210" r="7"/><circle class="packet p2 info" cx="440" cy="210" r="7"/><circle class="packet p3 safe" cx="650" cy="210" r="7"/><circle class="packet p4 safe" cx="860" cy="210" r="7"/>
+  <text x="50" y="355" class="small">No broad manifest write • no stale update • no metadata/security/network change • Kubernetes API dry-run before persistence</text>
+</svg>
