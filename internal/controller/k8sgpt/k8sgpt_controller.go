@@ -26,6 +26,7 @@ import (
 	metricspkg "github.com/k8sgpt-ai/k8sgpt-operator/pkg/metrics"
 	v1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -62,6 +63,7 @@ type K8sGPTReconciler struct {
 	MetricsBuilder      *metricspkg.MetricBuilder
 	EnableResultLogging bool
 	Signal              chan types.InterControllerSignal
+	Recorder            record.EventRecorder
 }
 
 type K8sGPTInstance struct {

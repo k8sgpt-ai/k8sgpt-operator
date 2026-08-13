@@ -798,6 +798,16 @@ spec:
             description: |-
               K8sGPTStatus defines the observed state of K8sGPT
               show the current backend used
+            properties:
+              lastAnalysisError:
+                description: LastAnalysisError contains the latest Analyze RPC or
+                  AI backend error reported by K8sGPT.
+                type: string
+              lastAnalysisErrorTime:
+                description: LastAnalysisErrorTime is the time when LastAnalysisError
+                  was last updated.
+                format: date-time
+                type: string
             type: object
         type: object
     served: true
