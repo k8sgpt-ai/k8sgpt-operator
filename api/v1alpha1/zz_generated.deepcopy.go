@@ -432,6 +432,20 @@ func (in *K8sGPTSpec) DeepCopyInto(out *K8sGPTSpec) {
 		*out = new(SecretRef)
 		**out = **in
 	}
+	if in.DeploymentLabels != nil {
+		in, out := &in.DeploymentLabels, &out.DeploymentLabels
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
+	if in.DeploymentAnnotations != nil {
+		in, out := &in.DeploymentAnnotations, &out.DeploymentAnnotations
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	if in.PodLabels != nil {
 		in, out := &in.PodLabels, &out.PodLabels
 		*out = make(map[string]string, len(*in))
