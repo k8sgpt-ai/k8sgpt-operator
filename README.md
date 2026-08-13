@@ -12,11 +12,11 @@
 > [!IMPORTANT]
 > ## Auto-remediation is here — now with a real safety gate
 >
-> K8sGPT Operator can now repair selected Kubernetes workload image failures automatically. A real live end-to-end run has validated the full path: DeepSeek analyzed an `ImagePullBackOff`, the operator generated a one-image repair, Kubernetes rolled out the corrected Deployment, and the `Mutation` reached `Successful`.
+> K8sGPT Operator can now repair selected Kubernetes workload image failures automatically. A real live end-to-end run has validated the full path: an AI provider analyzed an `ImagePullBackOff`, the operator generated a one-image repair, Kubernetes rolled out the corrected Deployment, and the `Mutation` reached `Successful`.
 >
 > This is deliberately **alpha and opt-in**. The LLM never receives write authority: the operator re-fetches the object, calculates the semantic JSON patch itself, allows exactly one approved image path, dry-runs it with the Kubernetes API server, and rejects stale, broad, or unsafe proposals. Owned Pod findings are repaired through their selected owning workload, so changes update desired state rather than an ephemeral Pod.
 >
-> Get started with [Auto Remediation](./AUTO_REMEDIATION.md) or the [DeepSeek live example](./config/samples/autoremediation/valid_k8sgpt_remediation_deepseek.yaml).
+> Get started with [Auto Remediation](./AUTO_REMEDIATION.md) and choose the provider configuration that fits your environment.
 
 <img src="./images/auto-remediation-flow.svg" alt="Animated auto-remediation flow from image-pull failure through DeepSeek, policy gate, Kubernetes rollout, and verification" width="100%" />
 
@@ -33,19 +33,16 @@ helm repo update
 helm install release k8sgpt/k8sgpt-operator -n k8sgpt-operator-system --create-namespace
 ```
 
-## Auto-remediation quick start (DeepSeek)
+## Auto-remediation quick start
 
-Create a Secret from a DeepSeek API key, then apply the opt-in example:
+Enable auto-remediation in a `K8sGPT` resource alongside your chosen AI backend and Secret. Provider setup remains independent from the remediation policy; the operator applies the same safeguards to every backend.
 
 ```sh
-kubectl create secret generic k8sgpt-deepseek-secret \
-  --from-literal=api-key="$DEEPSEEK_API_KEY" \
-  -n k8sgpt-operator-system
 kubectl apply -n k8sgpt-operator-system \
-  -f config/samples/autoremediation/valid_k8sgpt_remediation_deepseek.yaml
+  -f config/samples/autoremediation/valid_k8sgpt_remediation_sample.yaml
 ```
 
-`backend: deepseek` uses DeepSeek's OpenAI-compatible endpoint automatically. For the policy model, supported workload types, audit fields, and operational limits, read [Auto Remediation](./AUTO_REMEDIATION.md) before enabling it.
+For provider-specific manifests, see the [sample configurations](./config/samples/). Read [Auto Remediation](./AUTO_REMEDIATION.md) for the policy model, supported workload types, audit fields, and operational limits before enabling it.
 
 ## Run the example
 
