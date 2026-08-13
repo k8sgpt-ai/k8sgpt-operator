@@ -84,6 +84,28 @@ spec:
                 type: string
               parentObject:
                 type: string
+              targetRef:
+                description: |-
+                  TargetRef is the optional exact identity of the resource that produced this result.
+                  Kind and Name remain for backwards compatibility with existing analyzers.
+                properties:
+                  apiVersion:
+                    type: string
+                  kind:
+                    type: string
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                  resourceVersion:
+                    type: string
+                  uid:
+                    description: |-
+                      UID is a type that holds unique ID values, including UUIDs.  Because we
+                      don't ONLY use UUIDs, this is an alias to string.  Being a type captures
+                      intent and helps make sure that UIDs and names do not get conflated.
+                    type: string
+                type: object
             required:
             - autoRemediationStatus
             - backend

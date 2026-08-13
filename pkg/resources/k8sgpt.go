@@ -288,6 +288,8 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 		version = "latest"
 	}
 	image := config.Spec.Repository + ":" + version
+	backend := v1alpha1.EffectiveBackend(config.Spec.AI.Backend)
+	baseURL := v1alpha1.EffectiveBaseURL(*config.Spec.AI)
 	replicas := int32(1)
 
 	// Merge default labels with custom pod labels
@@ -370,7 +372,7 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 								},
 								{
 									Name:  "K8SGPT_BACKEND",
-									Value: config.Spec.AI.Backend,
+									Value: backend,
 								},
 								{
 									Name:  "K8SGPT_MAX_TOKENS",
@@ -562,10 +564,10 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 		)
 	}
 
-	if config.Spec.AI.BaseUrl != "" {
+	if baseURL != "" {
 		baseUrl := corev1.EnvVar{
 			Name:  "K8SGPT_BASEURL",
-			Value: config.Spec.AI.BaseUrl,
+			Value: baseURL,
 		}
 		deployment.Spec.Template.Spec.Containers[0].Env = append(
 			deployment.Spec.Template.Spec.Containers[0].Env, baseUrl,

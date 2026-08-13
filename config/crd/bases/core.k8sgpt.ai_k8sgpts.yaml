@@ -53,15 +53,20 @@ spec:
                         default:
                         - Pod
                         - Deployment
-                        - Service
-                        - Ingress
-                        description: Support Pod, Deployment, Service and Ingress
+                        description: |-
+                          Resources is an exact allowlist of target resource selectors. Use Kind for
+                          legacy matching, group/Kind (for example apps/Deployment), or
+                          group/version/Kind (for example apps/v1/Deployment or v1/ConfigMap).
+                          An enabled selector only makes a finding eligible; automatic execution
+                          remains deny-by-default until a matching GVK policy is registered.
                         items:
                           type: string
                         type: array
                       similarityRequirement:
                         default: "90"
-                        description: Defaults to 10%
+                        description: |-
+                          Deprecated: textual similarity is retained for API compatibility only.
+                          Execution is authorized by the deterministic remediation policy.
                         type: string
                     required:
                     - enabled
@@ -91,6 +96,7 @@ spec:
                     enum:
                     - ibmwatsonxai
                     - openai
+                    - deepseek
                     - localai
                     - azureopenai
                     - amazonbedrock

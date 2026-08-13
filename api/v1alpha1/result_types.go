@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 type Failure struct {
@@ -50,6 +51,23 @@ type AutoRemediationStatus struct {
 	Phase AutoRemediationPhase `json:"phase,omitempty"`
 }
 
+// ResultTargetReference identifies the exact Kubernetes object that produced a
+// result. All fields are optional while analyzers migrate from the legacy
+// Kind/Name representation, but auto-remediation must require a complete,
+// matching reference before mutating an object.
+//
+// This intentionally contains only object identity and concurrency fields. It
+// is not a Kubernetes ObjectReference because references such as FieldPath and
+// Controller are not meaningful for an analyzer finding.
+type ResultTargetReference struct {
+	APIVersion      string    `json:"apiVersion,omitempty"`
+	Kind            string    `json:"kind,omitempty"`
+	Namespace       string    `json:"namespace,omitempty"`
+	Name            string    `json:"name,omitempty"`
+	UID             types.UID `json:"uid,omitempty"`
+	ResourceVersion string    `json:"resourceVersion,omitempty"`
+}
+
 // ResultSpec defines the desired state of Result
 type ResultSpec struct {
 	Backend               string                `json:"backend"`
@@ -59,6 +77,9 @@ type ResultSpec struct {
 	Error                 []Failure             `json:"error"`
 	Details               string                `json:"details"`
 	ParentObject          string                `json:"parentObject"`
+	// TargetRef is the optional exact identity of the resource that produced this result.
+	// Kind and Name remain for backwards compatibility with existing analyzers.
+	TargetRef *ResultTargetReference `json:"targetRef,omitempty"`
 }
 
 // ResultStatus defines the observed state of Result

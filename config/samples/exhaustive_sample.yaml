@@ -48,12 +48,10 @@ spec:
   ai:                          # AI configuration (required)
     autoRemediation:           # Automatic remediation settings
       enabled: <boolean>        # Enable/disable auto-remediation
-      similarityRequirement: <percentage> # similarityRequirement (e.g., "90")
-      resources:                # Resource types for auto-remediation
+      similarityRequirement: <percentage-string> # Textual similarity percentage (e.g., "90")
+      resources:                # Supported resource kinds to auto-remediate
         - Pod
-        - Service
         - Deployment
-        - Ingress  # Example
     backend: <ai-backend>       # AI backend (e.g., openai, azureopenai, localai, etc.)
     backOff:                   # Retry backoff settings (optional)
       enabled: <boolean>

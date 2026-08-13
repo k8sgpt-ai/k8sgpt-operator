@@ -2,7 +2,6 @@ package util
 
 import (
 	"github.com/agnivade/levenshtein"
-	"strings"
 )
 
 func IsStringInSlice(a string, b []string) bool {
@@ -10,7 +9,7 @@ func IsStringInSlice(a string, b []string) bool {
 		return false
 	}
 	for _, i := range b {
-		if strings.Contains(i, a) {
+		if i == a {
 			return true
 		}
 	}

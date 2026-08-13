@@ -34,6 +34,7 @@ func hashResultContent(spec v1alpha1.ResultSpec) string {
 		Kind         string
 		Name         string
 		ParentObject string
+		TargetRef    *v1alpha1.ResultTargetReference
 		ErrorCount   int
 		// Include error text but not sensitive data which may vary
 		ErrorTexts []string
@@ -43,6 +44,7 @@ func hashResultContent(spec v1alpha1.ResultSpec) string {
 		Kind:         spec.Kind,
 		Name:         spec.Name,
 		ParentObject: spec.ParentObject,
+		TargetRef:    spec.TargetRef,
 		ErrorCount:   len(spec.Error),
 		ErrorTexts:   make([]string, len(spec.Error)),
 	}

@@ -39,6 +39,7 @@ var _ = Describe("The test cases for the K8sGPT CRDs result types", func() {
 		Details      = "This is a result"
 		ParentObject = "k8s-gpt"
 		Name         = "result"
+		TargetUID    = types.UID("4b07b05f-75c2-4f5b-9c1d-2ccf0a7b26e6")
 
 		sensitive = Sensitive{
 			Unmasked: Unmasked,
@@ -49,6 +50,15 @@ var _ = Describe("The test cases for the K8sGPT CRDs result types", func() {
 		failure = Failure{
 			Text:      Text,
 			Sensitive: []Sensitive{sensitive},
+		}
+
+		targetRef = &ResultTargetReference{
+			APIVersion:      "apps/v1",
+			Kind:            "Deployment",
+			Namespace:       Namespace,
+			Name:            "web",
+			UID:             TargetUID,
+			ResourceVersion: "123",
 		}
 
 		// Implement a instance of ResultSpec type
@@ -66,6 +76,7 @@ var _ = Describe("The test cases for the K8sGPT CRDs result types", func() {
 				Error:        []Failure{failure},
 				Details:      Details,
 				ParentObject: ParentObject,
+				TargetRef:    targetRef,
 			},
 		}
 		// Create a Namespace object
@@ -97,6 +108,7 @@ var _ = Describe("The test cases for the K8sGPT CRDs result types", func() {
 			Expect(result.Spec.Error[0].Text).Should(Equal(Text))
 			Expect(result.Spec.Details).Should(Equal(Details))
 			Expect(result.Spec.ParentObject).Should(Equal(ParentObject))
+			Expect(result.Spec.TargetRef).Should(Equal(targetRef))
 		})
 	})
 	// Update the ResultRef object
@@ -112,6 +124,7 @@ var _ = Describe("The test cases for the K8sGPT CRDs result types", func() {
 			Expect(result.Spec.Error[0].Text).Should(Equal(Text))
 			Expect(result.Spec.Details).Should(Equal("This is a new result"))
 			Expect(result.Spec.ParentObject).Should(Equal(ParentObject))
+			Expect(result.Spec.TargetRef).Should(Equal(targetRef))
 		})
 	})
 	// Get the ResultRef object by list

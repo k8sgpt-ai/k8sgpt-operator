@@ -100,18 +100,23 @@ type BackOff struct {
 type AutoRemediation struct {
 	// +kubebuilder:default:=false
 	Enabled bool `json:"enabled"`
-	// Defaults to 10%
+	// Deprecated: textual similarity is retained for API compatibility only.
+	// Execution is authorized by the deterministic remediation policy.
 	// +kubebuilder:default="90"
 	SimilarityRequirement string `json:"similarityRequirement"`
-	// Support Pod, Deployment, Service and Ingress
-	// +kubebuilder:default:={"Pod","Deployment","Service","Ingress"}
+	// Resources is an exact allowlist of target resource selectors. Use Kind for
+	// legacy matching, group/Kind (for example apps/Deployment), or
+	// group/version/Kind (for example apps/v1/Deployment or v1/ConfigMap).
+	// An enabled selector only makes a finding eligible; automatic execution
+	// remains deny-by-default until a matching GVK policy is registered.
+	// +kubebuilder:default:={"Pod","Deployment"}
 	Resources []string `json:"resources"`
 }
 
 type AISpec struct {
 	AutoRemediation AutoRemediation `json:"autoRemediation,omitempty"`
 	// +kubebuilder:default:=openai
-	// +kubebuilder:validation:Enum=ibmwatsonxai;openai;localai;azureopenai;amazonbedrock;cohere;amazonsagemaker;google;googlevertexai;customrest
+	// +kubebuilder:validation:Enum=ibmwatsonxai;openai;deepseek;localai;azureopenai;amazonbedrock;cohere;amazonsagemaker;google;googlevertexai;customrest
 	Backend string   `json:"backend"`
 	BackOff *BackOff `json:"backOff,omitempty"`
 	BaseUrl string   `json:"baseUrl,omitempty"`
@@ -200,7 +205,11 @@ type K8sGPTSpec struct {
 }
 
 const (
-	OpenAI          = "openai"
+	OpenAI = "openai"
+	// DeepSeek uses an OpenAI-compatible API. The operator translates this to
+	// the OpenAI K8sGPT backend and supplies DeepSeek's endpoint.
+	DeepSeek        = "deepseek"
+	DeepSeekBaseURL = "https://api.deepseek.com"
 	AzureOpenAI     = "azureopenai"
 	LocalAI         = "localai"
 	AmazonBedrock   = "amazonbedrock"
@@ -210,6 +219,26 @@ const (
 	GoogleVertexAI  = "googlevertexai"
 	IBMWatsonxAI    = "ibmwatsonxai"
 )
+
+// EffectiveBackend returns the backend understood by the K8sGPT server.
+// DeepSeek is served through K8sGPT's OpenAI-compatible client.
+func EffectiveBackend(backend string) string {
+	if backend == DeepSeek {
+		return OpenAI
+	}
+	return backend
+}
+
+// EffectiveBaseURL returns the endpoint to configure on the K8sGPT server.
+func EffectiveBaseURL(ai AISpec) string {
+	if ai.BaseUrl != "" {
+		return ai.BaseUrl
+	}
+	if ai.Backend == DeepSeek {
+		return DeepSeekBaseURL
+	}
+	return ""
+}
 
 // K8sGPTStatus defines the observed state of K8sGPT
 // show the current backend used

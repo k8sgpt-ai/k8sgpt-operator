@@ -8,6 +8,16 @@
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fk8sgpt-ai%2Fk8sgpt-operator.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fk8sgpt-ai%2Fk8sgpt-operator?ref=badge_shield)
 
 ---
+
+> [!IMPORTANT]
+> ## Auto-remediation is here — now with a real safety gate
+>
+> K8sGPT Operator can now repair selected Kubernetes workload image failures automatically. A real live end-to-end run has validated the full path: DeepSeek analyzed an `ImagePullBackOff`, the operator generated a one-image repair, Kubernetes rolled out the corrected Deployment, and the `Mutation` reached `Successful`.
+>
+> This is deliberately **alpha and opt-in**. The LLM never receives write authority: the operator re-fetches the object, calculates the semantic JSON patch itself, allows exactly one approved image path, dry-runs it with the Kubernetes API server, and rejects stale, broad, or unsafe proposals. Owned Pod findings are repaired through their selected owning workload, so changes update desired state rather than an ephemeral Pod.
+>
+> Get started with [Auto Remediation](./AUTO_REMEDIATION.md) or the [DeepSeek live example](./config/samples/autoremediation/valid_k8sgpt_remediation_deepseek.yaml).
+
 This Operator is designed to enable [K8sGPT](https://github.com/k8sgpt-ai/k8sgpt/) within a Kubernetes cluster.
 It will allow you to create a custom resource that defines the behaviour and scope of a managed K8sGPT workload. Analysis and outputs will also be configurable to enable integration into existing workflows.
 
@@ -20,6 +30,20 @@ helm repo add k8sgpt https://charts.k8sgpt.ai/
 helm repo update
 helm install release k8sgpt/k8sgpt-operator -n k8sgpt-operator-system --create-namespace
 ```
+
+## Auto-remediation quick start (DeepSeek)
+
+Create a Secret from a DeepSeek API key, then apply the opt-in example:
+
+```sh
+kubectl create secret generic k8sgpt-deepseek-secret \
+  --from-literal=api-key="$DEEPSEEK_API_KEY" \
+  -n k8sgpt-operator-system
+kubectl apply -n k8sgpt-operator-system \
+  -f config/samples/autoremediation/valid_k8sgpt_remediation_deepseek.yaml
+```
+
+`backend: deepseek` uses DeepSeek's OpenAI-compatible endpoint automatically. For the policy model, supported workload types, audit fields, and operational limits, read [Auto Remediation](./AUTO_REMEDIATION.md) before enabling it.
 
 ## Run the example
 

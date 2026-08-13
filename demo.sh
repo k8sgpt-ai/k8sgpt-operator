@@ -53,7 +53,6 @@ spec:
       similarityRequirement: "90"
       resources:
         - Pod
-        - Service
         - Deployment
     enabled: true
     model: gpt-4o-mini

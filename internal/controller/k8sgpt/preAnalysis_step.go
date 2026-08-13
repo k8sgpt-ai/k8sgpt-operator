@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"strings"
 
+	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/types"
 	Kclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -64,7 +65,7 @@ func (step *PreAnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, err
 	if instance.K8sgptConfig.Spec.AI.AutoRemediation.Enabled {
 		step.Signal <- types.InterControllerSignal{
 			K8sGPTClient: instance.kclient,
-			Backend:      instance.K8sgptConfig.Spec.AI.Backend,
+			Backend:      corev1alpha1.EffectiveBackend(instance.K8sgptConfig.Spec.AI.Backend),
 			K8sGPT:       instance.K8sgptConfig,
 		}
 	}
