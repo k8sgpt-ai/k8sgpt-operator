@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.29](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.28...v0.2.29) (2026-08-13)
+
+
+### Features
+
+* add policy-gated auto remediation ([e6a378d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e6a378d63fabfcaaa5d79c2efc72ca92a0fd4ccd))
+
+
+### Other
+
+* **deps:** update azure/setup-helm digest to 1a275c3 ([#743](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/743)) ([aea60c5](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/aea60c5fe03303da065934717ee33648861234e6))
+
 ## [0.2.28](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.27...v0.2.28) (2026-08-13)
 
 
