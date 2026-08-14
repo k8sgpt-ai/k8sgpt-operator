@@ -48,7 +48,6 @@ spec:
   ai:                          # AI configuration (required)
     autoRemediation:           # Automatic remediation settings
       enabled: <boolean>        # Enable/disable auto-remediation
-      similarityRequirement: <percentage-string> # Textual similarity percentage (e.g., "90")
       resources:                # Supported resource kinds to auto-remediate
         - Pod
         - Deployment

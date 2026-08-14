@@ -158,12 +158,8 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			}
 			return ctrl.Result{}, nil
 		}
-		// compute similarity score
-		score := util.SimilarityScore(mutation.Spec.OriginConfiguration, proposal)
-		mutationControllerLog.Info("Similarity score", "score", score)
 		mutationControllerLog.Info("Got mutation targetConfiguration for", "mutation", mutation.Name)
 		mutation.Spec.TargetConfiguration = proposal
-		mutation.Spec.SimilarityScore = fmt.Sprintf("%f", score)
 		mutation.Status.Phase = corev1alpha1.AutoRemediationPhaseInProgress
 		mutation.Status.Message = "In Progress"
 		if err := r.Client.Update(ctx, &mutation); err != nil {
@@ -182,8 +178,7 @@ func (r *MutationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			mutationControllerLog.Info("Target configuration is not set, this shouldn't occur at this phase", "mutation", mutation.Name)
 			return ctrl.Result{RequeueAfter: util.ErrorRequeueTime}, nil
 		}
-		// Similarity is recorded for backwards compatibility only. Authorization
-		// is determined by the semantic policy gate in ResourceToExecution.
+		// Authorization is determined by the semantic policy gate in ResourceToExecution.
 		// Convert the spec.targetConfiguration to an Object
 		// 1. Get the GVK from the Kind string
 		obj, err := util.FromConfig(util.FromObjectConfig{

@@ -100,10 +100,6 @@ type BackOff struct {
 type AutoRemediation struct {
 	// +kubebuilder:default:=false
 	Enabled bool `json:"enabled"`
-	// Deprecated: textual similarity is retained for API compatibility only.
-	// Execution is authorized by the deterministic remediation policy.
-	// +kubebuilder:default="90"
-	SimilarityRequirement string `json:"similarityRequirement"`
 	// Resources is an exact allowlist of target resource selectors. Use Kind for
 	// legacy matching, group/Kind (for example apps/Deployment), or
 	// group/version/Kind (for example apps/v1/Deployment or v1/ConfigMap).
