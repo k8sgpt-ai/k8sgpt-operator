@@ -1,10 +1,14 @@
 package k8sgpt
 
 import (
+	"crypto/sha256"
+	"fmt"
+
 	"github.com/go-logr/logr"
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/conversions"
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/util"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -54,7 +58,7 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 	for _, eligibleResource := range eligibleResources {
 		mutation := corev1alpha1.Mutation{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      eligibleResource.ResultRef.Name,
+				Name:      mutationName(eligibleResource.ResultRef.Name, eligibleResource.ObjectRef),
 				Namespace: instance.K8sgptConfig.Namespace,
 				OwnerReferences: []metav1.OwnerReference{
 					*metav1.NewControllerRef(instance.K8sgptConfig, instance.K8sgptConfig.GetObjectKind().GroupVersionKind()),
@@ -75,7 +79,7 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 		}
 		mutation.Finalizers = append(mutation.Finalizers, mutationFinalizer)
 		// Check if the mutation exists, else create it
-		mutationKey := client.ObjectKey{Namespace: instance.K8sgptConfig.Namespace, Name: eligibleResource.ResultRef.Name}
+		mutationKey := client.ObjectKey{Namespace: instance.K8sgptConfig.Namespace, Name: mutation.Name}
 		var existingMutation corev1alpha1.Mutation
 		if err := instance.R.Get(instance.Ctx, mutationKey, &existingMutation); err != nil {
 			if client.IgnoreNotFound(err) != nil {
@@ -94,6 +98,22 @@ func (step *calculateRemediationStep) execute(instance *K8sGPTInstance) (ctrl.Re
 	}
 	step.logger.Info("ending calculateRemediationStep")
 	return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
+}
+
+func mutationName(resultName string, resourceRef corev1.ObjectReference) string {
+	// Result names may collide when one finding refers to several distinct
+	// resources. Resource UID is stable and avoids cross-resource reuse.
+	if resourceRef.UID == "" {
+		return resultName
+	}
+	digest := sha256.Sum256([]byte(resourceRef.APIVersion + "/" + resourceRef.Kind + "/" + resourceRef.Namespace + "/" + resourceRef.Name + "/" + string(resourceRef.UID)))
+	// Kubernetes object names are limited to 63 characters. Result names are
+	// normally already valid, but leave room for a stable target discriminator.
+	prefix := resultName
+	if len(prefix) > 54 {
+		prefix = prefix[:54]
+	}
+	return fmt.Sprintf("%s-%x", prefix, digest[:4])
 }
 
 func (step *calculateRemediationStep) setNext(next K8sGPT) {

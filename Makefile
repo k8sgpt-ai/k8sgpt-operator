@@ -69,6 +69,10 @@ vet: ## Run go vet against code.
 test: manifests generate fmt vet envtest ## Run tests.
 	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" go test ./... -coverprofile cover.out
 
+.PHONY: e2e-remediation
+e2e-remediation: manifests generate fmt vet ## Run the real Kind auto-remediation system test (requires Docker and Kind).
+	go test -tags=e2e ./test/e2e -run TestBrokenDeploymentIsRemediatedOnKind -v
+
 ##@ Build
 
 .PHONY: build
@@ -173,7 +177,7 @@ ENVTEST ?= $(LOCALBIN)/setup-envtest
 
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v3.8.7
-CONTROLLER_TOOLS_VERSION ?= v0.16.0
+CONTROLLER_TOOLS_VERSION ?= v0.21.0
 
 KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
 .PHONY: kustomize

@@ -1,7 +1,7 @@
 apiVersion: core.k8sgpt.ai/v1alpha1
 kind: K8sGPT
 metadata:
-  name: k8sgpt-auto-remediation-sample
+  name: k8sgpt-deepseek-auto-remediation
 spec:
   ai:
     autoRemediation:
@@ -11,13 +11,11 @@ spec:
         - Pod
         - Deployment
     enabled: true
-    model: gpt-4o-mini
-    backend: openai
+    # DeepSeek is routed through K8sGPT's OpenAI-compatible client.
+    backend: deepseek
+    model: deepseek-v4-flash
     secret:
-      name: k8sgpt-sample-secret
-      key: openai-api-key
-  remoteCache:
-    interplex:
-      endpoint: release-interplex-service.k8sgpt-operator-system.svc.cluster.local:8084
+      name: k8sgpt-deepseek-secret
+      key: api-key
   repository: ghcr.io/k8sgpt-ai/k8sgpt
   version: v0.4.1

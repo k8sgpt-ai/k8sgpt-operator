@@ -80,3 +80,24 @@ func Test_GetDeploymentWithExplicitVersion(t *testing.T) {
 	actualImage := deployment.Spec.Template.Spec.Containers[0].Image
 	assert.Equal(t, expectedImage, actualImage, "Expected image to use the specified version tag")
 }
+
+func Test_GetDeploymentWithDeepSeekUsesOpenAICompatibleConfiguration(t *testing.T) {
+	scheme := runtime.NewScheme()
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+	config := v1alpha1.K8sGPT{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-k8sgpt", Namespace: "test-namespace", UID: "test-uid"},
+		Spec: v1alpha1.K8sGPTSpec{
+			Repository: "ghcr.io/k8sgpt-ai/k8sgpt", Version: "v0.4.1",
+			AI: &v1alpha1.AISpec{Backend: v1alpha1.DeepSeek, Model: "deepseek-v4-flash"},
+		},
+	}
+
+	deployment, err := GetDeployment(config, false, fakeClient, "test-sa")
+	require.NoError(t, err)
+	env := map[string]string{}
+	for _, variable := range deployment.Spec.Template.Spec.Containers[0].Env {
+		env[variable.Name] = variable.Value
+	}
+	assert.Equal(t, v1alpha1.OpenAI, env["K8SGPT_BACKEND"])
+	assert.Equal(t, v1alpha1.DeepSeekBaseURL, env["K8SGPT_BASEURL"])
+}

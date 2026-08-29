@@ -40,8 +40,11 @@ type MutationSpec struct {
 type MutationStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	Phase   AutoRemediationPhase `json:"phase,omitempty"`
-	Message string               `json:"message,omitempty"`
+	Phase          AutoRemediationPhase `json:"phase,omitempty"`
+	Message        string               `json:"message,omitempty"`
+	PolicyDecision string               `json:"policyDecision,omitempty"`
+	ChangedPaths   []string             `json:"changedPaths,omitempty"`
+	AppliedAt      *metav1.Time         `json:"appliedAt,omitempty"`
 }
 
 // +kubebuilder:object:root=true

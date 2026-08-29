@@ -1,5 +1,46 @@
 # Changelog
 
+## [0.2.29](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.28...v0.2.29) (2026-08-13)
+
+
+### Features
+
+* add policy-gated auto remediation ([e6a378d](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e6a378d63fabfcaaa5d79c2efc72ca92a0fd4ccd))
+
+
+### Other
+
+* **deps:** update azure/setup-helm digest to 1a275c3 ([#743](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/743)) ([aea60c5](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/aea60c5fe03303da065934717ee33648861234e6))
+
+## [0.2.28](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.27...v0.2.28) (2026-08-13)
+
+
+### Features
+
+* add Azure API type and custom headers in k8sgpt-operator ([#811](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/811)) ([92cc206](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/92cc2065bbcf23595b2b66c5b57d219a2ccb7bc9))
+
+
+### Bug Fixes
+
+* **deps:** update module google.golang.org/grpc to v1.79.3 [security] ([#806](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/806)) ([56c5653](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/56c56531556b6c1b02d58a855fb0dd764ccde50a))
+* **deps:** update module google.golang.org/grpc to v1.82.1 [security] ([#827](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/827)) ([66610ac](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/66610ac3c31de0ecab4957d3a80d54c06dfa9b29))
+* enforce original deployment identity in auto-remediation to prevent cross-namespace mutation via prompt injection ([e125807](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e125807f9f4f36141eaae1151465b58359c68f17))
+* surface Analyze errors in K8sGPT status. Fixes [#606](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/606) ([#819](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/819)) ([5ae9bfb](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/5ae9bfbb8f8387332b85eaad3893b4a0a31e3f86))
+
+
+### Other
+
+* **deps:** bump google.golang.org/grpc from 1.74.2 to 1.79.3 ([#805](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/805)) ([b85f719](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/b85f7194c555e9868afbe651ab929befd625377f))
+* **deps:** pin dependencies ([#808](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/808)) ([3012331](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/3012331b702909ab76a63857f55a02a7c669c78d))
+* **deps:** update docker/setup-buildx-action digest to 8d2750c ([#788](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/788)) ([ff7d6e8](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/ff7d6e8e7a79462fa4d532db00336a0deb1c99bd))
+* **deps:** update googleapis/release-please-action digest to 5c625bf ([#812](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/812)) ([19ec482](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/19ec482bc53b99c099c2cebe8b8ca347f54f2752))
+* migrate to Go 1.26 and controller-gen v0.21.0 ([#822](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/822)) ([645310e](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/645310e67a0540f76c2a1dd810e918d8bab24aad))
+
+
+### Docs
+
+* update k8sgpt version to v0.4.32 in README examples ([47b9b88](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/47b9b88db3d2775a1e970ce63caabb441fa62e0a))
+
 ## [0.2.27](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.26...v0.2.27) (2026-03-28)
 
 

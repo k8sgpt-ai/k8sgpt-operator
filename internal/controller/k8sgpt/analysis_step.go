@@ -15,6 +15,7 @@ limitations under the License.
 package k8sgpt
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -22,6 +23,8 @@ import (
 	"github.com/go-logr/logr"
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -55,9 +58,11 @@ func (step *AnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, error)
 			step.incK8sgptNumberOfFailedBackendAICalls(instance)
 			step.handleAIFailureBackoff(instance)
 		}
+		step.recordAnalysisError(instance, err)
 		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
 	step.logger.Info("AnalysisStep response", "count", len(response.Results))
+	step.clearAnalysisError(instance)
 
 	// reset analysisRetryCount
 	analysisRetryCount = 0
@@ -92,6 +97,41 @@ func (step *AnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, error)
 
 func (step *AnalysisStep) setNext(next K8sGPT) {
 	step.next = next
+}
+
+func (step *AnalysisStep) recordAnalysisError(instance *K8sGPTInstance, err error) {
+	if instance.R.Recorder != nil {
+		instance.R.Recorder.Event(instance.K8sgptConfig, corev1.EventTypeWarning, "AnalysisFailed", err.Error())
+	}
+	if statusErr := setAnalysisErrorStatus(instance.Ctx, instance.R.Client, instance.K8sgptConfig, err); statusErr != nil {
+		instance.logger.Error(statusErr, "failed to update K8sGPT analysis error status")
+	}
+}
+
+func (step *AnalysisStep) clearAnalysisError(instance *K8sGPTInstance) {
+	if instance.K8sgptConfig.Status.LastAnalysisError == "" && instance.K8sgptConfig.Status.LastAnalysisErrorTime == nil {
+		return
+	}
+	if statusErr := clearAnalysisErrorStatus(instance.Ctx, instance.R.Client, instance.K8sgptConfig); statusErr != nil {
+		instance.logger.Error(statusErr, "failed to clear K8sGPT analysis error status")
+	}
+}
+
+func setAnalysisErrorStatus(ctx context.Context, c client.Client, k8sgpt *corev1alpha1.K8sGPT, analysisErr error) error {
+	if k8sgpt.Status.LastAnalysisError == analysisErr.Error() {
+		return nil
+	}
+
+	now := metav1.Now()
+	k8sgpt.Status.LastAnalysisError = analysisErr.Error()
+	k8sgpt.Status.LastAnalysisErrorTime = &now
+	return c.Status().Update(ctx, k8sgpt)
+}
+
+func clearAnalysisErrorStatus(ctx context.Context, c client.Client, k8sgpt *corev1alpha1.K8sGPT) error {
+	k8sgpt.Status.LastAnalysisError = ""
+	k8sgpt.Status.LastAnalysisErrorTime = nil
+	return c.Status().Update(ctx, k8sgpt)
 }
 
 func (step *AnalysisStep) handleAIFailureBackoff(instance *K8sGPTInstance) {
