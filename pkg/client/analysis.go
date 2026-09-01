@@ -24,6 +24,9 @@ func (c *Client) ProcessAnalysis(deployment v1.Deployment, config *v1alpha1.K8sG
 		Anonymize: *config.Spec.AI.Anonymize,
 		Language:  config.Spec.AI.Language,
 	}
+	if config.Spec.AI.MaxConcurrency != nil {
+		req.MaxConcurrency = *config.Spec.AI.MaxConcurrency
+	}
 
 	res, err := client.Analyze(context.Background(), req)
 	if err != nil {
