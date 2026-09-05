@@ -56,7 +56,7 @@ jobs:
             --contract .iac-guard-v/contracts.yaml \
             --project-root . \
             --contract-root "${RUNNER_TEMP}/render-first" \
-            --contract-provenance SUGGESTED_CONTRACT \
+            --contract-provenance PROJECT_AUTHORED \
             --source-commit "${GITHUB_SHA}" \
             --default-namespace default \
             --format console
@@ -66,7 +66,7 @@ jobs:
             --contract .iac-guard-v/contracts.yaml \
             --project-root . \
             --contract-root "${RUNNER_TEMP}/render-first" \
-            --contract-provenance SUGGESTED_CONTRACT \
+            --contract-provenance PROJECT_AUTHORED \
             --source-commit "${GITHUB_SHA}" \
             --default-namespace default \
             --format json \
