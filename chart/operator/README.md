@@ -9,6 +9,27 @@ Automatic SRE Superpowers within your Kubernetes cluster
 
 The following table lists the configurable parameters of the K8sgpt-operator chart and their default values.
 
+## Metrics Configuration
+
+### kube-rbac-proxy
+
+By default, the operator deploys a `kube-rbac-proxy` sidecar container to protect the metrics endpoint with Kubernetes RBAC authorization and HTTPS encryption.
+
+#### Disabling kube-rbac-proxy
+
+You can disable the proxy to expose metrics directly via HTTP:
+
+```yaml
+controllerManager:
+  kubeRbacProxy:
+    enabled: false
+```
+
+When disabled, the manager exposes /metrics directly over HTTP on port
+8080 without Kubernetes RBAC authorization. Ensure access is protected by
+appropriate network policies, service mesh policies, or other infrastructure
+controls.
+
 <!---x-release-please-start-version-->
 | Parameter                | Description             | Default                                                                       |
 | ------------------------ | ----------------------- |-------------------------------------------------------------------------------|
@@ -19,6 +40,7 @@ The following table lists the configurable parameters of the K8sgpt-operator cha
 | `grafanaDashboard.folder.name` |  | `"ai"`                                                                        |
 | `grafanaDashboard.label.key` |  | `"grafana_dashboard"`                                                         |
 | `grafanaDashboard.label.value` |  | `"1"`                                                                         |
+| `controllerManager.kubeRbacProxy.enabled` | Enable kube-rbac-proxy for RBAC-protected HTTPS metrics | `true` |
 | `controllerManager.kubeRbacProxy.containerSecurityContext.allowPrivilegeEscalation` |  | `false`                                                                       |
 | `controllerManager.kubeRbacProxy.containerSecurityContext.capabilities.drop` |  | `["ALL"]`                                                                     |
 | `controllerManager.kubeRbacProxy.image.repository` |  | `"gcr.io/kubebuilder/kube-rbac-proxy"`                                        |

@@ -59,6 +59,7 @@ spec:
                 values:
                 - linux
       containers:
+      {{- if .Values.controllerManager.kubeRbacProxy.enabled }}
       - args:
         - --secure-listen-address=0.0.0.0:8443
         - --upstream=http://127.0.0.1:8080/
@@ -78,9 +79,14 @@ spec:
           10 }}
         securityContext: {{- toYaml .Values.controllerManager.kubeRbacProxy.containerSecurityContext
           | nindent 10 }}
+      {{- end }}
       - args:
         - --health-probe-bind-address=:8081
+      {{- if .Values.controllerManager.kubeRbacProxy.enabled }}
         - --metrics-bind-address=127.0.0.1:8080
+      {{- else }}
+        - --metrics-bind-address=:8080
+      {{- end }}
         - --leader-elect
       {{- if .Values.controllerManager.manager.enableResultLogging }}
         - --enable-result-logging
@@ -113,6 +119,12 @@ spec:
           }}
         securityContext: {{- toYaml .Values.controllerManager.manager.containerSecurityContext
           | nindent 10 }}
+      {{- if not .Values.controllerManager.kubeRbacProxy.enabled }}
+        ports:
+        - containerPort: 8080
+          name: metrics
+          protocol: TCP
+      {{- end }}
       {{- if .Values.controllerManager.podSecurityContext }}
       securityContext:
       {{- toYaml .Values.controllerManager.podSecurityContext | nindent 8 }}
