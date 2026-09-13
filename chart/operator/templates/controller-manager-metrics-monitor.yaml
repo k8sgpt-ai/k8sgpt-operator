@@ -20,12 +20,18 @@ spec:
     - {{ include "k8sgpt-operator.namespace" . }}
   {{- end }}
   endpoints:
+  {{- if .Values.controllerManager.kubeRbacProxy.enabled }}
   - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
     path: /metrics
     port: https
     scheme: https
     tlsConfig:
       insecureSkipVerify: true
+  {{- else }}
+  - path: /metrics
+    port: http
+    scheme: http
+  {{- end }}
   selector:
     matchLabels:
       control-plane: controller-manager
