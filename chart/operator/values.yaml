@@ -34,6 +34,9 @@ controllerManager:
   # Additional annotations to add to the controller manager deployment
   annotations: {}
   kubeRbacProxy:
+    ## When enabled (default), deploys kube-rbac-proxy sidecar for HTTPS and RBAC-protected metrics.
+    ## Set to false to expose metrics directly via HTTP without RBAC enforcement.
+    enabled: true
     containerSecurityContext:
       allowPrivilegeEscalation: false
       capabilities:
