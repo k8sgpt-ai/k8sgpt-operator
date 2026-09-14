@@ -1,0 +1,24 @@
+apiVersion: iac-guard-v.io/v1alpha1
+kind: InfrastructureContract
+metadata:
+  name: k8sgpt-operator-metrics-scrape-path
+spec:
+  artifactClass: kubernetes_rendered
+  subjects:
+    include:
+      identities:
+        - monitoring.coreos.com/v1/ServiceMonitor/k8sgpt-operator-system/k8sgpt-operator-controller-manager-metrics-monitor
+    cardinality: {min: 1, max: 1}
+  responsibility:
+    class: PROJECT_MANAGED
+    reason: The generated ServiceMonitor endpoint must select the project metrics Service and resolve its https port through to the controller workload.
+  expect:
+    - id: metrics-endpoint-resolves
+      property:
+        namespace: iac_guard_v
+        id: IACGV_PROM_SERVICEMONITOR_RESOLVES_SERVICE_PORT_V1
+        version: "1"
+      parameters:
+        endpoint_index: 0
+        expected_service: v1/Service/k8sgpt-operator-system/k8sgpt-operator-controller-manager-metrics-service
+      relationCardinality: {targetMin: 1, targetMax: 1}
