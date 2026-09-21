@@ -1,14 +1,14 @@
 /*
-Copyright 2023 The K8sGPT Authors.
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-    http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+	Copyright 2023 The K8sGPT Authors.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+		http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
 */
 
 package k8sgpt
@@ -220,6 +220,89 @@ var _ = Describe("K8sGPT controller", func() {
 					return nil
 				}).Should(BeNil())
 			})
+		})
+	})
+
+	Describe("Secret rotation triggers deployment rollout", Label("integration"), func() {
+		It("updates the Deployment checksum when the referenced Secret changes", func() {
+			secretName := "rotation-test-secret"
+			k8sgptName := "secret-rotation-test"
+
+			// Create Secret with initial data
+			secret := createFakeSecret(secretName, "default")
+			Expect(k8sClient.Create(ctx, secret)).Should(Succeed())
+
+			// Create K8sGPT CR referencing the Secret.
+			// Set a long analysis interval so the periodic reconcile cannot fire within
+			// the test window — the checksum update must be driven by the Secret watch.
+			k8sgpt := corev1alpha1.GetValidProjectResource(k8sgptName, "default")
+			k8sgpt.Spec.AI.Secret.Name = secretName
+			k8sgpt.Spec.Analysis = &corev1alpha1.AnalysisConfig{Interval: "5m"}
+			Expect(k8sClient.Create(ctx, &k8sgpt)).Should(Succeed())
+
+			nn := types.NamespacedName{
+				Namespace: "default",
+				Name:      k8sgptName,
+			}
+
+			var checksumBefore string
+
+			// Wait for Deployment to be created with initial checksum
+			Eventually(func() error {
+				deployment := v1.Deployment{}
+				if err := k8sClient.Get(ctx, nn, &deployment); err != nil {
+					return err
+				}
+
+				checksum, exists := deployment.Spec.Template.Annotations["core.k8sgpt.ai/ai-secret-checksum"]
+				if !exists {
+					return errors.New("checksum annotation not found")
+				}
+
+				if len(checksum) != 64 {
+					return fmt.Errorf("checksum should be 64 characters, got %d", len(checksum))
+				}
+
+				checksumBefore = checksum
+				return nil
+			}).Should(BeNil())
+
+			// Rotate the Secret data
+			secretNN := types.NamespacedName{
+				Namespace: "default",
+				Name:      secretName,
+			}
+
+			Eventually(func() error {
+				updatedSecret := &corev1.Secret{}
+				if err := k8sClient.Get(ctx, secretNN, updatedSecret); err != nil {
+					return err
+				}
+
+				updatedSecret.Data["openai-api-key"] = []byte("rotated-key-value")
+				return k8sClient.Update(ctx, updatedSecret)
+			}).Should(BeNil())
+
+			// Verify checksum changes after Secret rotation.
+			// 10-second window: the 5m periodic reconcile cannot fire here, so only
+			// the Secret watch event can drive this update.
+			Eventually(func() error {
+				deployment := v1.Deployment{}
+				if err := k8sClient.Get(ctx, nn, &deployment); err != nil {
+					return err
+				}
+
+				checksumAfter, exists := deployment.Spec.Template.Annotations["core.k8sgpt.ai/ai-secret-checksum"]
+				if !exists {
+					return errors.New("checksum annotation not found after rotation")
+				}
+
+				if checksumAfter == checksumBefore {
+					return fmt.Errorf("checksum unchanged: expected different checksum after Secret rotation")
+				}
+
+				return nil
+			}, 10*time.Second, 500*time.Millisecond).Should(BeNil())
 		})
 	})
 })
