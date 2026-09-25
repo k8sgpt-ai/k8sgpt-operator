@@ -98,6 +98,11 @@ spec:
 EOF
 ```
 
+> [!NOTE]
+> When data in the AI Secret referenced by `spec.ai.secret` changes, the operator automatically rolls the K8sGPT Deployment so the updated credentials are picked up. A manual restart is not required.
+>
+> The rollout is triggered by changes to any data key in the referenced Secret, not only the key specified by `spec.ai.secret.key`. Changes to Secret labels or annotations do not trigger a rollout.
+
 4. Once the custom resource has been applied the K8sGPT-deployment will be installed and
    you will be able to see the Results objects of the analysis after some minutes (if there are any issues in your cluster):
 

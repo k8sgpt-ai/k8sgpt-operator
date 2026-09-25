@@ -16,6 +16,9 @@ package resources
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	err "errors"
 	"fmt"
 	"os"
@@ -46,8 +49,9 @@ const (
 )
 
 const (
-	dynamicRBACEnvVar         = "K8SGPT_ENABLE_DYNAMIC_RBAC"
-	defaultServiceAccountName = "k8sgpt"
+	dynamicRBACEnvVar          = "K8SGPT_ENABLE_DYNAMIC_RBAC"
+	defaultServiceAccountName  = "k8sgpt"
+	aiSecretChecksumAnnotation = "core.k8sgpt.ai/ai-secret-checksum"
 )
 
 // dynamicRBACEnabled returns true when dynamic RBAC resources should be
@@ -64,6 +68,25 @@ func dynamicRBACEnabled() bool {
 		return true
 	}
 	return enabled
+}
+
+// calculateSecretChecksum computes a deterministic SHA-256 checksum of all data
+// in a Secret. This is used to trigger Deployment rollouts when Secret data changes.
+// Uses JSON encoding for deterministic serialization.
+// Returns empty string if the Secret is nil or has no data.
+func calculateSecretChecksum(secret *corev1.Secret) (string, error) {
+	if secret == nil || len(secret.Data) == 0 {
+		return "", nil
+	}
+
+	// json.Marshal provides deterministic encoding with sorted keys
+	data, err := json.Marshal(secret.Data)
+	if err != nil {
+		return "", err
+	}
+
+	checksum := sha256.Sum256(data)
+	return hex.EncodeToString(checksum[:]), nil
 }
 
 func addSecretAsEnvToDeployment(secretName string, secretKey string,
@@ -307,6 +330,27 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 	if config.Spec.PodAnnotations != nil {
 		for k, v := range config.Spec.PodAnnotations {
 			podAnnotations[k] = v
+		}
+	}
+
+	// Add AI Secret checksum annotation to trigger rolling update on Secret changes
+	// This annotation is operator-controlled and overwrites any user-provided value
+	if config.Spec.AI.Secret != nil && config.Spec.AI.Secret.Name != "" {
+		secret := &corev1.Secret{}
+		if err := c.Get(context.Background(), types.NamespacedName{
+			Name:      config.Spec.AI.Secret.Name,
+			Namespace: config.Namespace,
+		}, secret); err != nil {
+			return nil, fmt.Errorf("failed to get AI Secret %s/%s: %w", config.Namespace, config.Spec.AI.Secret.Name, err)
+		}
+
+		checksum, err := calculateSecretChecksum(secret)
+		if err != nil {
+			return nil, fmt.Errorf("failed to calculate Secret checksum: %w", err)
+		}
+
+		if checksum != "" {
+			podAnnotations[aiSecretChecksumAnnotation] = checksum
 		}
 	}
 
@@ -700,12 +744,24 @@ func Sync(ctx context.Context, c client.Client,
 
 	objs = append(objs, svc)
 
-	deployment, er := GetDeployment(config, outOfClusterMode, c, serviceAccountName)
-	if er != nil {
-		return er
+	// Build the Deployment before entering the sync/destroy loop so that any
+	// Secret validation happens before any resource is mutated (SyncOp) or so
+	// that a minimal stub is ready for deletion (DestroyOp).
+	if i == SyncOp {
+		deployment, er := GetDeployment(config, outOfClusterMode, c, serviceAccountName)
+		if er != nil {
+			return er
+		}
+		objs = append(objs, deployment)
+	} else {
+		// Only Name and Namespace are required for c.Delete().
+		objs = append(objs, &appsv1.Deployment{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      config.Name,
+				Namespace: config.Namespace,
+			},
+		})
 	}
-
-	objs = append(objs, deployment)
 
 	if useDynamicRBAC {
 		clusterRole, er := GetClusterRole(config, serviceAccountName)
@@ -726,18 +782,6 @@ func Sync(ctx context.Context, c client.Client,
 	for _, obj := range objs {
 		switch i {
 		case SyncOp:
-
-			// before creation, we will check to see if the secret exists if used as a ref
-			if config.Spec.AI.Secret != nil {
-
-				secret := &corev1.Secret{}
-				er := c.Get(ctx, types.NamespacedName{Name: config.Spec.AI.Secret.Name,
-					Namespace: config.Namespace}, secret)
-				if er != nil {
-					return er
-				}
-			}
-
 			err := doSync(ctx, c, obj)
 			if err != nil {
 				// If the object already exists, ignore the error
