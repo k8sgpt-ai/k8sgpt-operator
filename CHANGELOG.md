@@ -1,5 +1,47 @@
 # Changelog
 
+## [0.2.30](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.29...v0.2.30) (2026-09-26)
+
+
+### Features
+
+* add controllerManager.kubeRbacProxy.enabled flag to disable proxy sidecar ([#849](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/849)) ([2c769b4](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/2c769b48b9a4218765859a3b6acf22e4de928f67))
+
+
+### Bug Fixes
+
+* **deps:** update k8s.io/utils digest to cf1189d ([#828](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/828)) ([00ff9c7](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/00ff9c75a8a5c78e4b9b8c311351b850ed60ad6f))
+* **deps:** update module google.golang.org/grpc to v1.83.1 [security] ([#843](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/843)) ([4338ffb](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/4338ffbb1fd8f1b1fe2cac00fe667baf77353381))
+* keep remediation diagram labels within cards ([b6d52ee](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/b6d52eef0bc2e5a4406d277462f1896d3845d842))
+* roll deployment on AI secret rotation ([#853](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/853)) ([52cda12](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/52cda125d00339863a798c76d369cf05ed992a2e))
+
+
+### Other
+
+* **deps:** bump github.com/moby/spdystream from 0.5.0 to 0.5.1 ([#810](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/810)) ([e2fbcba](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e2fbcba0e02bfbcba9a72a3154a4df3c9b5bf290))
+* **deps:** bump google.golang.org/grpc from 1.83.1 to 1.83.2 ([#847](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/847)) ([8a8a5f5](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8a8a5f5b97594f9bfb05a4fd26d9f0263cbf301a))
+* **deps:** update actions/checkout action to v7 ([#825](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/825)) ([e32f0eb](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/e32f0ebbc4c525cd6f295f99d4fc7d279636c505))
+* **deps:** update actions/setup-go action to v7 ([#830](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/830)) ([ddbc292](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/ddbc2929c14f6fcca99008a64ffa7d92b1e9d24e))
+* **deps:** update actions/setup-python action to v7 ([#833](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/833)) ([97b3def](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/97b3def6937779e566a86effa7b1f4c55bbc8699))
+* **deps:** update actions/upload-artifact action to v7 ([#800](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/800)) ([952201c](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/952201cbe0c4c6664e9dbd976d26e0469e003835))
+* **deps:** update azure/setup-helm action to v5 ([#834](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/834)) ([931f8ea](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/931f8eaac5034a9ceae58c031e3f48a8674716e2))
+* **deps:** update dependency helm to v4 ([#835](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/835)) ([d27dd21](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/d27dd21b1dc4d566b18c120f879e2afa2f0e41a4))
+* **deps:** update docker/build-push-action action to v7 ([#837](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/837)) ([8f61533](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8f615336f8aac7ddbf9e02fcc0b15a55c95b5c9d))
+* **deps:** update docker/build-push-action digest to c3c9e26 ([#850](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/850)) ([8714798](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/8714798e26411f0d7a6b55b67716ade2dbde930a))
+* **deps:** update docker/login-action action to v4 ([#838](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/838)) ([48b3212](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/48b321224be677fcb4127c73f64d76376f36ed3e))
+* **deps:** update docker/login-action digest to c94ce9f ([#756](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/756)) ([3aa6e62](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/3aa6e628df565af0e67890a9272b6965a031cac0))
+* **deps:** update docker/setup-buildx-action action to v4 ([#839](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/839)) ([1e06622](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/1e066225a7da0d9eaf9601bf172cab755377dc2a))
+* **deps:** update docker/setup-buildx-action digest to f87e599 ([#851](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/851)) ([ead1c37](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/ead1c377541bd4c753cd3c6ad04d51d969896aee))
+* **deps:** update googleapis/release-please-action action to v5 ([#840](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/840)) ([46ecdab](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/46ecdab2b9b2f497e30bcd4a6e860a8c142a8c19))
+* **deps:** update softprops/action-gh-release action to v3 ([#841](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/841)) ([44dc081](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/44dc081abf89aab69a533726e701f1dc39512894))
+* **deps:** update softprops/action-gh-release digest to a06a81a ([#764](https://github.com/k8sgpt-ai/k8sgpt-operator/issues/764)) ([bb25105](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/bb25105b6923b0e51a147df9d7aecf46d596ac48))
+
+
+### Docs
+
+* add auto remediation explainer ([09f4da1](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/09f4da1b62421db05a2db599fd5b54dda242032c))
+* make remediation launch provider agnostic ([abe9a17](https://github.com/k8sgpt-ai/k8sgpt-operator/commit/abe9a17f30fbd3f9cbdb729433490e662b75b412))
+
 ## [0.2.29](https://github.com/k8sgpt-ai/k8sgpt-operator/compare/v0.2.28...v0.2.29) (2026-08-13)
 
 
