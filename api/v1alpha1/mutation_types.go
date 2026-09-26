@@ -28,7 +28,6 @@ import (
 type MutationSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	SimilarityScore     string                 `json:"similarityScore,omitempty"`
 	ResourceGVK         string                 `json:"resourceGVK,omitempty"`
 	ResourceRef         corev1.ObjectReference `json:"resource,omitempty"`
 	ResultRef           corev1.ObjectReference `json:"result,omitempty"`
@@ -49,9 +48,8 @@ type MutationStatus struct {
 
 // +kubebuilder:object:root=true
 
-// Display in wide format the autoremediationphase status and similarity score
+// Display the autoremediation phase in wide format.
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.message",description="Updates of the autoremediation phase"
-// +kubebuilder:printcolumn:name="Similarity Score",type="string",JSONPath=".spec.similarityScore",description="The similarity score of the autoremediation"
 // Mutation is the Schema for the mutations API.
 type Mutation struct {
 	metav1.TypeMeta   `json:",inline"`

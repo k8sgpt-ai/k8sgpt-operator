@@ -50,7 +50,6 @@ spec:
   ai:
     autoRemediation:
       enabled: true
-      similarityRequirement: "90"
       resources:
         - Pod
         - Deployment
