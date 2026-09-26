@@ -3,7 +3,11 @@ kind: Service
 metadata:
   name: {{ include "chart.fullname" . | trunc 20}}-controller-manager-metrics-service
   labels:
+    {{- if .Values.controllerManager.kubeRbacProxy.enabled }}
     app.kubernetes.io/component: kube-rbac-proxy
+    {{- else }}
+    app.kubernetes.io/component: metrics
+    {{- end }}
     app.kubernetes.io/created-by: k8sgpt-operator
     app.kubernetes.io/part-of: k8sgpt-operator
     control-plane: controller-manager
@@ -14,4 +18,11 @@ spec:
     control-plane: controller-manager
   {{- include "chart.selectorLabels" . | nindent 4 }}
   ports:
-	{{- .Values.metricsService.ports | toYaml | nindent 2 -}}
+  {{- if .Values.controllerManager.kubeRbacProxy.enabled }}
+  {{- .Values.metricsService.ports | toYaml | nindent 2 }}
+  {{- else }}
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: metrics
+  {{- end }}
