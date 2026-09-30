@@ -37,7 +37,7 @@ jobs:
             --disable-pip-version-check \
             --no-compile \
             --only-binary=:all: \
-            iac-guard-v==0.1.0b1
+            iac-guard-v==1.0.0
 
       - name: Render the generated manifests deterministically
         run: |
