@@ -25,12 +25,15 @@ import (
 
 	metricspkg "github.com/k8sgpt-ai/k8sgpt-operator/pkg/metrics"
 	v1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	kclient "github.com/k8sgpt-ai/k8sgpt-operator/pkg/client"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations"
@@ -40,6 +43,8 @@ import (
 const (
 	ReconcileErrorInterval   = 10 * time.Second
 	ReconcileSuccessInterval = 30 * time.Second
+	// aiSecretIndexField is the field index name for spec.ai.secret.name
+	aiSecretIndexField = ".spec.ai.secret.name"
 )
 
 var (
@@ -143,12 +148,59 @@ func (r *K8sGPTReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		k8sgptNumberOfFailedBackendAICalls,
 	)
 
+	// Set up field index for spec.ai.secret.name to efficiently map Secrets to K8sGPT resources
+	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &corev1alpha1.K8sGPT{}, aiSecretIndexField, func(rawObj client.Object) []string {
+		k8sgpt := rawObj.(*corev1alpha1.K8sGPT)
+		if k8sgpt.Spec.AI == nil || k8sgpt.Spec.AI.Secret == nil || k8sgpt.Spec.AI.Secret.Name == "" {
+			return nil
+		}
+		return []string{k8sgpt.Spec.AI.Secret.Name}
+	}); err != nil {
+		return err
+	}
+
 	// Setup the controller
 	c := ctrl.NewControllerManagedBy(mgr).
 		For(&corev1alpha1.K8sGPT{}).
+		Watches(
+			&corev1.Secret{},
+			handler.EnqueueRequestsFromMapFunc(r.findK8sGPTsForSecret),
+		).
 		Complete(r)
 
 	return c
+}
+
+// findK8sGPTsForSecret maps a Secret to the K8sGPT resources that reference it.
+// This enables the controller to reconcile K8sGPT resources when their AI Secret changes.
+func (r *K8sGPTReconciler) findK8sGPTsForSecret(ctx context.Context, obj client.Object) []reconcile.Request {
+	secret := obj.(*corev1.Secret)
+
+	// Find all K8sGPT resources that reference this Secret
+	var k8sgptList corev1alpha1.K8sGPTList
+	if err := r.List(ctx, &k8sgptList,
+		client.InNamespace(secret.Namespace),
+		client.MatchingFields{aiSecretIndexField: secret.Name},
+	); err != nil {
+		k8sgptControllerLog.Error(err, "failed to list K8sGPT resources for Secret",
+			"secret", secret.Name, "namespace", secret.Namespace)
+		return nil
+	}
+
+	// Create reconcile requests for each K8sGPT resource
+	requests := make([]reconcile.Request, len(k8sgptList.Items))
+	for i, k8sgpt := range k8sgptList.Items {
+		requests[i] = reconcile.Request{
+			NamespacedName: client.ObjectKey{
+				Name:      k8sgpt.Name,
+				Namespace: k8sgpt.Namespace,
+			},
+		}
+		k8sgptControllerLog.Info("enqueuing K8sGPT reconciliation due to Secret change",
+			"k8sgpt", k8sgpt.Name, "secret", secret.Name, "namespace", secret.Namespace)
+	}
+
+	return requests
 }
 
 func (r *K8sGPTReconciler) FinishReconcile(err error, requeueImmediate bool, name string, k8sgpt *corev1alpha1.K8sGPT) (ctrl.Result, error) {

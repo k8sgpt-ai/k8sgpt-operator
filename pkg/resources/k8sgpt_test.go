@@ -593,3 +593,386 @@ func Test_GetDeploymentWithAzureAPITypeAndCustomHeaders(t *testing.T) {
 		})
 	}
 }
+
+func TestCalculateSecretChecksum_Deterministic(t *testing.T) {
+	// Test that the same secret data always produces the same checksum
+	// regardless of map iteration order
+	secret1 := &v1.Secret{
+		Data: map[string][]byte{
+			"password": []byte("my-secret-key"),
+			"username": []byte("admin"),
+			"token":    []byte("abc123"),
+		},
+	}
+
+	secret2 := &v1.Secret{
+		Data: map[string][]byte{
+			"token":    []byte("abc123"),
+			"username": []byte("admin"),
+			"password": []byte("my-secret-key"),
+		},
+	}
+
+	checksum1, err := calculateSecretChecksum(secret1)
+	require.NoError(t, err)
+
+	checksum2, err := calculateSecretChecksum(secret2)
+	require.NoError(t, err)
+
+	assert.Equal(t, checksum1, checksum2, "checksums should be identical regardless of map iteration order")
+	assert.Len(t, checksum1, 64, "SHA-256 hex digest should be 64 characters")
+}
+
+func TestCalculateSecretChecksum_DifferentData(t *testing.T) {
+	// Test that different secret data produces different checksums
+	secret1 := &v1.Secret{
+		Data: map[string][]byte{
+			"password": []byte("old-password"),
+		},
+	}
+
+	secret2 := &v1.Secret{
+		Data: map[string][]byte{
+			"password": []byte("new-password"),
+		},
+	}
+
+	checksum1, err := calculateSecretChecksum(secret1)
+	require.NoError(t, err)
+
+	checksum2, err := calculateSecretChecksum(secret2)
+	require.NoError(t, err)
+
+	assert.NotEqual(t, checksum1, checksum2, "checksums should differ when secret data changes")
+}
+
+func TestCalculateSecretChecksum_MetadataDoesNotMatter(t *testing.T) {
+	// Test that metadata changes don't affect the checksum
+	// This documents WHY we use checksum instead of resourceVersion
+	secret1 := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels:          map[string]string{"team": "platform"},
+			Annotations:     map[string]string{"owner": "alice"},
+			ResourceVersion: "12345",
+		},
+		Data: map[string][]byte{
+			"password": []byte("same-secret"),
+		},
+	}
+
+	secret2 := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels:          map[string]string{"team": "sre"},
+			Annotations:     map[string]string{"owner": "bob"},
+			ResourceVersion: "67890",
+		},
+		Data: map[string][]byte{
+			"password": []byte("same-secret"),
+		},
+	}
+
+	checksum1, err := calculateSecretChecksum(secret1)
+	require.NoError(t, err)
+
+	checksum2, err := calculateSecretChecksum(secret2)
+	require.NoError(t, err)
+
+	assert.Equal(t, checksum1, checksum2, "checksums should be identical when only metadata differs")
+}
+
+func TestCalculateSecretChecksum_EmptyAndNil(t *testing.T) {
+	tests := []struct {
+		name   string
+		secret *v1.Secret
+	}{
+		{
+			name:   "nil secret",
+			secret: nil,
+		},
+		{
+			name: "empty secret data",
+			secret: &v1.Secret{
+				Data: map[string][]byte{},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			checksum, err := calculateSecretChecksum(tt.secret)
+			require.NoError(t, err)
+			assert.Empty(t, checksum, "checksum should be empty for nil/empty secret")
+		})
+	}
+}
+
+func TestCalculateSecretChecksum_CollisionResistance(t *testing.T) {
+	// This test guards against delimiter-collision bugs.
+	// Under a naive key:value\n serialization, these two secrets produce identical
+	// bytes ("a:x\nb:y\n"), so their hashes would collide.
+	// The JSON-based implementation must produce distinct checksums.
+	secret1 := &v1.Secret{
+		Data: map[string][]byte{
+			"a": []byte("x\nb:y"),
+		},
+	}
+
+	secret2 := &v1.Secret{
+		Data: map[string][]byte{
+			"a": []byte("x"),
+			"b": []byte("y"),
+		},
+	}
+
+	checksum1, err := calculateSecretChecksum(secret1)
+	require.NoError(t, err)
+
+	checksum2, err := calculateSecretChecksum(secret2)
+	require.NoError(t, err)
+
+	assert.NotEqual(t, checksum1, checksum2,
+		"distinct secret data must not produce the same checksum (delimiter-collision guard)")
+}
+
+func TestGetDeployment_WithSecretChecksum(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, v1.AddToScheme(scheme))
+	require.NoError(t, v1alpha1.AddToScheme(scheme))
+
+	secret := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-secret",
+			Namespace: "default",
+		},
+		Data: map[string][]byte{
+			"password": []byte("my-api-key"),
+		},
+	}
+
+	fakeClient := fake.NewClientBuilder().
+		WithScheme(scheme).
+		WithObjects(secret).
+		Build()
+
+	config := v1alpha1.K8sGPT{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-k8sgpt",
+			Namespace: "default",
+		},
+		Spec: v1alpha1.K8sGPTSpec{
+			AI: &v1alpha1.AISpec{
+				Secret: &v1alpha1.SecretRef{
+					Name: "test-secret",
+					Key:  "password",
+				},
+			},
+			Repository: "ghcr.io/k8sgpt-ai/k8sgpt",
+			Version:    "v0.3.8",
+		},
+	}
+
+	deployment, err := GetDeployment(config, false, fakeClient, "default")
+	require.NoError(t, err)
+
+	// Verify checksum annotation exists
+	checksum, exists := deployment.Spec.Template.Annotations[aiSecretChecksumAnnotation]
+	assert.True(t, exists, "checksum annotation should exist")
+	assert.NotEmpty(t, checksum, "checksum should not be empty")
+	assert.Len(t, checksum, 64, "SHA-256 hex digest should be 64 characters")
+}
+
+func TestGetDeployment_SecretNotFound(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, v1.AddToScheme(scheme))
+	require.NoError(t, v1alpha1.AddToScheme(scheme))
+
+	fakeClient := fake.NewClientBuilder().
+		WithScheme(scheme).
+		Build()
+
+	config := v1alpha1.K8sGPT{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-k8sgpt",
+			Namespace: "default",
+		},
+		Spec: v1alpha1.K8sGPTSpec{
+			AI: &v1alpha1.AISpec{
+				Secret: &v1alpha1.SecretRef{
+					Name: "nonexistent-secret",
+					Key:  "password",
+				},
+			},
+			Repository: "ghcr.io/k8sgpt-ai/k8sgpt",
+			Version:    "v0.3.8",
+		},
+	}
+
+	// GetDeployment should fail when Secret doesn't exist
+	_, err := GetDeployment(config, false, fakeClient, "default")
+	assert.Error(t, err, "GetDeployment should fail when referenced Secret doesn't exist")
+	assert.Contains(t, err.Error(), "failed to get AI Secret")
+}
+
+func TestGetDeployment_WithoutSecret(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, v1.AddToScheme(scheme))
+	require.NoError(t, v1alpha1.AddToScheme(scheme))
+
+	fakeClient := fake.NewClientBuilder().
+		WithScheme(scheme).
+		Build()
+
+	config := v1alpha1.K8sGPT{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-k8sgpt",
+			Namespace: "default",
+		},
+		Spec: v1alpha1.K8sGPTSpec{
+			AI: &v1alpha1.AISpec{
+				// No secret reference - valid for some backends
+			},
+			Repository: "ghcr.io/k8sgpt-ai/k8sgpt",
+			Version:    "v0.3.8",
+		},
+	}
+
+	deployment, err := GetDeployment(config, false, fakeClient, "default")
+	require.NoError(t, err)
+
+	// Verify no checksum annotation when no secret is referenced
+	_, exists := deployment.Spec.Template.Annotations[aiSecretChecksumAnnotation]
+	assert.False(t, exists, "checksum annotation should not exist when no secret is referenced")
+}
+
+func TestGetDeployment_PreservesPodAnnotations(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, v1.AddToScheme(scheme))
+	require.NoError(t, v1alpha1.AddToScheme(scheme))
+
+	secret := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-secret",
+			Namespace: "default",
+		},
+		Data: map[string][]byte{
+			"password": []byte("my-api-key"),
+		},
+	}
+
+	fakeClient := fake.NewClientBuilder().
+		WithScheme(scheme).
+		WithObjects(secret).
+		Build()
+
+	config := v1alpha1.K8sGPT{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-k8sgpt",
+			Namespace: "default",
+		},
+		Spec: v1alpha1.K8sGPTSpec{
+			AI: &v1alpha1.AISpec{
+				Secret: &v1alpha1.SecretRef{
+					Name: "test-secret",
+					Key:  "password",
+				},
+			},
+			Repository: "ghcr.io/k8sgpt-ai/k8sgpt",
+			Version:    "v0.3.8",
+			PodAnnotations: map[string]string{
+				"custom-annotation":    "custom-value",
+				"prometheus.io/scrape": "true",
+			},
+		},
+	}
+
+	deployment, err := GetDeployment(config, false, fakeClient, "default")
+	require.NoError(t, err)
+
+	// Verify both user annotations and checksum annotation exist
+	assert.Equal(t, "custom-value", deployment.Spec.Template.Annotations["custom-annotation"])
+	assert.Equal(t, "true", deployment.Spec.Template.Annotations["prometheus.io/scrape"])
+
+	checksum, exists := deployment.Spec.Template.Annotations[aiSecretChecksumAnnotation]
+	assert.True(t, exists, "checksum annotation should exist alongside user annotations")
+	assert.NotEmpty(t, checksum)
+}
+
+func TestGetDeployment_OperatorOwnsChecksumAnnotation(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, v1.AddToScheme(scheme))
+	require.NoError(t, v1alpha1.AddToScheme(scheme))
+
+	secret := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-secret",
+			Namespace: "default",
+		},
+		Data: map[string][]byte{
+			"password": []byte("my-api-key"),
+		},
+	}
+
+	fakeClient := fake.NewClientBuilder().
+		WithScheme(scheme).
+		WithObjects(secret).
+		Build()
+
+	config := v1alpha1.K8sGPT{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-k8sgpt",
+			Namespace: "default",
+		},
+		Spec: v1alpha1.K8sGPTSpec{
+			AI: &v1alpha1.AISpec{
+				Secret: &v1alpha1.SecretRef{
+					Name: "test-secret",
+					Key:  "password",
+				},
+			},
+			Repository: "ghcr.io/k8sgpt-ai/k8sgpt",
+			Version:    "v0.3.8",
+			PodAnnotations: map[string]string{
+				// User tries to set the operator-controlled annotation
+				aiSecretChecksumAnnotation: "fake-user-value",
+			},
+		},
+	}
+
+	deployment, err := GetDeployment(config, false, fakeClient, "default")
+	require.NoError(t, err)
+
+	// Verify operator overwrites user-provided value
+	actualChecksum := deployment.Spec.Template.Annotations[aiSecretChecksumAnnotation]
+	assert.NotEqual(t, "fake-user-value", actualChecksum, "operator should overwrite user-provided checksum annotation")
+	assert.Len(t, actualChecksum, 64, "operator should set correct SHA-256 checksum")
+}
+
+func TestSync_DestroyOp_SucceedsWhenSecretAlreadyDeleted(t *testing.T) {
+	// Regression test for the DestroyOp ordering fix.
+	// Before the fix, GetDeployment() was called unconditionally and returned an error
+	// when the AI Secret was missing, blocking finalizer/resource cleanup on deletion.
+	fakeClient, _ := newSchemeAndClient(t)
+	ctx := context.Background()
+
+	// Config references a Secret that does not exist in the fake client.
+	config := v1alpha1.K8sGPT{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-k8sgpt",
+			Namespace: "default",
+		},
+		Spec: v1alpha1.K8sGPTSpec{
+			AI: &v1alpha1.AISpec{
+				Backend: "openai",
+				Secret: &v1alpha1.SecretRef{
+					Name: "already-deleted-secret",
+					Key:  "password",
+				},
+			},
+			Repository: "ghcr.io/k8sgpt-ai/k8sgpt",
+			Version:    "v0.3.8",
+		},
+	}
+
+	err := Sync(ctx, fakeClient, config, DestroyOp)
+	assert.NoError(t, err, "DestroyOp must succeed even when the referenced AI Secret no longer exists")
+}
