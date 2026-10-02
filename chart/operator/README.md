@@ -44,7 +44,7 @@ controls.
 | `controllerManager.kubeRbacProxy.containerSecurityContext.allowPrivilegeEscalation` |  | `false`                                                                       |
 | `controllerManager.kubeRbacProxy.containerSecurityContext.capabilities.drop` |  | `["ALL"]`                                                                     |
 | `controllerManager.kubeRbacProxy.image.repository` |  | `"gcr.io/kubebuilder/kube-rbac-proxy"`                                        |
-| `controllerManager.kubeRbacProxy.image.tag` |  | `"v0.2.29"`                                                                    |
+| `controllerManager.kubeRbacProxy.image.tag` |  | `"v0.2.30"`                                                                    |
 | `controllerManager.kubeRbacProxy.resources.limits.cpu` |  | `"500m"`                                                                      |
 | `controllerManager.kubeRbacProxy.resources.limits.memory` |  | `"128Mi"`                                                                     |
 | `controllerManager.kubeRbacProxy.resources.requests.cpu` |  | `"5m"`                                                                        |
@@ -54,7 +54,7 @@ controls.
 | `controllerManager.manager.containerSecurityContext.allowPrivilegeEscalation` |  | `false`                                                                       |
 | `controllerManager.manager.containerSecurityContext.capabilities.drop` |  | `["ALL"]`                                                                     |
 | `controllerManager.manager.image.repository` |  | `"ghcr.io/k8sgpt-ai/k8sgpt-operator"`                                         |
-| `controllerManager.manager.image.tag` | x-release-please-version | `"v0.2.29"`                                                                    |
+| `controllerManager.manager.image.tag` | x-release-please-version | `"v0.2.30"`                                                                    |
 | `controllerManager.manager.resources.limits.cpu` |  | `"500m"`                                                                      |
 | `controllerManager.manager.resources.limits.memory` |  | `"128Mi"`                                                                     |
 | `controllerManager.manager.resources.requests.cpu` |  | `"10m"`                                                                       |
