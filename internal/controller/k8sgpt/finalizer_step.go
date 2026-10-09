@@ -46,6 +46,9 @@ func (step *FinalizerStep) execute(instance *K8sGPTInstance) (ctrl.Result, error
 				return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 			}
 		}
+		// Release the gRPC connection held for this resource; nothing else will reconcile it.
+		instance.R.closeClientFor(instance.K8sgptConfig)
+
 		// Stop reconciliation as the item is being deleted
 		return instance.R.FinishReconcile(nil, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
