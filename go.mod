@@ -7,7 +7,6 @@ toolchain go1.26.5
 require (
 	buf.build/gen/go/k8sgpt-ai/k8sgpt/grpc/go v1.5.1-20241118152629-1379a5a1889d.2
 	buf.build/gen/go/k8sgpt-ai/k8sgpt/protocolbuffers/go v1.36.6-20241118152629-1379a5a1889d.1
-	github.com/agnivade/levenshtein v1.2.1
 	github.com/cloudevents/sdk-go/v2 v2.16.1
 	github.com/go-logr/logr v1.4.3
 	github.com/google/uuid v1.6.0
