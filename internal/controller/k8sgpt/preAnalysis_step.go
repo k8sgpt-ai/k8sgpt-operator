@@ -54,7 +54,7 @@ func (step *PreAnalysisStep) execute(instance *K8sGPTInstance) (ctrl.Result, err
 
 	instance.logger.Info("K8sGPT address: " + address)
 
-	instance.kclient, err = Kclient.NewClient(address)
+	instance.kclient, err = instance.R.clientFor(instance.K8sgptConfig, address)
 	if err != nil {
 		return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 	}
