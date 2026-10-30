@@ -16,6 +16,7 @@ package k8sgpt
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/types"
@@ -69,6 +70,79 @@ type K8sGPTReconciler struct {
 	EnableResultLogging bool
 	Signal              chan types.InterControllerSignal
 	Recorder            record.EventRecorder
+
+	// Reused across reconciles, keyed per K8sGPT resource: see clientFor.
+	kclientMu sync.Mutex
+	kclients  map[client.ObjectKey]*cachedClient
+}
+
+// cachedClient is the connection currently held for one K8sGPT resource, with the address it was
+// dialled for so a change can be detected.
+type cachedClient struct {
+	address string
+	client  *kclient.Client
+}
+
+// clientFor returns a K8sGPT client for k8sgpt at address, reusing the connection already held for
+// that resource while its address is unchanged.
+//
+// Reconciles requeue every 30s by default, and the previous code dialled a new grpc.ClientConn on
+// each pass and dropped the old one without closing it. Each orphaned connection keeps its
+// resolver, balancer and transport goroutines alive, so the manager accumulated roughly 1.5
+// goroutines per reconcile (~4.3k/day) until it was restarted.
+//
+// The cache is keyed per resource rather than held in a single slot. One K8sGPTReconciler serves
+// every K8sGPT in the cluster and each gets its own service address, so a single slot would thrash
+// between them - dialling on every reconcile again, and closing a connection the mutation
+// controller may still hold from another resource's last Signal.
+//
+// For the same reason the connection is not closed at the end of a reconcile: it is handed to the
+// mutation controller over Signal and may still be in use there. It is closed only when this
+// resource's address changes, or when the resource is deleted (see closeClientFor).
+func (r *K8sGPTReconciler) clientFor(k8sgpt *corev1alpha1.K8sGPT, address string) (*kclient.Client, error) {
+	key := client.ObjectKeyFromObject(k8sgpt)
+
+	r.kclientMu.Lock()
+	defer r.kclientMu.Unlock()
+
+	if cached, ok := r.kclients[key]; ok {
+		if cached.address == address {
+			return cached.client, nil
+		}
+		if err := cached.client.Close(); err != nil {
+			k8sgptControllerLog.Error(err, "closing K8sGPT client after address change",
+				"k8sgpt", key, "address", cached.address)
+		}
+		delete(r.kclients, key)
+	}
+
+	c, err := kclient.NewClient(address)
+	if err != nil {
+		return nil, err
+	}
+	if r.kclients == nil {
+		r.kclients = make(map[client.ObjectKey]*cachedClient)
+	}
+	r.kclients[key] = &cachedClient{address: address, client: c}
+	return c, nil
+}
+
+// closeClientFor releases the connection held for a K8sGPT resource. Called when the resource is
+// deleted, so a removed K8sGPT does not leave its connection behind for the life of the manager.
+func (r *K8sGPTReconciler) closeClientFor(k8sgpt *corev1alpha1.K8sGPT) {
+	key := client.ObjectKeyFromObject(k8sgpt)
+
+	r.kclientMu.Lock()
+	defer r.kclientMu.Unlock()
+
+	cached, ok := r.kclients[key]
+	if !ok {
+		return
+	}
+	if err := cached.client.Close(); err != nil {
+		k8sgptControllerLog.Error(err, "closing K8sGPT client on delete", "k8sgpt", key)
+	}
+	delete(r.kclients, key)
 }
 
 type K8sGPTInstance struct {
