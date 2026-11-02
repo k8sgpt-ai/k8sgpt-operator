@@ -79,6 +79,29 @@ spec:
                     - AZURE_AD
                     - CLOUDFLARE_AZURE
                     type: string
+                  azureWorkloadIdentity:
+                    description: |-
+                      AzureWorkloadIdentity configures passwordless Entra Workload Identity
+                      authentication for the azureopenai backend.
+                    properties:
+                      clientId:
+                        description: |-
+                          ClientID is the client ID of the user-assigned managed identity federated
+                          with the K8sGPT ServiceAccount. If omitted, the operator reads the
+                          azure.workload.identity/client-id ServiceAccount annotation.
+                        type: string
+                      enabled:
+                        description: |-
+                          Enabled turns on Azure Workload Identity. The block also enables the
+                          integration when clientId or tenantId is set; enabled is useful when the
+                          client ID is supplied only through spec.serviceAccountAnnotations.
+                        type: boolean
+                      tenantId:
+                        description: |-
+                          TenantID is the Microsoft Entra tenant ID. If omitted, the operator reads
+                          the azure.workload.identity/tenant-id ServiceAccount annotation.
+                        type: string
+                    type: object
                   backOff:
                     properties:
                       enabled:
@@ -770,6 +793,17 @@ spec:
                           PodSecurityContext, the value specified in SecurityContext takes precedence.
                         type: string
                     type: object
+                type: object
+              serviceAccountAnnotations:
+                additionalProperties:
+                  type: string
+                description: |-
+                  ServiceAccountAnnotations adds annotations to the ServiceAccount that the
+                  operator creates for the K8sGPT workload when dynamic RBAC is enabled.
+                  This is the primary hook for cloud workload identity integrations such as
+                  Azure Workload Identity (azure.workload.identity/client-id) and AWS IRSA.
+                  When dynamic RBAC is disabled, configure the static Helm-managed
+                  ServiceAccount instead (k8sgpt.serviceAccountAnnotations).
                 type: object
               sink:
                 properties:
