@@ -16,10 +16,15 @@ package k8sgpt
 import (
 	"context"
 	"errors"
+	"testing"
 
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations"
+	metricspkg "github.com/k8sgpt-ai/k8sgpt-operator/pkg/metrics"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -158,3 +163,59 @@ var _ = Describe("AnalysisStep", func() {
 		})
 	})
 })
+
+func TestProcessRawResultsCreatesOneResultForEveryFilterKind(t *testing.T) {
+	ctx := context.Background()
+	scheme := runtime.NewScheme()
+	require.NoError(t, corev1alpha1.AddToScheme(scheme))
+
+	config := &corev1alpha1.K8sGPT{
+		ObjectMeta: metav1.ObjectMeta{Name: "k8sgpt", Namespace: "k8sgpt"},
+		Spec: corev1alpha1.K8sGPTSpec{
+			Filters: []string{"Pod", "Deployment", "StatefulSet", "DaemonSet", "Service", "Ingress"},
+			AI:      &corev1alpha1.AISpec{Backend: "openai"},
+		},
+	}
+	k8sClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(config).Build()
+	metricsBuilder := metricspkg.NewMetricBuilder().AddMetric(metricspkg.MetricConfig{
+		Name:   "k8sgpt_number_of_results_by_type",
+		Labels: []string{"object_namespace", "kind", "name", "k8sgpt"},
+		Type:   metricspkg.Gauge,
+	})
+
+	instance := &K8sGPTInstance{
+		R: &K8sGPTReconciler{
+			Client:         k8sClient,
+			MetricsBuilder: metricsBuilder,
+		},
+		Ctx:          ctx,
+		K8sgptConfig: config,
+		logger:       ctrl.Log.WithName("test-process-raw-results"),
+	}
+
+	resultSpecs := make([]corev1alpha1.ResultSpec, 0, len(config.Spec.Filters))
+	for _, kind := range config.Spec.Filters {
+		resultSpecs = append(resultSpecs, corev1alpha1.ResultSpec{
+			Kind:  kind,
+			Name:  "shop/checkout",
+			Error: []corev1alpha1.Failure{{Text: kind + " failure"}},
+		})
+	}
+
+	rawResults, err := resources.MapResults(integrations.Integrations{}, resultSpecs, *config)
+	require.NoError(t, err)
+	require.Len(t, rawResults, len(resultSpecs))
+
+	step := &AnalysisStep{logger: ctrl.Log.WithName("test-analysis-step")}
+	require.NoError(t, step.processRawResults(rawResults, instance))
+
+	var resultList corev1alpha1.ResultList
+	require.NoError(t, k8sClient.List(ctx, &resultList, client.InNamespace(config.Namespace)))
+	require.Len(t, resultList.Items, len(resultSpecs))
+
+	var kinds []string
+	for _, result := range resultList.Items {
+		kinds = append(kinds, result.Spec.Kind)
+	}
+	require.ElementsMatch(t, config.Spec.Filters, kinds)
+}
