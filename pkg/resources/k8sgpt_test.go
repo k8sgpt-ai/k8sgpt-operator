@@ -273,6 +273,57 @@ func Test_GetDeploymentWithKubeconfigAndIRSA(t *testing.T) {
 	}
 }
 
+func Test_GetDeploymentWithSchedulingConstraints(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, appsv1.AddToScheme(scheme))
+	require.NoError(t, v1.AddToScheme(scheme))
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+
+	nodeSelector := map[string]string{
+		"kubernetes.io/os": "linux",
+		"workload":         "ai",
+	}
+	tolerations := []v1.Toleration{
+		{
+			Key:      "dedicated",
+			Operator: v1.TolerationOpEqual,
+			Value:    "ai",
+			Effect:   v1.TaintEffectNoSchedule,
+		},
+	}
+
+	config := v1alpha1.K8sGPT{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "K8sGPT",
+			APIVersion: "core.k8sgpt.ai/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-k8sgpt",
+			Namespace: "test-namespace",
+			UID:       "test-uid",
+		},
+		Spec: v1alpha1.K8sGPTSpec{
+			Repository:      "ghcr.io/k8sgpt-ai/k8sgpt",
+			Version:         "v0.4.1",
+			ImagePullPolicy: v1.PullAlways,
+			NodeSelector:    nodeSelector,
+			Tolerations:     tolerations,
+			AI: &v1alpha1.AISpec{
+				Backend:   "openai",
+				Model:     "gpt-4o-mini",
+				MaxTokens: "2048",
+				Topk:      "50",
+			},
+		},
+	}
+
+	deployment, err := GetDeployment(config, false, fakeClient, "test-sa")
+	require.NoError(t, err)
+
+	assert.Equal(t, nodeSelector, deployment.Spec.Template.Spec.NodeSelector)
+	assert.Equal(t, tolerations, deployment.Spec.Template.Spec.Tolerations)
+}
+
 func Test_GetDeploymentWithFilters(t *testing.T) {
 	scheme := runtime.NewScheme()
 	require.NoError(t, appsv1.AddToScheme(scheme))

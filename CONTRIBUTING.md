@@ -39,5 +39,22 @@ grpcurl -plaintext -d '{ "backend": "amazonbedrock", "explain": true}' localhost
 For API details visit the spec on [buf](https://buf.build/k8sgpt-ai/k8sgpt)
 
 ## Help
-Feel free to join our slack [channel](https://k8sgpt.slack.com) and open GH issues, so we can make the development experience better for all K8sGPT contributors
+Feel free to join `#k8sgpt` on the [CNCF Slack](https://slack.cncf.io/) and open GH issues, so we can make the development experience better for all K8sGPT contributors
 
+## Signing off your commits (DCO)
+Contributions are accepted under the [Developer Certificate of Origin](https://developercertificate.org/) (DCO). It is the only sign-off this repository requires; there is no separate CLA to sign.
+
+Every commit needs a `Signed-off-by` line that matches the commit author:
+
+```
+git commit --signoff -m "fix: describe the change"
+```
+
+To sign off the last commit you made, or every commit on your branch:
+
+```
+git commit --amend --signoff
+git rebase --signoff main
+```
+
+The `DCO` status check runs on every PR and must pass before merge.
