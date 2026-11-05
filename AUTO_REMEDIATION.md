@@ -18,15 +18,12 @@ spec:
   ai:
     autoRemediation:
       enabled: true
-      similarityRequirement: "90"
       resources:
         - Pod
         - Deployment
 ```
 
 `enabled` turns the feature on. `resources` is an exact allowlist of resource selectors. Use a legacy `Kind` (`Deployment`), `group/Kind` (`apps/Deployment`), or an exact `group/version/Kind` (`apps/v1/Deployment`, `v1/ConfigMap`). A selector lets the operator create a proposal; it does not grant mutation rights. The matching GVK must also have a registered policy.
-
-`similarityRequirement` is retained for CRD compatibility but no longer authorizes execution. Whole-manifest textual similarity is not a safety proof: YAML formatting, field order, generated fields, and unrelated changes can affect it.
 
 ## Safety model and lifecycle
 
