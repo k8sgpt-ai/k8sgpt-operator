@@ -113,6 +113,25 @@ type AutoRemediation struct {
 	Resources []string `json:"resources"`
 }
 
+// AzureWorkloadIdentity configures Microsoft Entra Workload Identity for the
+// Azure OpenAI backend. The K8sGPT ServiceAccount is annotated so the Azure
+// Workload Identity webhook can project a federated token into the pod. The
+// deployment receives the standard AZURE_* environment variables used by the
+// Azure Identity SDKs.
+type AzureWorkloadIdentity struct {
+	// Enabled turns on Azure Workload Identity. The block also enables the
+	// integration when clientId or tenantId is set; enabled is useful when the
+	// client ID is supplied only through spec.serviceAccountAnnotations.
+	Enabled bool `json:"enabled,omitempty"`
+	// ClientID is the client ID of the user-assigned managed identity federated
+	// with the K8sGPT ServiceAccount. If omitted, the operator reads the
+	// azure.workload.identity/client-id ServiceAccount annotation.
+	ClientID string `json:"clientId,omitempty"`
+	// TenantID is the Microsoft Entra tenant ID. If omitted, the operator reads
+	// the azure.workload.identity/tenant-id ServiceAccount annotation.
+	TenantID string `json:"tenantId,omitempty"`
+}
+
 type AISpec struct {
 	AutoRemediation AutoRemediation `json:"autoRemediation,omitempty"`
 	// +kubebuilder:default:=openai
@@ -123,6 +142,9 @@ type AISpec struct {
 	Region  string   `json:"region,omitempty"`
 	// +kubebuilder:validation:Enum=AZURE;AZURE_AD;CLOUDFLARE_AZURE
 	AzureAPIType string `json:"azureAPIType,omitempty"`
+	// AzureWorkloadIdentity configures passwordless Entra Workload Identity
+	// authentication for the azureopenai backend.
+	AzureWorkloadIdentity *AzureWorkloadIdentity `json:"azureWorkloadIdentity,omitempty"`
 	// +kubebuilder:default:=gpt-4o-mini
 	Model   string     `json:"model,omitempty"`
 	Engine  string     `json:"engine,omitempty"`
@@ -174,14 +196,21 @@ type K8sGPTSpec struct {
 	CustomAnalyzers  []CustomAnalyzer             `json:"customAnalyzers,omitempty"`
 	Filters          []string                     `json:"filters,omitempty"`
 	ExtraOptions     *ExtraOptionsRef             `json:"extraOptions,omitempty"`
-	Sink             *WebhookRef                  `json:"sink,omitempty"`
-	AI               *AISpec                      `json:"ai,omitempty"`
-	RemoteCache      *RemoteCacheRef              `json:"remoteCache,omitempty"`
-	Integrations     *Integrations                `json:"integrations,omitempty"`
-	NodeSelector     map[string]string            `json:"nodeSelector,omitempty"`
-	Tolerations      []corev1.Toleration          `json:"tolerations,omitempty"`
-	TargetNamespace  string                       `json:"targetNamespace,omitempty"`
-	Analysis         *AnalysisConfig              `json:"analysis,omitempty"`
+	// ServiceAccountAnnotations adds annotations to the ServiceAccount that the
+	// operator creates for the K8sGPT workload when dynamic RBAC is enabled.
+	// This is the primary hook for cloud workload identity integrations such as
+	// Azure Workload Identity (azure.workload.identity/client-id) and AWS IRSA.
+	// When dynamic RBAC is disabled, configure the static Helm-managed
+	// ServiceAccount instead (k8sgpt.serviceAccountAnnotations).
+	ServiceAccountAnnotations map[string]string   `json:"serviceAccountAnnotations,omitempty"`
+	Sink                      *WebhookRef         `json:"sink,omitempty"`
+	AI                        *AISpec             `json:"ai,omitempty"`
+	RemoteCache               *RemoteCacheRef     `json:"remoteCache,omitempty"`
+	Integrations              *Integrations       `json:"integrations,omitempty"`
+	NodeSelector              map[string]string   `json:"nodeSelector,omitempty"`
+	Tolerations               []corev1.Toleration `json:"tolerations,omitempty"`
+	TargetNamespace           string              `json:"targetNamespace,omitempty"`
+	Analysis                  *AnalysisConfig     `json:"analysis,omitempty"`
 	// Define the kubeconfig the Deployment must use.
 	// If empty, the Deployment will use the ServiceAccount provided by Kubernetes itself.
 	Kubeconfig *SecretRef `json:"kubeconfig,omitempty"`

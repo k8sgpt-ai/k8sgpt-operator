@@ -363,6 +363,71 @@ EOF
 
 <details>
 
+<summary>Azure OpenAI with Entra Workload Identity</summary>
+
+Azure Workload Identity removes the need to store an Azure OpenAI API key in a
+Kubernetes Secret. The operator can annotate the K8sGPT ServiceAccount, label
+the K8sGPT pod for the workload identity webhook, and project a federated token
+into the pod.
+
+Prerequisites:
+
+- The cluster must run the [Azure Workload Identity webhook](https://azure.github.io/azure-workload-identity/docs/installation.html)
+  (AKS with OIDC issuer and workload identity enabled).
+- A user-assigned managed identity with access to the Azure OpenAI resource.
+- A federated identity credential whose subject is the K8sGPT ServiceAccount.
+  When dynamic RBAC is enabled (the default), the operator creates the
+  ServiceAccount as `k8sgpt-<namespace>`; with `dynamicRBAC.enabled=false`, the
+  static ServiceAccount is `k8sgpt` in the release namespace.
+
+```yaml
+apiVersion: core.k8sgpt.ai/v1alpha1
+kind: K8sGPT
+metadata:
+  name: k8sgpt-sample
+  namespace: k8sgpt-operator-system
+spec:
+  serviceAccountAnnotations:
+    azure.workload.identity/client-id: <client-id>
+    azure.workload.identity/tenant-id: <tenant-id>
+  ai:
+    enabled: true
+    backend: azureopenai
+    model: gpt-4o-mini
+    baseUrl: https://k8sgpt.openai.azure.com/
+    engine: llm
+    azureAPIType: AZURE_AD
+    azureWorkloadIdentity:
+      enabled: true
+      clientId: <client-id>
+      tenantId: <tenant-id>
+  noCache: false
+  repository: ghcr.io/k8sgpt-ai/k8sgpt
+  version: v0.4.32
+```
+
+`azureWorkloadIdentity.clientId` may be omitted when the
+`azure.workload.identity/client-id` annotation is present. Do not set
+`ai.secret` together with `azureWorkloadIdentity`: the operator rejects that
+combination because the workload must not mix API-key and federated
+credentials.
+
+The operator renders the standard Azure Identity environment variables
+(`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_FEDERATED_TOKEN_FILE`,
+`AZURE_AUTHORITY_HOST`) and a projected ServiceAccount token with audience
+`api://AzureADTokenExchange`. It also defaults `azureAPIType` to `AZURE_AD`
+when workload identity is enabled.
+
+> **Limitation:** current k8sgpt releases read Azure credentials from the
+> `K8SGPT_PASSWORD` API key and do not yet call `DefaultAzureCredential` or
+> exchange the projected token themselves. This operator slice provisions the
+> Kubernetes identity wiring, but passwordless token exchange becomes fully
+> end-to-end only with a k8sgpt runtime that supports Azure Workload Identity.
+
+</details>
+
+<details>
+
 <summary>Amazon Bedrock</summary>
 
 1. Install the operator from the [Installation](#installation) section.

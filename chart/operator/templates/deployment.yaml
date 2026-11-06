@@ -7,6 +7,10 @@ metadata:
     app.kubernetes.io/created-by: k8sgpt-operator
     app.kubernetes.io/part-of: k8sgpt-operator
   {{- include "chart.labels" . | nindent 4 }}
+  {{- with .Values.controllerManager.serviceAccount.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 ---
 apiVersion: apps/v1
 kind: Deployment
