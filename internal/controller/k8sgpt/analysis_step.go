@@ -23,6 +23,7 @@ import (
 	"github.com/go-logr/logr"
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/resources"
+	"github.com/prometheus/client_golang/prometheus"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -156,6 +157,9 @@ func (step *AnalysisStep) setk8sgptNumberOfResults(instance *K8sGPTInstance, res
 	groupedResults := step.getResultsPerNamespace(results)
 	numberOfResultsGauge := instance.R.MetricsBuilder.GetGaugeVec("k8sgpt_number_of_results")
 	if numberOfResultsGauge != nil {
+		// Drop the previous counts of this K8sGPT so that namespaces without
+		// results anymore stop reporting their last value.
+		numberOfResultsGauge.DeletePartialMatch(prometheus.Labels{"k8sgpt": instance.K8sgptConfig.Name})
 		for namespace, count := range groupedResults {
 			numberOfResultsGauge.WithLabelValues(namespace, instance.K8sgptConfig.Name).Set(float64(count))
 		}

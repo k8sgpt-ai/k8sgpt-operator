@@ -18,8 +18,11 @@ import (
 	"errors"
 
 	corev1alpha1 "github.com/k8sgpt-ai/k8sgpt-operator/api/v1alpha1"
+	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/metrics"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/prometheus/client_golang/prometheus"
+	dto "github.com/prometheus/client_model/go"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -75,6 +78,71 @@ var _ = Describe("AnalysisStep", func() {
 				Expect(counts).To(HaveKeyWithValue("kube-system", 1))
 				Expect(counts).To(HaveKeyWithValue("", 1))
 			})
+		})
+	})
+
+	Describe("setk8sgptNumberOfResults", func() {
+		// series returns the current gauge values keyed by "k8sgpt/object_namespace".
+		series := func(gauge *prometheus.GaugeVec) map[string]float64 {
+			ch := make(chan prometheus.Metric, 10)
+			gauge.Collect(ch)
+			close(ch)
+			values := map[string]float64{}
+			for m := range ch {
+				var out dto.Metric
+				Expect(m.Write(&out)).To(Succeed())
+				labels := map[string]string{}
+				for _, l := range out.GetLabel() {
+					labels[l.GetName()] = l.GetValue()
+				}
+				values[labels["k8sgpt"]+"/"+labels["object_namespace"]] = out.GetGauge().GetValue()
+			}
+			return values
+		}
+
+		It("stops reporting namespaces that no longer have results", func() {
+			metricsBuilder := metrics.NewMetricBuilder().AddMetric(metrics.MetricConfig{
+				Name:   "k8sgpt_number_of_results",
+				Labels: []string{"object_namespace", "k8sgpt"},
+				Type:   metrics.Gauge,
+			})
+			gauge := metricsBuilder.GetGaugeVec("k8sgpt_number_of_results")
+			newInstance := func(name string) *K8sGPTInstance {
+				k8sgpt := &corev1alpha1.K8sGPT{}
+				k8sgpt.Name = name
+				return &K8sGPTInstance{
+					R:            &K8sGPTReconciler{MetricsBuilder: metricsBuilder},
+					K8sgptConfig: k8sgpt,
+				}
+			}
+			instance := newInstance("test-k8sgpt")
+			other := newInstance("other-k8sgpt")
+
+			step.setk8sgptNumberOfResults(other, []corev1alpha1.ResultSpec{
+				{Name: "default/pod-1", Kind: "Pod"},
+			})
+			step.setk8sgptNumberOfResults(instance, []corev1alpha1.ResultSpec{
+				{Name: "default/pod-1", Kind: "Pod"},
+				{Name: "kube-system/pod-1", Kind: "Pod"},
+			})
+			Expect(series(gauge)).To(Equal(map[string]float64{
+				"other-k8sgpt/default":    1,
+				"test-k8sgpt/default":     1,
+				"test-k8sgpt/kube-system": 1,
+			}))
+
+			step.setk8sgptNumberOfResults(instance, []corev1alpha1.ResultSpec{
+				{Name: "default/pod-1", Kind: "Pod"},
+			})
+			Expect(series(gauge)).To(Equal(map[string]float64{
+				"other-k8sgpt/default": 1,
+				"test-k8sgpt/default":  1,
+			}))
+
+			step.setk8sgptNumberOfResults(instance, nil)
+			Expect(series(gauge)).To(Equal(map[string]float64{
+				"other-k8sgpt/default": 1,
+			}))
 		})
 	})
 
