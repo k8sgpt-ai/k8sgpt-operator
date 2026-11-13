@@ -62,16 +62,9 @@ spec:
                         items:
                           type: string
                         type: array
-                      similarityRequirement:
-                        default: "90"
-                        description: |-
-                          Deprecated: textual similarity is retained for API compatibility only.
-                          Execution is authorized by the deterministic remediation policy.
-                        type: string
                     required:
                     - enabled
                     - resources
-                    - similarityRequirement
                     type: object
                   azureAPIType:
                     enum:
