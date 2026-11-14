@@ -33,6 +33,8 @@ controls.
 <!---x-release-please-start-version-->
 | Parameter                | Description             | Default                                                                       |
 | ------------------------ | ----------------------- |-------------------------------------------------------------------------------|
+| `dynamicRBAC.enabled` | Create a ServiceAccount, ClusterRole and ClusterRoleBinding per K8sGPT workload | `true` |
+| `k8sgpt.serviceAccountAnnotations` | Annotations for the static k8sgpt ServiceAccount when dynamic RBAC is disabled | `{}` |
 | `serviceMonitor.enabled` |  | `false`                                                                       |
 | `serviceMonitor.additionalLabels` |  | `{}`                                                                          |
 | `grafanaDashboard.enabled` |  | `false`                                                                       |
@@ -40,6 +42,7 @@ controls.
 | `grafanaDashboard.folder.name` |  | `"ai"`                                                                        |
 | `grafanaDashboard.label.key` |  | `"grafana_dashboard"`                                                         |
 | `grafanaDashboard.label.value` |  | `"1"`                                                                         |
+| `controllerManager.serviceAccount.annotations` | Annotations for the controller manager ServiceAccount | `{}` |
 | `controllerManager.kubeRbacProxy.enabled` | Enable kube-rbac-proxy for RBAC-protected HTTPS metrics | `true` |
 | `controllerManager.kubeRbacProxy.containerSecurityContext.allowPrivilegeEscalation` |  | `false`                                                                       |
 | `controllerManager.kubeRbacProxy.containerSecurityContext.capabilities.drop` |  | `["ALL"]`                                                                     |

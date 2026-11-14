@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	v1 "k8s.io/api/rbac/v1"
 
@@ -52,7 +53,131 @@ const (
 	dynamicRBACEnvVar          = "K8SGPT_ENABLE_DYNAMIC_RBAC"
 	defaultServiceAccountName  = "k8sgpt"
 	aiSecretChecksumAnnotation = "core.k8sgpt.ai/ai-secret-checksum"
+
+	azureWorkloadIdentityUseLabel             = "azure.workload.identity/use"
+	azureWorkloadIdentityClientIDAnnotation   = "azure.workload.identity/client-id"
+	azureWorkloadIdentityTenantIDAnnotation   = "azure.workload.identity/tenant-id"
+	azureWorkloadIdentityTokenVolumeName      = "azure-workload-identity-token"
+	azureWorkloadIdentityTokenMountPath       = "/var/run/secrets/azure/tokens"
+	azureWorkloadIdentityTokenFileName        = "azure-identity-token"
+	azureWorkloadIdentityTokenFilePath        = azureWorkloadIdentityTokenMountPath + "/" + azureWorkloadIdentityTokenFileName
+	azureWorkloadIdentityAudience             = "api://AzureADTokenExchange"
+	azureWorkloadIdentityAuthorityHost        = "https://login.microsoftonline.com/"
+	azureWorkloadIdentityAPIType              = "AZURE_AD"
+	azureWorkloadIdentityClientIDEnvVar       = "AZURE_CLIENT_ID"
+	azureWorkloadIdentityTenantIDEnvVar       = "AZURE_TENANT_ID"
+	azureWorkloadIdentityFederatedTokenEnvVar = "AZURE_FEDERATED_TOKEN_FILE"
+	azureWorkloadIdentityAuthorityHostEnvVar  = "AZURE_AUTHORITY_HOST"
 )
+
+// azureWorkloadIdentity returns the Azure Workload Identity configuration when
+// the Azure OpenAI backend is configured to use it.
+func azureWorkloadIdentity(config v1alpha1.K8sGPT) *v1alpha1.AzureWorkloadIdentity {
+	if config.Spec.AI == nil {
+		return nil
+	}
+	return config.Spec.AI.AzureWorkloadIdentity
+}
+
+// azureWorkloadIdentityClientID resolves the client ID from the explicit
+// workload identity configuration first, then from the ServiceAccount
+// annotation. Supporting the annotation directly keeps the first slice useful
+// even when users manage identity metadata outside the Azure-specific block.
+func azureWorkloadIdentityClientID(config v1alpha1.K8sGPT) string {
+	if workloadIdentity := azureWorkloadIdentity(config); workloadIdentity != nil {
+		if clientID := strings.TrimSpace(workloadIdentity.ClientID); clientID != "" {
+			return clientID
+		}
+	}
+	return strings.TrimSpace(config.Spec.ServiceAccountAnnotations[azureWorkloadIdentityClientIDAnnotation])
+}
+
+func azureWorkloadIdentityTenantID(config v1alpha1.K8sGPT) string {
+	if workloadIdentity := azureWorkloadIdentity(config); workloadIdentity != nil {
+		if tenantID := strings.TrimSpace(workloadIdentity.TenantID); tenantID != "" {
+			return tenantID
+		}
+	}
+	return strings.TrimSpace(config.Spec.ServiceAccountAnnotations[azureWorkloadIdentityTenantIDAnnotation])
+}
+
+// azureWorkloadIdentityEnabled reports whether Azure Workload Identity should
+// be rendered. The block may be enabled explicitly, inferred from its fields,
+// or inferred from the standard client-id ServiceAccount annotation.
+func azureWorkloadIdentityEnabled(config v1alpha1.K8sGPT) bool {
+	if config.Spec.AI == nil {
+		return false
+	}
+
+	if workloadIdentity := config.Spec.AI.AzureWorkloadIdentity; workloadIdentity != nil {
+		if workloadIdentity.Enabled ||
+			strings.TrimSpace(workloadIdentity.ClientID) != "" ||
+			strings.TrimSpace(workloadIdentity.TenantID) != "" {
+			return true
+		}
+	}
+
+	return config.Spec.AI.Backend == v1alpha1.AzureOpenAI &&
+		azureWorkloadIdentityClientID(config) != ""
+}
+
+func validateAzureWorkloadIdentity(config v1alpha1.K8sGPT) error {
+	if !azureWorkloadIdentityEnabled(config) {
+		return nil
+	}
+
+	ai := config.Spec.AI
+	if ai == nil || ai.Backend != v1alpha1.AzureOpenAI {
+		return fmt.Errorf("azureWorkloadIdentity is supported only by azureopenai provider")
+	}
+	if ai.Secret != nil {
+		return fmt.Errorf("azureWorkloadIdentity cannot be combined with ai.secret")
+	}
+	if azureWorkloadIdentityClientID(config) == "" {
+		return fmt.Errorf("azureWorkloadIdentity requires clientId or the %s service account annotation", azureWorkloadIdentityClientIDAnnotation)
+	}
+	if ai.AzureAPIType != "" && ai.AzureAPIType != azureWorkloadIdentityAPIType {
+		return fmt.Errorf("azureWorkloadIdentity requires azureAPIType %s", azureWorkloadIdentityAPIType)
+	}
+
+	return nil
+}
+
+func setEnvVar(container *corev1.Container, name, value string) {
+	for i := range container.Env {
+		if container.Env[i].Name == name {
+			container.Env[i].Value = value
+			container.Env[i].ValueFrom = nil
+			return
+		}
+	}
+	container.Env = append(container.Env, corev1.EnvVar{Name: name, Value: value})
+}
+
+func addAzureWorkloadIdentityVolume(deployment *appsv1.Deployment) {
+	container := &deployment.Spec.Template.Spec.Containers[0]
+	container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{
+		Name:      azureWorkloadIdentityTokenVolumeName,
+		MountPath: azureWorkloadIdentityTokenMountPath,
+		ReadOnly:  true,
+	})
+	deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
+		Name: azureWorkloadIdentityTokenVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			Projected: &corev1.ProjectedVolumeSource{
+				Sources: []corev1.VolumeProjection{
+					{
+						ServiceAccountToken: &corev1.ServiceAccountTokenProjection{
+							Audience:          azureWorkloadIdentityAudience,
+							ExpirationSeconds: ptr.To[int64](3600),
+							Path:              azureWorkloadIdentityTokenFileName,
+						},
+					},
+				},
+			},
+		},
+	})
+}
 
 // dynamicRBACEnabled returns true when dynamic RBAC resources should be
 // created by the operator.  This is the default behaviour; set the env var
@@ -117,6 +242,10 @@ func addSecretAsEnvToDeployment(secretName string, secretKey string,
 
 // GetServiceAccount Create ServiceAccount for K8sGPT
 func GetServiceAccount(config v1alpha1.K8sGPT, serviceAccountName string) (*corev1.ServiceAccount, error) {
+	if err := validateAzureWorkloadIdentity(config); err != nil {
+		return nil, err
+	}
+
 	serviceAccount := &corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      serviceAccountName,
@@ -135,9 +264,20 @@ func GetServiceAccount(config v1alpha1.K8sGPT, serviceAccountName string) (*core
 		},
 	}
 
+	for key, value := range config.Spec.ServiceAccountAnnotations {
+		serviceAccount.ObjectMeta.Annotations[key] = value
+	}
+
 	if config.Spec.ExtraOptions != nil {
 		if config.Spec.ExtraOptions.ServiceAccountIRSA != "" {
 			serviceAccount.ObjectMeta.Annotations["eks.amazonaws.com/role-arn"] = config.Spec.ExtraOptions.ServiceAccountIRSA
+		}
+	}
+
+	if azureWorkloadIdentityEnabled(config) {
+		serviceAccount.ObjectMeta.Annotations[azureWorkloadIdentityClientIDAnnotation] = azureWorkloadIdentityClientID(config)
+		if tenantID := azureWorkloadIdentityTenantID(config); tenantID != "" {
+			serviceAccount.ObjectMeta.Annotations[azureWorkloadIdentityTenantIDAnnotation] = tenantID
 		}
 	}
 
@@ -305,6 +445,10 @@ func buildK8sGPTArgs(config v1alpha1.K8sGPT) []string {
 func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Client,
 	serviceAccountName string) (*appsv1.Deployment, error) {
 
+	if err := validateAzureWorkloadIdentity(config); err != nil {
+		return &appsv1.Deployment{}, err
+	}
+
 	// Create deployment
 	version := config.Spec.Version
 	if version == "" {
@@ -323,6 +467,9 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 		for k, v := range config.Spec.PodLabels {
 			podLabels[k] = v
 		}
+	}
+	if azureWorkloadIdentityEnabled(config) {
+		podLabels[azureWorkloadIdentityUseLabel] = "true"
 	}
 
 	// Create pod annotations if specified
@@ -517,10 +664,13 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 		},
 	}
 	if outOfClusterMode {
-		// Keep the service account if using Amazon Bedrock with IRSA
-		needsServiceAccount := config.Spec.AI.Backend == v1alpha1.AmazonBedrock &&
-			config.Spec.ExtraOptions != nil &&
-			config.Spec.ExtraOptions.ServiceAccountIRSA != ""
+		// Keep the service account for cloud workload identity providers. The
+		// K8sGPT pod needs its projected token even though it talks to an
+		// external cluster through a kubeconfig.
+		needsServiceAccount := azureWorkloadIdentityEnabled(config) ||
+			(config.Spec.AI.Backend == v1alpha1.AmazonBedrock &&
+				config.Spec.ExtraOptions != nil &&
+				config.Spec.ExtraOptions.ServiceAccountIRSA != "")
 
 		if !needsServiceAccount {
 			// No need of ServiceAccount since the Deployment will use
@@ -647,6 +797,28 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 		)
 	} else if config.Spec.AI.AzureAPIType != "" && config.Spec.AI.Backend != v1alpha1.AzureOpenAI {
 		return &appsv1.Deployment{}, err.New("azureAPIType is supported only by azureopenai provider")
+	}
+
+	if azureWorkloadIdentityEnabled(config) {
+		container := &deployment.Spec.Template.Spec.Containers[0]
+
+		// The Azure Identity SDKs read these standard variables. Setting them
+		// explicitly also makes the deployment work on clusters where the
+		// workload identity webhook is not installed.
+		setEnvVar(container, azureWorkloadIdentityClientIDEnvVar, azureWorkloadIdentityClientID(config))
+		if tenantID := azureWorkloadIdentityTenantID(config); tenantID != "" {
+			setEnvVar(container, azureWorkloadIdentityTenantIDEnvVar, tenantID)
+		}
+		setEnvVar(container, azureWorkloadIdentityFederatedTokenEnvVar, azureWorkloadIdentityTokenFilePath)
+		setEnvVar(container, azureWorkloadIdentityAuthorityHostEnvVar, azureWorkloadIdentityAuthorityHost)
+
+		// The k8sgpt Azure OpenAI client requires the AZURE_AD API type to send
+		// the federated token as a Bearer token.
+		if config.Spec.AI.AzureAPIType == "" {
+			setEnvVar(container, "K8SGPT_AZURE_API_TYPE", azureWorkloadIdentityAPIType)
+		}
+
+		addAzureWorkloadIdentityVolume(&deployment)
 	}
 
 	// Add Custom Headers if specified
@@ -827,6 +999,25 @@ func doSync(ctx context.Context, clt client.Client, obj client.Object) error {
 		} else if err == nil {
 			mutateFn = func() error {
 				exist.Spec = expect.Spec
+				return nil
+			}
+			obj = exist
+		}
+	case *corev1.ServiceAccount:
+		exist := &corev1.ServiceAccount{}
+		err := clt.Get(context.Background(), client.ObjectKeyFromObject(obj), exist)
+		if err != nil && !errors.IsNotFound(err) {
+			return err
+		} else if err == nil {
+			mutateFn = func() error {
+				if len(expect.Annotations) > 0 {
+					if exist.Annotations == nil {
+						exist.Annotations = make(map[string]string)
+					}
+					for key, value := range expect.Annotations {
+						exist.Annotations[key] = value
+					}
+				}
 				return nil
 			}
 			obj = exist

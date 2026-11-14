@@ -9,6 +9,13 @@ interplex:
 dynamicRBAC:
   enabled: true
 
+## Annotations for the static k8sgpt ServiceAccount created when
+## dynamicRBAC.enabled is false. Use this for cloud workload identity (for
+## example azure.workload.identity/client-id) when the operator does not manage
+## the ServiceAccount itself.
+k8sgpt:
+  serviceAccountAnnotations: {}
+
 serviceMonitor:
   enabled: false
   additionalLabels: {}
@@ -33,6 +40,10 @@ grafanaDashboard:
 controllerManager:
   # Additional annotations to add to the controller manager deployment
   annotations: {}
+  # Annotations for the controller manager ServiceAccount. Use this when the
+  # operator itself needs cloud workload identity credentials.
+  serviceAccount:
+    annotations: {}
   kubeRbacProxy:
     ## When enabled (default), deploys kube-rbac-proxy sidecar for HTTPS and RBAC-protected metrics.
     ## Set to false to expose metrics directly via HTTP without RBAC enforcement.
