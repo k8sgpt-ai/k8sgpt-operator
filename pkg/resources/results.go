@@ -66,14 +66,27 @@ func hashResultContent(spec v1alpha1.ResultSpec) string {
 	return fmt.Sprintf("%x", hash)
 }
 
+// resultName returns a stable Kubernetes object name for a Result. The kind
+// prefix is required because K8sGPT uses "<namespace>/<name>" as Result.Name
+// for every analyzer. Different kinds can therefore refer to the same object
+// name (for example a Deployment and its Service); keying only by the resource
+// name made one result overwrite the other in MapResults.
+func resultName(resultSpec v1alpha1.ResultSpec) string {
+	name := strings.ReplaceAll(resultSpec.Name, "-", "")
+	name = strings.ReplaceAll(name, "/", "")
+	if resultSpec.Kind == "" {
+		return name
+	}
+	return fmt.Sprintf("%s-%s", strings.ToLower(resultSpec.Kind), name)
+}
+
 func MapResults(i integrations.Integrations, resultsSpec []v1alpha1.ResultSpec, config v1alpha1.K8sGPT) (map[string]v1alpha1.Result, error) {
 	namespace := config.Namespace
 	backend := config.Spec.AI.Backend
 	backstageEnabled := config.Spec.ExtraOptions != nil && config.Spec.ExtraOptions.Backstage.Enabled
 	rawResults := make(map[string]v1alpha1.Result)
 	for _, resultSpec := range resultsSpec {
-		name := strings.ReplaceAll(resultSpec.Name, "-", "")
-		name = strings.ReplaceAll(name, "/", "")
+		name := resultName(resultSpec)
 		result := GetResult(resultSpec, name, namespace, backend, resultSpec.Details, &config)
 		labels := map[string]string{
 			"k8sgpts.k8sgpt.ai/name":      config.Name,
