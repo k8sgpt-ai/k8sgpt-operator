@@ -9,6 +9,20 @@ interplex:
 dynamicRBAC:
   enabled: true
 
+## Namespaces whose Secrets the operator caches and watches, e.g. the
+## namespaces containing K8sGPT resources and their AI/sink Secrets:
+## secretCache:
+##   namespaces:
+##     - team-a
+##     - team-b
+## Use this on installs where the operator ServiceAccount is not allowed to
+## list Secrets cluster-wide (see k8sgpt-ai/k8sgpt-operator#876): the operator
+## then caches Secrets only in these namespaces, and this chart additionally
+## grants secrets get/list/watch on them to the operator ServiceAccount.
+## When empty (default), Secrets are cached cluster-wide as before.
+secretCache:
+  namespaces: []
+
 serviceMonitor:
   enabled: false
   additionalLabels: {}

@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/k8sgpt-ai/k8sgpt-operator/internal/controller/k8sgpt"
@@ -34,10 +35,13 @@ import (
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/integrations"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/metrics"
 	"github.com/k8sgpt-ai/k8sgpt-operator/pkg/sinks"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
@@ -57,14 +61,55 @@ func init() {
 	//+kubebuilder:scaffold:scheme
 }
 
+// parseNamespaceList splits a comma-separated list of namespaces into a slice,
+// trimming whitespace and dropping empty entries.
+func parseNamespaceList(list string) []string {
+	var namespaces []string
+	for _, ns := range strings.Split(list, ",") {
+		ns = strings.TrimSpace(ns)
+		if ns != "" {
+			namespaces = append(namespaces, ns)
+		}
+	}
+	return namespaces
+}
+
+// secretCacheOptions returns the manager cache options for the given Secret
+// namespaces. With an empty list it returns the zero value, i.e. the default
+// cluster-wide Secrets cache, so behaviour is unchanged unless the operator is
+// explicitly configured. Scoping the Secrets informer lets the operator run
+// with a ServiceAccount that cannot list Secrets cluster-wide: without a scope
+// the Secrets informer (needed by the K8sGPT controller's Secret watch) never
+// syncs and the reconcile hangs (see k8sgpt-ai/k8sgpt-operator#876).
+func secretCacheOptions(namespaces []string) cache.Options {
+	if len(namespaces) == 0 {
+		return cache.Options{}
+	}
+	scoped := make(map[string]cache.Config, len(namespaces))
+	for _, ns := range namespaces {
+		scoped[ns] = cache.Config{}
+	}
+	return cache.Options{
+		ByObject: map[client.Object]cache.ByObject{
+			&corev1.Secret{}: {Namespaces: scoped},
+		},
+	}
+}
+
 func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
 	var enableResultLogging bool
+	var secretCacheNamespaces string
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&enableResultLogging, "enable-result-logging", false, "Whether to enable results logging")
+	flag.StringVar(&secretCacheNamespaces, "secret-cache-namespaces", "",
+		"Comma-separated list of namespaces whose Secrets the operator caches and watches, "+
+			"typically the namespaces containing K8sGPT resources and their AI/sink Secrets. "+
+			"Set this on installs where the operator ServiceAccount cannot list Secrets "+
+			"cluster-wide; when unset, Secrets are cached cluster-wide (default).")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
@@ -84,8 +129,15 @@ func main() {
 		setupLog.Info(fmt.Sprintf("Metrics address: %s", metricsAddr))
 		setupLog.Info(fmt.Sprintf("Probe address: %s", probeAddr))
 	}
+	secretNamespaces := parseNamespaceList(secretCacheNamespaces)
+	if len(secretNamespaces) > 0 {
+		setupLog.Info("Scoping the Secrets cache and watch to specific namespaces",
+			"namespaces", secretNamespaces)
+	}
+
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme: scheme,
+		Cache:  secretCacheOptions(secretNamespaces),
 		Metrics: metricsserver.Options{
 			BindAddress: metricsAddr,
 		},
@@ -161,6 +213,7 @@ func main() {
 
 	if err = (&k8sgpt.K8sGPTReconciler{
 		Client:              mgr.GetClient(),
+		APIReader:           mgr.GetAPIReader(),
 		Scheme:              mgr.GetScheme(),
 		Signal:              ready,
 		Integrations:        integration,

@@ -37,7 +37,7 @@ func (step *FinalizerStep) execute(instance *K8sGPTInstance) (ctrl.Result, error
 		if utils.ContainsString(instance.K8sgptConfig.GetFinalizers(), FinalizerName) {
 
 			// Delete any external resources associated with the instance
-			err := resources.Sync(instance.Ctx, instance.R.Client, *instance.K8sgptConfig, resources.DestroyOp)
+			err := resources.Sync(instance.Ctx, instance.R.Client, instance.R.APIReader, *instance.K8sgptConfig, resources.DestroyOp)
 			if err != nil {
 				return instance.R.FinishReconcile(err, false, instance.K8sgptConfig.Name, instance.K8sgptConfig)
 			}

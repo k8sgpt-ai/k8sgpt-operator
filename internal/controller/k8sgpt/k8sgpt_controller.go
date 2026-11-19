@@ -71,9 +71,26 @@ type K8sGPTReconciler struct {
 	Signal              chan types.InterControllerSignal
 	Recorder            record.EventRecorder
 
+	// APIReader reads directly from the API server, bypassing the manager's
+	// cache. It is used for Secrets referenced by the K8sGPT spec (AI Secret,
+	// sink Secret) so those reads never start the Secrets informer lazily -
+	// which hangs the reconcile when the ServiceAccount cannot list Secrets
+	// cluster-wide (see k8sgpt-ai/k8sgpt-operator#876).
+	APIReader client.Reader
+
 	// Reused across reconciles, keyed per K8sGPT resource: see clientFor.
 	kclientMu sync.Mutex
 	kclients  map[client.ObjectKey]*cachedClient
+}
+
+// secretReader returns the reader to use for Secrets referenced by the
+// K8sGPT spec: the uncached APIReader when set, otherwise the cached client
+// (keeps unit tests that build the reconciler without an APIReader working).
+func (r *K8sGPTReconciler) secretReader() client.Reader {
+	if r.APIReader != nil {
+		return r.APIReader
+	}
+	return r.Client
 }
 
 // cachedClient is the connection currently held for one K8sGPT resource, with the address it was

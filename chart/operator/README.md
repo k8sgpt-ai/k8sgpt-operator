@@ -33,6 +33,7 @@ controls.
 <!---x-release-please-start-version-->
 | Parameter                | Description             | Default                                                                       |
 | ------------------------ | ----------------------- |-------------------------------------------------------------------------------|
+| `secretCache.namespaces` | Namespaces whose Secrets the operator caches and watches (for restricted-RBAC installs, see k8sgpt-ai/k8sgpt-operator#876); the chart additionally grants the operator ServiceAccount `secrets` get/list/watch in exactly these namespaces. Empty = cluster-wide cache (default) | `[]` |
 | `serviceMonitor.enabled` |  | `false`                                                                       |
 | `serviceMonitor.additionalLabels` |  | `{}`                                                                          |
 | `grafanaDashboard.enabled` |  | `false`                                                                       |
