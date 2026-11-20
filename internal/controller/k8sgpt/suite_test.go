@@ -114,6 +114,7 @@ var _ = BeforeSuite(func() {
 
 	err = (&K8sGPTReconciler{
 		Client:         k8sManager.GetClient(),
+		APIReader:      k8sManager.GetAPIReader(),
 		Scheme:         k8sManager.GetScheme(),
 		Integrations:   integration,
 		SinkClient:     sinkClient,

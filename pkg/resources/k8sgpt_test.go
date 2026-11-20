@@ -1024,6 +1024,112 @@ func TestSync_DestroyOp_SucceedsWhenSecretAlreadyDeleted(t *testing.T) {
 		},
 	}
 
-	err := Sync(ctx, fakeClient, config, DestroyOp)
+	err := Sync(ctx, fakeClient, nil, config, DestroyOp)
 	assert.NoError(t, err, "DestroyOp must succeed even when the referenced AI Secret no longer exists")
+}
+
+// recordingReader wraps a client.Reader and records the objects requested from
+// it, so tests can assert which reader a function actually used.
+type recordingReader struct {
+	client.Reader
+	gets []client.Object
+}
+
+func (r *recordingReader) Get(ctx context.Context, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
+	r.gets = append(r.gets, obj)
+	return r.Reader.Get(ctx, key, obj, opts...)
+}
+
+func TestGetDeployment_ReadsAISecretViaProvidedReader(t *testing.T) {
+	// The AI Secret must be read through the reader passed to GetDeployment.
+	// Callers pass the manager's uncached APIReader so the read cannot lazily
+	// start a cluster-scoped Secrets informer, which never syncs - and hangs
+	// the reconcile - on restricted-RBAC installs
+	// (k8sgpt-ai/k8sgpt-operator#876).
+	scheme := runtime.NewScheme()
+	require.NoError(t, v1.AddToScheme(scheme))
+	require.NoError(t, v1alpha1.AddToScheme(scheme))
+
+	secret := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-secret",
+			Namespace: "default",
+		},
+		Data: map[string][]byte{
+			"password": []byte("my-api-key"),
+		},
+	}
+
+	fakeClient := fake.NewClientBuilder().
+		WithScheme(scheme).
+		WithObjects(secret).
+		Build()
+	reader := &recordingReader{Reader: fakeClient}
+
+	config := v1alpha1.K8sGPT{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-k8sgpt",
+			Namespace: "default",
+		},
+		Spec: v1alpha1.K8sGPTSpec{
+			AI: &v1alpha1.AISpec{
+				Secret: &v1alpha1.SecretRef{
+					Name: "test-secret",
+					Key:  "password",
+				},
+			},
+			Repository: "ghcr.io/k8sgpt-ai/k8sgpt",
+			Version:    "v0.3.8",
+		},
+	}
+
+	deployment, err := GetDeployment(config, false, reader, "default")
+	require.NoError(t, err)
+
+	// Exactly one read went through the provided reader, and it was the AI Secret.
+	require.Len(t, reader.gets, 1, "the AI Secret read must go through the provided reader")
+	_, isSecret := reader.gets[0].(*v1.Secret)
+	assert.True(t, isSecret, "the recorded read should be a Secret")
+
+	// The checksum annotation is still computed from the Secret.
+	checksum, exists := deployment.Spec.Template.Annotations[aiSecretChecksumAnnotation]
+	assert.True(t, exists, "checksum annotation should exist")
+	assert.Len(t, checksum, 64, "SHA-256 hex digest should be 64 characters")
+}
+
+func TestSync_NilAPIReaderFallsBackToCachedClient(t *testing.T) {
+	// When no APIReader is supplied, Secret reads fall back to the cached
+	// client so existing callers keep working unchanged.
+	fakeClient, _ := newSchemeAndClient(t)
+	ctx := context.Background()
+
+	secret := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-secret",
+			Namespace: "default",
+		},
+		Data: map[string][]byte{"password": []byte("my-api-key")},
+	}
+	require.NoError(t, fakeClient.Create(ctx, secret))
+
+	config := v1alpha1.K8sGPT{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-k8sgpt",
+			Namespace: "default",
+		},
+		Spec: v1alpha1.K8sGPTSpec{
+			AI: &v1alpha1.AISpec{
+				Backend: "openai",
+				Secret: &v1alpha1.SecretRef{
+					Name: "test-secret",
+					Key:  "password",
+				},
+			},
+			Repository: "ghcr.io/k8sgpt-ai/k8sgpt",
+			Version:    "v0.3.8",
+		},
+	}
+
+	err := Sync(ctx, fakeClient, nil, config, SyncOp)
+	assert.NoError(t, err, "SyncOp with a nil APIReader must fall back to the cached client")
 }

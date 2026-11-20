@@ -106,7 +106,7 @@ func Test_Sync_DynamicRBACEnabled_CreatesRBACResources(t *testing.T) {
 	ctx := context.Background()
 	config := newTestConfig("test-ns")
 
-	err := Sync(ctx, fakeClient, config, SyncOp)
+	err := Sync(ctx, fakeClient, nil, config, SyncOp)
 	require.NoError(t, err)
 
 	expectedSAName := "k8sgpt-test-ns"
@@ -146,7 +146,7 @@ func Test_Sync_DynamicRBACDisabled_SkipsRBACResources(t *testing.T) {
 	ctx := context.Background()
 	config := newTestConfig("test-ns")
 
-	err := Sync(ctx, fakeClient, config, SyncOp)
+	err := Sync(ctx, fakeClient, nil, config, SyncOp)
 	require.NoError(t, err)
 
 	// ServiceAccount should NOT be created by the operator
@@ -184,14 +184,14 @@ func Test_Sync_Destroy_DynamicRBACEnabled(t *testing.T) {
 	config := newTestConfig("test-ns")
 
 	// First sync (create)
-	require.NoError(t, Sync(ctx, fakeClient, config, SyncOp))
+	require.NoError(t, Sync(ctx, fakeClient, nil, config, SyncOp))
 
 	// Verify resources exist
 	dep := &appsv1.Deployment{}
 	require.NoError(t, fakeClient.Get(ctx, client.ObjectKey{Name: config.Name, Namespace: "test-ns"}, dep))
 
 	// Destroy
-	require.NoError(t, Sync(ctx, fakeClient, config, DestroyOp))
+	require.NoError(t, Sync(ctx, fakeClient, nil, config, DestroyOp))
 
 	// Verify deployment is gone
 	err := fakeClient.Get(ctx, client.ObjectKey{Name: config.Name, Namespace: "test-ns"}, dep)
@@ -206,10 +206,10 @@ func Test_Sync_Destroy_DynamicRBACDisabled(t *testing.T) {
 	config := newTestConfig("test-ns")
 
 	// First sync (create)
-	require.NoError(t, Sync(ctx, fakeClient, config, SyncOp))
+	require.NoError(t, Sync(ctx, fakeClient, nil, config, SyncOp))
 
 	// Destroy – should only destroy Service + Deployment (no RBAC)
-	require.NoError(t, Sync(ctx, fakeClient, config, DestroyOp))
+	require.NoError(t, Sync(ctx, fakeClient, nil, config, DestroyOp))
 
 	// Verify deployment is gone
 	dep := &appsv1.Deployment{}
@@ -308,7 +308,7 @@ func Test_Sync_DynamicRBACExplicitFalse_SkipsRBACResources(t *testing.T) {
 	ctx := context.Background()
 	config := newTestConfig("test-ns")
 
-	err := Sync(ctx, fakeClient, config, SyncOp)
+	err := Sync(ctx, fakeClient, nil, config, SyncOp)
 	require.NoError(t, err)
 
 	// Same assertions as unset – no RBAC resources created
@@ -333,7 +333,7 @@ func Test_Sync_DynamicRBACEnabled_CreatesAllFiveResources(t *testing.T) {
 	ctx := context.Background()
 	config := newTestConfig("prod")
 
-	err := Sync(ctx, fakeClient, config, SyncOp)
+	err := Sync(ctx, fakeClient, nil, config, SyncOp)
 	require.NoError(t, err)
 
 	expectedSAName := "k8sgpt-prod"
@@ -367,7 +367,7 @@ func Test_Sync_DynamicRBACDisabled_CreatesTwoResources(t *testing.T) {
 	ctx := context.Background()
 	config := newTestConfig("prod")
 
-	err := Sync(ctx, fakeClient, config, SyncOp)
+	err := Sync(ctx, fakeClient, nil, config, SyncOp)
 	require.NoError(t, err)
 
 	// Service and Deployment exist
