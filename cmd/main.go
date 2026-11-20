@@ -109,7 +109,10 @@ func main() {
 		"Comma-separated list of namespaces whose Secrets the operator caches and watches, "+
 			"typically the namespaces containing K8sGPT resources and their AI/sink Secrets. "+
 			"Set this on installs where the operator ServiceAccount cannot list Secrets "+
-			"cluster-wide; when unset, Secrets are cached cluster-wide (default).")
+			"cluster-wide; when unset, Secrets are cached cluster-wide (default). "+
+			"Note: a K8sGPT resource in a namespace outside this list still reconciles "+
+			"(Secret reads go through the uncached API reader), but Secret rotations in it "+
+			"are not detected via watch.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")

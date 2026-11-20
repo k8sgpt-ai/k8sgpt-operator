@@ -20,6 +20,7 @@ dynamicRBAC:
 ## then caches Secrets only in these namespaces, and this chart additionally
 ## grants secrets get/list/watch on them to the operator ServiceAccount.
 ## When empty (default), Secrets are cached cluster-wide as before.
+## Note: the listed namespaces must already exist at install time (Helm fails to render a Role in a missing namespace).
 secretCache:
   namespaces: []
 
