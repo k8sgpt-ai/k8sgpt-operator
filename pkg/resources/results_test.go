@@ -61,6 +61,25 @@ func TestMapResultsKeepsDifferentKindsWithSameResourceName(t *testing.T) {
 	require.NotEqual(t, names[0], names[1])
 }
 
+func TestMapResultsWithoutBackstageOptions(t *testing.T) {
+	config := v1alpha1.K8sGPT{
+		ObjectMeta: metav1.ObjectMeta{Name: "k8sgpt", Namespace: "k8sgpt"},
+		Spec: v1alpha1.K8sGPTSpec{
+			AI: &v1alpha1.AISpec{Backend: "openai"},
+			ExtraOptions: &v1alpha1.ExtraOptionsRef{
+				ServiceAccountIRSA: "arn:aws:iam::123456789012:role/k8sgpt",
+			},
+		},
+	}
+	results := []v1alpha1.ResultSpec{
+		{Kind: "Deployment", Name: "shop/checkout", Error: []v1alpha1.Failure{{Text: "deployment failure"}}},
+	}
+
+	mapped, err := MapResults(integrations.Integrations{}, results, config)
+	require.NoError(t, err)
+	require.Len(t, mapped, 1)
+}
+
 func TestMapResultsCreatesOneResultForEveryRequestedFilter(t *testing.T) {
 	scheme := runtime.NewScheme()
 	require.NoError(t, v1alpha1.AddToScheme(scheme))
