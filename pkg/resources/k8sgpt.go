@@ -89,8 +89,16 @@ func calculateSecretChecksum(secret *corev1.Secret) (string, error) {
 	return hex.EncodeToString(checksum[:]), nil
 }
 
+// addSecretAsEnvToDeployment reads the referenced Secret and adds the given key
+// as a secretKeyRef environment variable on the deployment.
+//
+// The Secret is read through a client.Reader rather than the manager's cached
+// client so that the read does not lazily start a cluster-scoped Secrets
+// informer: on installs where the operator ServiceAccount cannot list Secrets
+// cluster-wide, a cached Get blocks forever waiting for the informer cache to
+// sync (see k8sgpt-ai/k8sgpt-operator#876).
 func addSecretAsEnvToDeployment(secretName string, secretKey string,
-	config v1alpha1.K8sGPT, c client.Client,
+	config v1alpha1.K8sGPT, c client.Reader,
 	deployment *appsv1.Deployment) error {
 	secret := &corev1.Secret{}
 	er := c.Get(context.Background(), types.NamespacedName{Name: secretName,
@@ -302,7 +310,14 @@ func buildK8sGPTArgs(config v1alpha1.K8sGPT) []string {
 }
 
 // GetDeployment Create deployment with the latest K8sGPT image
-func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Client,
+//
+// secretReader is used for every Secret lookup. Callers should pass the
+// manager's APIReader (an uncached reader) so that reading the AI Secret does
+// not start a cluster-scoped Secrets informer, which never syncs - and thus
+// hangs the reconcile - when the operator ServiceAccount lacks cluster-wide
+// Secrets list permission (see k8sgpt-ai/k8sgpt-operator#876). A client.Client
+// also satisfies client.Reader, so existing callers keep working.
+func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, secretReader client.Reader,
 	serviceAccountName string) (*appsv1.Deployment, error) {
 
 	// Create deployment
@@ -337,7 +352,7 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 	// This annotation is operator-controlled and overwrites any user-provided value
 	if config.Spec.AI.Secret != nil && config.Spec.AI.Secret.Name != "" {
 		secret := &corev1.Secret{}
-		if err := c.Get(context.Background(), types.NamespacedName{
+		if err := secretReader.Get(context.Background(), types.NamespacedName{
 			Name:      config.Spec.AI.Secret.Name,
 			Namespace: config.Namespace,
 		}, secret); err != nil {
@@ -674,10 +689,10 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 	// Add checks for amazonbedrock
 	if config.Spec.AI.Backend == v1alpha1.AmazonBedrock {
 		if config.Spec.AI.Secret != nil {
-			if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "AWS_ACCESS_KEY_ID", config, c, &deployment); err != nil {
+			if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "AWS_ACCESS_KEY_ID", config, secretReader, &deployment); err != nil {
 				return &appsv1.Deployment{}, err
 			}
-			if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "AWS_SECRET_ACCESS_KEY", config, c, &deployment); err != nil {
+			if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "AWS_SECRET_ACCESS_KEY", config, secretReader, &deployment); err != nil {
 				return &appsv1.Deployment{}, err
 			}
 		}
@@ -705,7 +720,7 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 	// Add checks for ibmwatsonxai
 	if config.Spec.AI.Backend == v1alpha1.IBMWatsonxAI {
 		if config.Spec.AI.Secret != nil {
-			if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "K8SGPT_PROVIDER_ID", config, c, &deployment); err != nil {
+			if err := addSecretAsEnvToDeployment(config.Spec.AI.Secret.Name, "K8SGPT_PROVIDER_ID", config, secretReader, &deployment); err != nil {
 				return &appsv1.Deployment{}, err
 			}
 		}
@@ -713,8 +728,19 @@ func GetDeployment(config v1alpha1.K8sGPT, outOfClusterMode bool, c client.Clien
 	return &deployment, nil
 }
 
-func Sync(ctx context.Context, c client.Client,
+// Sync creates or destroys the resources managed for a K8sGPT config.
+//
+// apiReader is used for all Secret reads (see GetDeployment): pass the
+// manager's APIReader so that a reconcile never depends on a cluster-wide
+// Secrets informer syncing. When nil, the cached client is used as a
+// fallback, preserving the previous behaviour for callers that do not
+// supply a reader (e.g. unit tests).
+func Sync(ctx context.Context, c client.Client, apiReader client.Reader,
 	config v1alpha1.K8sGPT, i SyncOrDestroy) error {
+	secretReader := apiReader
+	if secretReader == nil {
+		secretReader = c
+	}
 
 	var objs []client.Object
 	outOfClusterMode := config.Spec.Kubeconfig != nil
@@ -749,7 +775,7 @@ func Sync(ctx context.Context, c client.Client,
 	// Secret validation happens before any resource is mutated (SyncOp) or so
 	// that a minimal stub is ready for deletion (DestroyOp).
 	if i == SyncOp {
-		deployment, er := GetDeployment(config, outOfClusterMode, c, serviceAccountName)
+		deployment, er := GetDeployment(config, outOfClusterMode, secretReader, serviceAccountName)
 		if er != nil {
 			return er
 		}

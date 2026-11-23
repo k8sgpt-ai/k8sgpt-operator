@@ -81,7 +81,7 @@ func (step *ConfigureStep) getDeployment(instance *K8sGPTInstance) (*v1.Deployme
 		return &deployment, err
 	}
 
-	err = resources.Sync(instance.Ctx, instance.R.Client, *instance.K8sgptConfig, resources.SyncOp)
+	err = resources.Sync(instance.Ctx, instance.R.Client, instance.R.APIReader, *instance.K8sgptConfig, resources.SyncOp)
 
 	return &deployment, err
 }

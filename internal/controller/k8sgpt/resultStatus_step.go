@@ -76,7 +76,10 @@ func (step *ResultStatusStep) initSinkType(instance *K8sGPTInstance) (bool, sink
 				Namespace: instance.req.Namespace,
 				Name:      instance.K8sgptConfig.Spec.Sink.Secret.Name,
 			}
-			if err := instance.R.Get(instance.Ctx, secretNamespacedName, secret); err != nil {
+			// Read the sink Secret uncached (see K8sGPTReconciler.APIReader): a
+			// cached Get here would lazily start the Secrets informer and hang
+			// on restricted-RBAC installs (k8sgpt-ai/k8sgpt-operator#876).
+			if err := instance.R.secretReader().Get(instance.Ctx, secretNamespacedName, secret); err != nil {
 
 				return sinkEnabled, sinkType, fmt.Errorf("could not find sink secret: %w", err)
 			}

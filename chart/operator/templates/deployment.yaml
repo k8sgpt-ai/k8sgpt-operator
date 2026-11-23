@@ -91,6 +91,9 @@ spec:
       {{- if .Values.controllerManager.manager.enableResultLogging }}
         - --enable-result-logging
       {{- end }}
+      {{- with .Values.secretCache.namespaces }}
+        - --secret-cache-namespaces={{ join "," . }}
+      {{- end }}
         command:
         - /manager
         env:
