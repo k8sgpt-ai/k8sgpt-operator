@@ -12,6 +12,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
@@ -116,6 +117,40 @@ func Test_ServiceAccountShouldNotBeSynced(t *testing.T) {
 	assert.NotNil(t, existSA)
 	assert.NotNil(t, existSA.AutomountServiceAccountToken)
 }
+
+func Test_ServiceAccountAnnotationsShouldBeSynced(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, v1.AddToScheme(scheme))
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+	ctx := context.Background()
+
+	existing := &v1.ServiceAccount{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "k8sgpt",
+			Namespace: "test-ns",
+			Annotations: map[string]string{
+				"example.com/existing": "keep",
+			},
+		},
+		AutomountServiceAccountToken: pointer.Bool(true),
+	}
+	require.NoError(t, fakeClient.Create(ctx, existing))
+
+	desired := existing.DeepCopy()
+	desired.Annotations["example.com/new"] = "added"
+	desired.Annotations[azureWorkloadIdentityClientIDAnnotation] = "client-id"
+
+	require.NoError(t, doSync(ctx, fakeClient, desired))
+
+	updated := &v1.ServiceAccount{}
+	require.NoError(t, fakeClient.Get(ctx, client.ObjectKeyFromObject(existing), updated))
+	assert.Equal(t, "keep", updated.Annotations["example.com/existing"])
+	assert.Equal(t, "added", updated.Annotations["example.com/new"])
+	assert.Equal(t, "client-id", updated.Annotations[azureWorkloadIdentityClientIDAnnotation])
+	assert.NotNil(t, updated.AutomountServiceAccountToken)
+	assert.True(t, *updated.AutomountServiceAccountToken)
+}
+
 func Test_GetDeploymentWithKubeconfigAndIRSA(t *testing.T) {
 	scheme := runtime.NewScheme()
 	require.NoError(t, appsv1.AddToScheme(scheme))
@@ -494,6 +529,288 @@ func Test_GetDeploymentWithAzureAPIType(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_GetDeploymentWithAzureWorkloadIdentity(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, appsv1.AddToScheme(scheme))
+	require.NoError(t, v1.AddToScheme(scheme))
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+
+	config := v1alpha1.K8sGPT{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "K8sGPT",
+			APIVersion: "core.k8sgpt.ai/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-k8sgpt",
+			Namespace: "test-namespace",
+			UID:       "test-uid",
+		},
+		Spec: v1alpha1.K8sGPTSpec{
+			Repository:      "ghcr.io/k8sgpt-ai/k8sgpt",
+			Version:         "v0.4.1",
+			ImagePullPolicy: v1.PullAlways,
+			AI: &v1alpha1.AISpec{
+				Backend:   "azureopenai",
+				Model:     "gpt-4o-mini",
+				MaxTokens: "2048",
+				Topk:      "50",
+				AzureWorkloadIdentity: &v1alpha1.AzureWorkloadIdentity{
+					Enabled:  ptr.To(true),
+					ClientID: "client-id",
+					TenantID: "tenant-id",
+				},
+			},
+		},
+	}
+
+	deployment, err := GetDeployment(config, false, fakeClient, "k8sgpt-sa")
+	require.NoError(t, err)
+	require.NotNil(t, deployment)
+
+	pod := deployment.Spec.Template
+	assert.Equal(t, "true", pod.Labels[azureWorkloadIdentityUseLabel])
+	assert.Equal(t, "k8sgpt-sa", pod.Spec.ServiceAccountName)
+
+	env := pod.Spec.Containers[0].Env
+	assert.Equal(t, "client-id", findEnvVar(env, azureWorkloadIdentityClientIDEnvVar).Value)
+	assert.Equal(t, "tenant-id", findEnvVar(env, azureWorkloadIdentityTenantIDEnvVar).Value)
+	assert.Equal(t, azureWorkloadIdentityTokenFilePath, findEnvVar(env, azureWorkloadIdentityFederatedTokenEnvVar).Value)
+	assert.Nil(t, findEnvVar(env, azureWorkloadIdentityAuthorityHostEnvVar))
+	assert.Equal(t, azureWorkloadIdentityAPIType, findEnvVar(env, "K8SGPT_AZURE_API_TYPE").Value)
+	assert.Nil(t, findEnvVar(env, "K8SGPT_PASSWORD"))
+
+	var tokenVolume *v1.Volume
+	for i := range pod.Spec.Volumes {
+		if pod.Spec.Volumes[i].Name == azureWorkloadIdentityTokenVolumeName {
+			tokenVolume = &pod.Spec.Volumes[i]
+			break
+		}
+	}
+	require.NotNil(t, tokenVolume, "expected Azure Workload Identity token volume")
+	require.NotNil(t, tokenVolume.Projected)
+	require.Len(t, tokenVolume.Projected.Sources, 1)
+	require.NotNil(t, tokenVolume.Projected.Sources[0].ServiceAccountToken)
+	tokenSource := tokenVolume.Projected.Sources[0].ServiceAccountToken
+	assert.Equal(t, azureWorkloadIdentityAudience, tokenSource.Audience)
+	assert.Equal(t, azureWorkloadIdentityTokenFileName, tokenSource.Path)
+
+	foundMount := false
+	for _, mount := range pod.Spec.Containers[0].VolumeMounts {
+		if mount.Name == azureWorkloadIdentityTokenVolumeName {
+			foundMount = true
+			assert.Equal(t, azureWorkloadIdentityTokenMountPath, mount.MountPath)
+			assert.True(t, mount.ReadOnly)
+		}
+	}
+	assert.True(t, foundMount, "expected Azure Workload Identity token volume mount")
+}
+
+func Test_GetDeploymentWithAzureWorkloadIdentityOutOfCluster(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, appsv1.AddToScheme(scheme))
+	require.NoError(t, v1.AddToScheme(scheme))
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+
+	config := v1alpha1.K8sGPT{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "K8sGPT",
+			APIVersion: "core.k8sgpt.ai/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-k8sgpt",
+			Namespace: "test-namespace",
+			UID:       "test-uid",
+		},
+		Spec: v1alpha1.K8sGPTSpec{
+			Repository:      "ghcr.io/k8sgpt-ai/k8sgpt",
+			Version:         "v0.4.1",
+			ImagePullPolicy: v1.PullAlways,
+			Kubeconfig: &v1alpha1.SecretRef{
+				Name: "kubeconfig-secret",
+				Key:  "kubeconfig",
+			},
+			AI: &v1alpha1.AISpec{
+				Backend:   "azureopenai",
+				Model:     "gpt-4o-mini",
+				MaxTokens: "2048",
+				Topk:      "50",
+				AzureWorkloadIdentity: &v1alpha1.AzureWorkloadIdentity{
+					Enabled:  ptr.To(true),
+					ClientID: "client-id",
+				},
+			},
+		},
+	}
+
+	deployment, err := GetDeployment(config, true, fakeClient, "k8sgpt-sa")
+	require.NoError(t, err)
+	assert.Equal(t, "k8sgpt-sa", deployment.Spec.Template.Spec.ServiceAccountName)
+	assert.Nil(t, deployment.Spec.Template.Spec.AutomountServiceAccountToken)
+	assert.NotNil(t, findEnvVar(deployment.Spec.Template.Spec.Containers[0].Env, azureWorkloadIdentityClientIDEnvVar))
+}
+
+func Test_GetDeploymentWithAzureWorkloadIdentityFromServiceAccountAnnotations(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, appsv1.AddToScheme(scheme))
+	require.NoError(t, v1.AddToScheme(scheme))
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+
+	config := v1alpha1.K8sGPT{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "K8sGPT",
+			APIVersion: "core.k8sgpt.ai/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-k8sgpt",
+			Namespace: "test-namespace",
+			UID:       "test-uid",
+		},
+		Spec: v1alpha1.K8sGPTSpec{
+			Repository:      "ghcr.io/k8sgpt-ai/k8sgpt",
+			Version:         "v0.4.1",
+			ImagePullPolicy: v1.PullAlways,
+			ServiceAccountAnnotations: map[string]string{
+				azureWorkloadIdentityClientIDAnnotation: "annotated-client-id",
+				azureWorkloadIdentityTenantIDAnnotation: "annotated-tenant-id",
+			},
+			AI: &v1alpha1.AISpec{
+				Backend:   "azureopenai",
+				Model:     "gpt-4o-mini",
+				MaxTokens: "2048",
+				Topk:      "50",
+			},
+		},
+	}
+
+	deployment, err := GetDeployment(config, false, fakeClient, "k8sgpt-sa")
+	require.NoError(t, err)
+	assert.Equal(t, "true", deployment.Spec.Template.Labels[azureWorkloadIdentityUseLabel])
+
+	env := deployment.Spec.Template.Spec.Containers[0].Env
+	assert.Equal(t, "annotated-client-id", findEnvVar(env, azureWorkloadIdentityClientIDEnvVar).Value)
+	assert.Equal(t, "annotated-tenant-id", findEnvVar(env, azureWorkloadIdentityTenantIDEnvVar).Value)
+	assert.Equal(t, azureWorkloadIdentityAPIType, findEnvVar(env, "K8SGPT_AZURE_API_TYPE").Value)
+}
+
+func Test_GetDeploymentWithAzureWorkloadIdentityValidation(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, appsv1.AddToScheme(scheme))
+	require.NoError(t, v1.AddToScheme(scheme))
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+
+	baseConfig := func() v1alpha1.K8sGPT {
+		return v1alpha1.K8sGPT{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "K8sGPT",
+				APIVersion: "core.k8sgpt.ai/v1alpha1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-k8sgpt",
+				Namespace: "test-namespace",
+				UID:       "test-uid",
+			},
+			Spec: v1alpha1.K8sGPTSpec{
+				Repository:      "ghcr.io/k8sgpt-ai/k8sgpt",
+				Version:         "v0.4.1",
+				ImagePullPolicy: v1.PullAlways,
+				AI: &v1alpha1.AISpec{
+					Backend:   "azureopenai",
+					Model:     "gpt-4o-mini",
+					MaxTokens: "2048",
+					Topk:      "50",
+					AzureWorkloadIdentity: &v1alpha1.AzureWorkloadIdentity{
+						Enabled:  ptr.To(true),
+						ClientID: "client-id",
+					},
+				},
+			},
+		}
+	}
+
+	testCases := []struct {
+		name             string
+		mutate           func(*v1alpha1.K8sGPT)
+		expectedErrorMsg string
+	}{
+		{
+			name: "non azureopenai backend",
+			mutate: func(config *v1alpha1.K8sGPT) {
+				config.Spec.AI.Backend = "openai"
+			},
+			expectedErrorMsg: "supported only by azureopenai provider",
+		},
+		{
+			name: "secret cannot be combined",
+			mutate: func(config *v1alpha1.K8sGPT) {
+				config.Spec.AI.Secret = &v1alpha1.SecretRef{Name: "azure-secret", Key: "key"}
+			},
+			expectedErrorMsg: "cannot be combined with ai.secret",
+		},
+		{
+			name: "client id required",
+			mutate: func(config *v1alpha1.K8sGPT) {
+				config.Spec.AI.AzureWorkloadIdentity.ClientID = ""
+			},
+			expectedErrorMsg: "requires clientId",
+		},
+		{
+			name: "azure api type must be azure ad",
+			mutate: func(config *v1alpha1.K8sGPT) {
+				config.Spec.AI.AzureAPIType = "AZURE"
+			},
+			expectedErrorMsg: "requires azureAPIType AZURE_AD",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			config := baseConfig()
+			tc.mutate(&config)
+
+			_, err := GetDeployment(config, false, fakeClient, "k8sgpt-sa")
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), tc.expectedErrorMsg)
+		})
+	}
+}
+
+func Test_GetDeploymentWithoutAzureWorkloadIdentityIsBackwardCompatible(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, appsv1.AddToScheme(scheme))
+	require.NoError(t, v1.AddToScheme(scheme))
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+
+	config := v1alpha1.K8sGPT{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "K8sGPT",
+			APIVersion: "core.k8sgpt.ai/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-k8sgpt",
+			Namespace: "test-namespace",
+			UID:       "test-uid",
+		},
+		Spec: v1alpha1.K8sGPTSpec{
+			Repository:      "ghcr.io/k8sgpt-ai/k8sgpt",
+			Version:         "v0.4.1",
+			ImagePullPolicy: v1.PullAlways,
+			AI: &v1alpha1.AISpec{
+				Backend:   "azureopenai",
+				Model:     "gpt-4o-mini",
+				MaxTokens: "2048",
+				Topk:      "50",
+			},
+		},
+	}
+
+	deployment, err := GetDeployment(config, false, fakeClient, "k8sgpt-sa")
+	require.NoError(t, err)
+	assert.Empty(t, deployment.Spec.Template.Labels[azureWorkloadIdentityUseLabel])
+	assert.Nil(t, findEnvVar(deployment.Spec.Template.Spec.Containers[0].Env, azureWorkloadIdentityClientIDEnvVar))
+	assert.Nil(t, findEnvVar(deployment.Spec.Template.Spec.Containers[0].Env, "K8SGPT_AZURE_API_TYPE"))
+	assert.Len(t, deployment.Spec.Template.Spec.Volumes, 1, "only the default k8sgpt volume should be present")
 }
 
 func Test_GetDeploymentWithCustomHeaders(t *testing.T) {
@@ -1026,4 +1343,95 @@ func TestSync_DestroyOp_SucceedsWhenSecretAlreadyDeleted(t *testing.T) {
 
 	err := Sync(ctx, fakeClient, config, DestroyOp)
 	assert.NoError(t, err, "DestroyOp must succeed even when the referenced AI Secret no longer exists")
+}
+
+func Test_GetDeploymentAzureWorkloadIdentityReviewFixes(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, appsv1.AddToScheme(scheme))
+	require.NoError(t, v1.AddToScheme(scheme))
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+
+	newConfig := func() v1alpha1.K8sGPT {
+		return v1alpha1.K8sGPT{
+			TypeMeta:   metav1.TypeMeta{Kind: "K8sGPT", APIVersion: "core.k8sgpt.ai/v1alpha1"},
+			ObjectMeta: metav1.ObjectMeta{Name: "test-k8sgpt", Namespace: "test-namespace"},
+			Spec: v1alpha1.K8sGPTSpec{
+				Repository: "ghcr.io/k8sgpt-ai/k8sgpt",
+				Version:    "v0.4.1",
+				AI: &v1alpha1.AISpec{
+					Backend: "azureopenai",
+					Model:   "gpt-4o-mini",
+					AzureWorkloadIdentity: &v1alpha1.AzureWorkloadIdentity{
+						ClientID: "client-id",
+					},
+				},
+			},
+		}
+	}
+
+	// An explicit enabled: false must override clientId/tenantId inference.
+	disabled := newConfig()
+	disabled.Spec.AI.AzureWorkloadIdentity.Enabled = ptr.To(false)
+	deployment, err := GetDeployment(disabled, false, fakeClient, "k8sgpt-sa")
+	require.NoError(t, err)
+	assert.Empty(t, deployment.Spec.Template.Labels[azureWorkloadIdentityUseLabel])
+	assert.Nil(t, findEnvVar(deployment.Spec.Template.Spec.Containers[0].Env, azureWorkloadIdentityClientIDEnvVar))
+	assert.Nil(t, findVolume(&deployment.Spec.Template.Spec, azureWorkloadIdentityTokenVolumeName))
+
+	// The projected token mount must not collide with the webhook's own mount.
+	enabled := newConfig()
+	enabled.Spec.AI.AzureWorkloadIdentity.Enabled = ptr.To(true)
+	deployment, err = GetDeployment(enabled, false, fakeClient, "k8sgpt-sa")
+	require.NoError(t, err)
+	for _, mount := range deployment.Spec.Template.Spec.Containers[0].VolumeMounts {
+		if mount.MountPath == azureWorkloadIdentityTokenMountPath {
+			assert.Equal(t, azureWorkloadIdentityTokenFileName, mount.Name)
+		}
+	}
+	require.NotNil(t, findVolume(&deployment.Spec.Template.Spec, azureWorkloadIdentityTokenFileName))
+
+	// Sovereign-cloud authority hosts must not be overwritten with the public one.
+	deployment = &appsv1.Deployment{
+		Spec: appsv1.DeploymentSpec{
+			Template: v1.PodTemplateSpec{
+				Spec: v1.PodSpec{Containers: []v1.Container{{
+					Env: []v1.EnvVar{{Name: azureWorkloadIdentityAuthorityHostEnvVar, Value: "https://login.microsoftonline.us/"}},
+				}}},
+			},
+		},
+	}
+	setEnvVarIfAbsent(&deployment.Spec.Template.Spec.Containers[0], azureWorkloadIdentityAuthorityHostEnvVar, "https://login.microsoftonline.com/")
+	assert.Equal(t, "https://login.microsoftonline.us/", findEnvVar(deployment.Spec.Template.Spec.Containers[0].Env, azureWorkloadIdentityAuthorityHostEnvVar).Value)
+}
+
+func findVolume(spec *v1.PodSpec, name string) *v1.Volume {
+	for i := range spec.Volumes {
+		if spec.Volumes[i].Name == name {
+			return &spec.Volumes[i]
+		}
+	}
+	return nil
+}
+
+func TestAzureWorkloadIdentityDoesNotPinAuthorityHost(t *testing.T) {
+	config := v1alpha1.K8sGPT{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-k8sgpt", Namespace: "test-namespace"},
+		Spec: v1alpha1.K8sGPTSpec{
+			Repository: "ghcr.io/k8sgpt-ai/k8sgpt",
+			Version:    "v0.4.1",
+			AI: &v1alpha1.AISpec{
+				Backend: "azureopenai",
+				AzureWorkloadIdentity: &v1alpha1.AzureWorkloadIdentity{
+					Enabled:  ptr.To(true),
+					ClientID: "client-id",
+					TenantID: "tenant-id",
+				},
+			},
+		},
+	}
+	deployment, err := GetDeployment(config, false, fake.NewClientBuilder().Build(), "k8sgpt-sa")
+	require.NoError(t, err)
+	env := deployment.Spec.Template.Spec.Containers[0].Env
+	assert.Nil(t, findEnvVar(env, azureWorkloadIdentityAuthorityHostEnvVar),
+		"operator must leave AZURE_AUTHORITY_HOST unset so the webhook/SDK can supply the sovereign-cloud value")
 }

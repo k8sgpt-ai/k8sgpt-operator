@@ -13,6 +13,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
@@ -242,6 +243,53 @@ func Test_GetServiceAccount_IRSA(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "arn:aws:iam::123456789012:role/test-role",
 		sa.Annotations["eks.amazonaws.com/role-arn"])
+}
+
+func Test_GetServiceAccount_CustomAnnotations(t *testing.T) {
+	config := newTestConfig("test-ns")
+	config.Spec.ServiceAccountAnnotations = map[string]string{
+		"example.com/team": "platform",
+	}
+	config.Spec.ExtraOptions = &v1alpha1.ExtraOptionsRef{
+		ServiceAccountIRSA: "arn:aws:iam::123456789012:role/test-role",
+	}
+
+	sa, err := GetServiceAccount(config, "my-sa")
+	require.NoError(t, err)
+	assert.Equal(t, "platform", sa.Annotations["example.com/team"])
+	assert.Equal(t, "arn:aws:iam::123456789012:role/test-role",
+		sa.Annotations["eks.amazonaws.com/role-arn"])
+}
+
+func Test_GetServiceAccount_AzureWorkloadIdentity(t *testing.T) {
+	config := newTestConfig("test-ns")
+	config.Spec.AI = &v1alpha1.AISpec{
+		Backend: "azureopenai",
+		AzureWorkloadIdentity: &v1alpha1.AzureWorkloadIdentity{
+			Enabled:  ptr.To(true),
+			ClientID: "client-id",
+			TenantID: "tenant-id",
+		},
+	}
+
+	sa, err := GetServiceAccount(config, "my-sa")
+	require.NoError(t, err)
+	assert.Equal(t, "client-id", sa.Annotations[azureWorkloadIdentityClientIDAnnotation])
+	assert.Equal(t, "tenant-id", sa.Annotations[azureWorkloadIdentityTenantIDAnnotation])
+}
+
+func Test_GetServiceAccount_AzureWorkloadIdentityFromAnnotations(t *testing.T) {
+	config := newTestConfig("test-ns")
+	config.Spec.AI = &v1alpha1.AISpec{Backend: "azureopenai"}
+	config.Spec.ServiceAccountAnnotations = map[string]string{
+		azureWorkloadIdentityClientIDAnnotation: "annotated-client-id",
+		azureWorkloadIdentityTenantIDAnnotation: "annotated-tenant-id",
+	}
+
+	sa, err := GetServiceAccount(config, "my-sa")
+	require.NoError(t, err)
+	assert.Equal(t, "annotated-client-id", sa.Annotations[azureWorkloadIdentityClientIDAnnotation])
+	assert.Equal(t, "annotated-tenant-id", sa.Annotations[azureWorkloadIdentityTenantIDAnnotation])
 }
 
 // ---------------------------------------------------------------------------
