@@ -54,7 +54,7 @@
         },
         "id": 10,
         "options": {
-          "content": "![K8sGPT Logo](https://k8sgpt.ai/images/logo-black.png)\n\nGiving Kubernetes Superpowers to everyone!",
+          "content": "![K8sGPT Logo](https://k8sgpt.ai/images/k8sgpt-icon.svg)\n\nGiving Kubernetes Superpowers to everyone!",
           "mode": "markdown"
         },
         "pluginVersion": "9.0.4",
