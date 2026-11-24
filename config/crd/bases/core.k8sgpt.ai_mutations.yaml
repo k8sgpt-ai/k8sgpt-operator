@@ -19,15 +19,11 @@ spec:
       jsonPath: .status.message
       name: State
       type: string
-    - description: The similarity score of the autoremediation
-      jsonPath: .spec.similarityScore
-      name: Similarity Score
-      type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:
         description: |-
-          Display in wide format the autoremediationphase status and similarity score
+          Display the autoremediation phase in wide format.
           Mutation is the Schema for the mutations API.
         properties:
           apiVersion:
@@ -97,6 +93,9 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               resourceGVK:
+                description: |-
+                  INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                  Important: Run "make" to regenerate code after modifying this file
                 type: string
               result:
                 description: ObjectReference contains enough information to let you
@@ -142,11 +141,6 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
-              similarityScore:
-                description: |-
-                  INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-                  Important: Run "make" to regenerate code after modifying this file
-                type: string
               targetConfiguration:
                 type: string
             type: object
