@@ -15,7 +15,7 @@ annotations:
   artifacthub.io/categories: monitoring-logging
 type: application
 version: 0.2.29
-appVersion: 0.2.25
+appVersion: 0.2.29  # x-release-please-version
 dependencies:
   - name: interplex
     version: 1.1.0
